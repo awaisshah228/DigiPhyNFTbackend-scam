@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "espsofttech",
+  "private_key_id": "e63effbb13d0b8a00171023686f62e162e90227e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCyBHqbpJ4Sisji\n77ETTw/DO6uORGw7xn5fb/Gk3sTYhmbD0lXh8THtTSSjS9/tzhepNdqzbn4M0LTK\nY3FJXHwN4odGW/NzI6dELiQbl7o83zmBXW4k67Zd3jZI9BGVjovPK0C4TKKFNnvt\nEwHcyTU4qeofZ9h8Yv1dt0c0cKHj4rtu2f6qMWZj4qQzOHUwjFHUJ2CrJmRoNY+x\nIeGra+3YUh+3sfCVbOH6YMkwmjestgDjaK7D94VdOye8fi6B9X5slW9jH7uAZwYH\nj5Sp2R0Qpupq3nrsEnQZHGAGNN0IP2HzlOk0LipfNpy8nGeVOV5vtMJ+Gu9u6qaR\n5k66BysHAgMBAAECggEABfhsfEfbHVgWQLY1RCaEqtGXgV/+GUsg9eZ1PkhSZcis\nLakiRD+oowLRVcC3s+wTkxNBUH9GLvvY9Gi9Ze56IqUUUGHJGnV5qKm7gElob540\n+Ye+p/JX3XIUdAHrjQ6I1dvngcbgNIONSHg4ucTtyga42XDMK+/N+5SoCLQ2WcQ0\nk4gYzKbT+2qSPeYg2PPUFX8bLAFoZUBciBDm4KYD3nVAUowkFmoNW1fR6z63hHs0\nlcOgvOCUzGuBawP/skgIxlsmEM8LHB4FV4MqC48gg1QqBm3FtIYVEEk7cFWLcJHJ\njkxhnWliutjpOSd1wqFP90We0JJZ3XdUVPlaAcCwoQKBgQDnRDRBQHxMGfsPaHvK\nmssHMV+E2jmzKkxKvnvhVrIzcHRm23uDDRznXdw1EWeOcF73zBu8kvEV586vQxtF\ngltruIOSE7faNI+j91t6Fj0tNjzXZW3ihCOzFEVPStkedboAVpd8FDDROj68b4XE\nQDD3IeV+3zlVyd91kxUHf3UbyQKBgQDFDmImJfcu/ebsFt1sf1Btp8RJZqMJcu7i\nmQhsszHdSp5FlC4zd0ql5FvmdU+wjNpJ99Q5pRurrFymTW3Gfac6QfBFq/yBMLBP\n8stVMWfADC83SmnTEngAzSIakNlTLJVwguh4y8g4vR6JLKFc+VzkF1merWuuoWkW\n3vETnuLYTwKBgQC1IDXM5TR0ZeS7rJlHlPRuLb0hz8hhCj+2Snm7gqsOnoSMClox\nyZNZoalV5su0Q04dxT3z8yHehi7aFTTGu9HeDCT/w3G69G+Le6+pbsF7J39/M3Fc\ndyF+n+GouHZT5OBIY4lBJI8XTwbTjoS1r5Cp/WJAe5PsHK9m5ksSFEEkAQKBgGTS\n4y0Zp8uHZavOVyS4T3KLsEbOGQUwpUGTg1f6p7zN/QUkuC7lDnCq0sqro0Z2Cwpl\nn1SPQgUof48nds9kYzfPnRxIzz1aqBt/4sGIMcl1coMbs+GnRXdDffuRuWBxI1UZ\n5dBIk/1T5lfRWg60F+8sc1JY8Qu80oQ9NaQQW4jJAoGACQQiO7A1sORK1BZv6CYs\n0KnFkyd36rAM7yTZfasx+JVBgsf/l7Mx+D6lMJeAFAQspzLtWP7RwmbSU67TSVDG\nvjDWFxMSbs9DFMWKA+EZgNwviSK++B5E7L4tYmzQw0P1fDkxNH8C7SPsm/eknE0Y\nrDbJ8ae6+UBcfPklPyCz6Sg=\n-----END PRIVATE KEY-----\n",
+  "client_email": "email-api@espsofttech.iam.gserviceaccount.com",
+  "client_id": "113204322039015702235",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/email-api%40espsofttech.iam.gserviceaccount.com"
+}
