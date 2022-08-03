@@ -11,7 +11,7 @@ module.exports = {
     JWT_SECRET_KEY: '6dqw7dydyw7ewyuw',
     SESSION_EXPIRES_IN: '1h', // Session will expire after 1 day of creation
     imageUrl: 'https://infinity8.mypinata.cloud/ipfs/',
-
+    nftMetadataUrl : "https://espsofttech.in:6018/api/nft/metadata/",
     // OLD KEY BEFORE UPDATE 20210617
     // contractOwnerAddress : '0xcf601e63906c587245b614baa8ad35a073cdee01', //live
     // contractOwnerPrivateKey : '0xbbb184aef7ee8e86998089c376069a8bb915bef5e6533645ec728deb44944b86', 

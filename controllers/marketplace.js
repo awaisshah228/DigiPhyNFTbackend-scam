@@ -28,7 +28,7 @@ var iterations = 100;
 const { base64encode, base64decode } = require('nodejs-base64');
 var reverse = require('reverse-string');
 /*-------------------*/
-
+const BLOCKCHAIN = require('./web3/deploy');
 const marketplaceQueries = require("../services/marketplaceQueries");
 const adminQueries = require("../services/adminQueries");
 const { json } = require("body-parser");
@@ -1548,61 +1548,99 @@ exports.insertUserCollection = async (db, req, res) => {
     var website = req.body.website;
     var games_category = req.body.games_category;
 
-    // if(!games_category){
-    //     res.status(400).send({
-    //         success: false,
-    //         msg: "Games category required!"
-    //     });        
-    // }
+    let ownerAddress = req.body.ownerAddress; // optional
+    let contractName = req.body.contractName; // required  || olny string
 
-    var dataArr = {
-        "user_id": user_id,
-        "name": name,
-        "description": description,
-        "profile_pic": profile_pic,
-        "banner": banner,
-        "website": website,
-        "facebook": req.body.facebook,
-        "insta": req.body.insta,
-        "telegram": req.body.telegram,
-        "twitter": req.body.twitter,
-        "discord": req.body.discord,
-    }
-    await db.query(marketplaceQueries.getCollectionAlreadyExist, [name], async function (error, data) {
+    await db.query(adminQueries.getSettings, async function (error, settingData) {
         if (error) {
+            
             return res.status(400).send({
                 success: false,
-                msg: "Error occured!!",
+                msg: "error occured in item insert",
                 error
             });
         }
-        if (data.length > 0) {
+        var contract = `${config.contractAddress}`; //LIVE CONTRACT
+        
+        
+
+        
+
+        var apiData = await openNFT(settingData[0].public_key);
+        var apiData1 = await openNFT(settingData[0].private_key);
+
+        let adminWallet = apiData;
+        let adminPrivateKey = apiData1;
+        
+        ownerAddress = (!ownerAddress) ? adminWallet : ownerAddress;
+        const deployResposne = await BLOCKCHAIN.deploy({
+            account: adminWallet,
+            privateKey: adminPrivateKey,
+            nftName: contractName,
+            nftSymbol: contractName,
+            ownerAddress: ownerAddress,
+            baseUri: config.nftMetadataUrl
+        });
+        console.log('deployResposne',deployResposne)
+        if (!deployResposne.success) {
             return res.status(400).send({
                 success: false,
-                msg: "Collection already exist",
+                msg: deployResposne.error
             });
+
         }
-        await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
+        let deployhash = deployResposne.hash;
+
+        var dataArr = {
+            "user_id": user_id,
+            "name": name,
+            "description": description,
+            "profile_pic": profile_pic,
+            "banner": banner,
+            "website": website,
+            "facebook": req.body.facebook,
+            "insta": req.body.insta,
+            "telegram": req.body.telegram,
+            "twitter": req.body.twitter,
+            "discord": req.body.discord,
+            "hash": deployhash
+        }
+        await db.query(marketplaceQueries.getCollectionAlreadyExist, [name], async function (error, data) {
             if (error) {
-                console.log(error);
                 return res.status(400).send({
                     success: false,
-                    msg: "Something want wrong, Please try again!",
+                    msg: "Error occured!!",
                     error
                 });
             }
-            if (data) {
-                res.status(200).send({
-                    success: true,
-                    msg: "Collection created successfully!"
-                });
-            } else {
-                res.status(400).send({
+            if (data.length > 0) {
+                return res.status(400).send({
                     success: false,
-                    msg: "Something want wrong, Please try again!"
+                    msg: "Collection already exist",
                 });
             }
-        });
+            await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
+                if (error) {
+                    console.log(error);
+                    return res.status(400).send({
+                        success: false,
+                        msg: "Something want wrong, Please try again!",
+                        error
+                    });
+                }
+                if (data) {
+                    res.status(200).send({
+                        success: true,
+                        msg: "Collection created successfully!"
+                    });
+                } else {
+                    res.status(400).send({
+                        success: false,
+                        msg: "Something want wrong, Please try again!"
+                    });
+                }
+            });
+        })
     })
 }
 
@@ -1986,7 +2024,7 @@ exports.getUserItem = async (db, req, res) => {
             qry = qry + ` GROUP BY it.id order by ie.datetime desc `;
         }
 
-        console.log('qry',qry);
+        console.log('qry', qry);
         await db.query(qry, function (error, data) {
             if (error) {
                 return res.status(400).send({
@@ -3178,7 +3216,7 @@ exports.addNftByUser = async (db, req, res) => {
             "expiry_date": expiry_date,
             "quantity": quantity,
             'token_id': tokenId,
-            "productId":productId,
+            "productId": productId,
             "local_image": recCompress.images[0],
             "metadata": metadata,
             "external_link": external_link,
@@ -4601,13 +4639,13 @@ exports.getfaq = async (db, req, res) => {
 
 
 exports.blockchainupdatetransaction = async (db, req, res) => {
-   
+
     let user_id = req.body.user_id;
     let token_owner_address = req.body.token_owner_address;
     let item_id = req.body.item_id;
     let user_address = req.body.user_address;
-    let purchased_quantity =req.body.purchased_quantity;
-    
+    let purchased_quantity = req.body.purchased_quantity;
+
     await db.query(adminQueries.getSettings, async function (error, settingData) {
         var apiData = await openNFT(settingData[0].private_key);
         var apiData2 = await openNFT(settingData[0].public_key);
@@ -4645,7 +4683,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             });
             const data1 = await response1.json();
 
-            console.log('hello',data1,response1.json(),data1.hash)
+            console.log('hello', data1, response1.json(), data1.hash)
 
             if (!data1.hash) {
                 return res.status(400).send({
@@ -4658,13 +4696,13 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             data1hash = data1.hash
 
             let data = {
-                from_address : from,
-                to_address : user_address,
-                hash : data1.hash,
-                blockchain_status :1
+                from_address: from,
+                to_address: user_address,
+                hash: data1.hash,
+                blockchain_status: 1
             }
 
-            await db.query(adminQueries.updateblockchainstatus,[data,user_id,item_id],async function (error, trx){
+            await db.query(adminQueries.updateblockchainstatus, [data, user_id, item_id], async function (error, trx) {
 
                 if (error) {
                     return res.status(400).send({
@@ -4674,15 +4712,15 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
                     });
                 }
 
-                if(trx){
-            return res.status(200).send({
-                success: true,
-                msg: "Ownership changed successfully",
-                // transaction_id: buydata.insertId
-            });
+                if (trx) {
+                    return res.status(200).send({
+                        success: true,
+                        msg: "Ownership changed successfully",
+                        // transaction_id: buydata.insertId
+                    });
                 }
             })
-   
+
         }
     })
 }
@@ -4708,7 +4746,7 @@ exports.itemPurchase = async (db, req, res) => {
         if (sell_type === 'Price') {
             /// transactoin for sell product start
             console.log('ddddd', user_address);
-            
+
             await db.query(adminQueries.getSettings, async function (error, settingData) {
                 var apiData = await openNFT(settingData[0].private_key);
                 var apiData2 = await openNFT(settingData[0].public_key);
@@ -6438,45 +6476,46 @@ exports.transferList = async (db, req, res) => {
                                 error
                             });
                         }
+                        if (token > 0) {
+                            var transaction = {
+                                "user_id": data[0].id,
+                                "transaction_type_id": '14',
+                                "item_id": itemData[0].item_id,
+                                "item_edition_id": itemData[0].item_edition_id,
+                                "amount": 0,
+                                "from_address": itemData[0].owner_address,
+                                "to_address": data[0].address,
+                                "token": token,
+                                "payment_currency": 'DigiPhyNFT',
+                                "payment_currency_amount": token,
+                                "currency": 'DigiPhyNFT',
+                                "status": 1
+                            }
 
-                        var transaction = {
-                            "user_id": data[0].id,
-                            "transaction_type_id": '14',
-                            "item_id": itemData[0].item_id,
-                            "item_edition_id": itemData[0].item_edition_id,
-                            "amount": 0,
-                            "from_address": itemData[0].owner_address,
-                            "to_address": data[0].address,
-                            "token": token,
-                            "payment_currency": 'DigiPhyNFT',
-                            "payment_currency_amount": token,
-                            "currency": 'DigiPhyNFT',
-                            "status": 1
+                            await db.query(marketplaceQueries.insertTransaction, [transaction], async function (error, trxdata) {
+                                if (error) {
+                                    return res.status(400).send({
+                                        success: false,
+                                        msg: "Error occured in insertTransaction!!",
+                                        error
+                                    });
+                                }
+                            });
                         }
-
-                        await db.query(marketplaceQueries.insertTransaction, [transaction], async function (error, trxdata) {
+                        await db.query(marketplaceQueries.updateSold2, [1, data[0].id, data1.hash, data[0].address, itemData[0].item_edition_id], async function (error, sold2Data) {
                             if (error) {
                                 return res.status(400).send({
                                     success: false,
-                                    msg: "Error occured in insertTransaction!!",
+                                    msg: "Error occured in updateSold2!!",
                                     error
                                 });
                             }
 
-                            await db.query(marketplaceQueries.updateSold2, [1, data[0].id, data1.hash, data[0].address, itemData[0].item_edition_id], async function (error, sold2Data) {
-                                if (error) {
-                                    return res.status(400).send({
-                                        success: false,
-                                        msg: "Error occured in updateSold2!!",
-                                        error
-                                    });
-                                }
-
-                                res.status(200).send({
-                                    success: true,
-                                    msg: "List data inserted successfully!!"
-                                });
+                            res.status(200).send({
+                                success: true,
+                                msg: "List data inserted successfully!!"
                             });
+
                         });
                     });
                 });
@@ -6571,6 +6610,7 @@ exports.insertBankDetail = async (db, req, res) => {
     let account_number = req.body.account_number;
     let holder_name = req.body.holder_name;
     let beneficiary_name = req.body.beneficiary_name;
+    let ifsc_code = req.body.ifsc_code;
     let datetime = new Date();
     try {
 
@@ -6580,85 +6620,93 @@ exports.insertBankDetail = async (db, req, res) => {
                 msg: "user_id required!!"
             });
         }
-        if(!account_name){
+        if (!account_name) {
             return res.status(400).send({
                 success: false,
                 msg: "Account Name required!!"
             });
         }
-        if(!account_email){
+        if (!account_email) {
             return res.status(400).send({
                 success: false,
                 msg: "Account Email required!!"
             });
         }
-        if(!bank_name){
+        if (!bank_name) {
             return res.status(400).send({
                 success: false,
                 msg: "bank Name required!!"
             });
         }
-        if(!account_number){
+        if (!account_number) {
             return res.status(400).send({
                 success: false,
                 msg: "account number required!!"
             });
         }
-        if(!account_number){
+        if (!account_number) {
             return res.status(400).send({
                 success: false,
                 msg: "account number required!!"
             });
         }
-        if(!holder_name){
+        if (!holder_name) {
             return res.status(400).send({
                 success: false,
                 msg: "holder  name required!!"
             });
         }
-        if(!beneficiary_name){
+        if (!beneficiary_name) {
             return res.status(400).send({
                 success: false,
                 msg: "beneficiary  name required!!"
             });
         }
+        if (!ifsc_code) {
+            return res.status(400).send({
+                success: false,
+                msg: "IFSC Code required!!"
+            });
+        }
 
         db.query(marketplaceQueries.getbankdetail, [user_id], function (error, result) {
- 
-            if(result.length > 0){
+
+            if (result.length > 0) {
 
                 var dataArr = {
                     'account_name': account_name,
-                    'account_email' : account_email,
-                    'bank_name' : bank_name,
-                    'account_number' : account_number,
-                    'holder_name' :holder_name,
-                    'beneficiary_name' :beneficiary_name,
-                    'datetime' : datetime
+                    'account_email': account_email,
+                    'bank_name': bank_name,
+                    'account_number': account_number,
+                    'holder_name': holder_name,
+                    'beneficiary_name': beneficiary_name,
+                    'ifsc_code': ifsc_code,
+                    'datetime': datetime
                 }
-                db.query(marketplaceQueries.updatebankdetail, [dataArr,user_id], function (error, data) {
-               
+                db.query(marketplaceQueries.updatebankdetail, [dataArr, user_id], function (error, data) {
+
                     if (data) {
                         res.status(200).send({
                             success: true,
                             msg: "Bank Detail Update Successfully !!",
-                             });
+                        });
                     }
                 })
-               
-            }else{
+
+            } else {
 
                 var dataArr = {
-                    'user_id' : user_id,
+                    'user_id': user_id,
                     'account_name': account_name,
-                    'account_email' : account_email,
-                    'bank_name' : bank_name,
-                    'account_number' : account_number,
-                    'holder_name' :holder_name,
-                    'beneficiary_name' :beneficiary_name,
-                    'datetime' : datetime
+                    'account_email': account_email,
+                    'bank_name': bank_name,
+                    'account_number': account_number,
+                    'holder_name': holder_name,
+                    'beneficiary_name': beneficiary_name,
+                    'ifsc_code': ifsc_code,
+                    'datetime': datetime
                 }
-           
+
                 db.query(marketplaceQueries.addbankdetail, [dataArr], function (error, result) {
                     if (error) {
                         return res.status(400).send({
@@ -6671,9 +6719,9 @@ exports.insertBankDetail = async (db, req, res) => {
                         success: true,
                         msg: "Bank Detail Submit Successfully !!!",
                     })
-        
+
                 })
-        
+
             }
         });
     } catch (err) {
@@ -6695,9 +6743,9 @@ exports.getBankDetail = async (db, req, res) => {
 
 
 
-     
+
         db.query(marketplaceQueries.getbankdetail, [user_id], function (error, result) {
- 
+
             if (error) {
                 return res.status(400).send({
                     success: false,
@@ -6705,23 +6753,23 @@ exports.getBankDetail = async (db, req, res) => {
                     error
                 });
             }
-            if(result.length > 0){
+            if (result.length > 0) {
 
-                
-                        res.status(200).send({
-                            data : result[0],
-                            success: true,
-                            msg: "Bank Detail Update Successfully !!",
-                             });
-                
-                }else {
-                    res.status(400).send({
-                        success: false,
-                        msg: "No Data Found !!",
-                         });
-                
-                }              
-            
+
+                res.status(200).send({
+                    data: result[0],
+                    success: true,
+                    msg: "Bank Detail Update Successfully !!",
+                });
+
+            } else {
+                res.status(400).send({
+                    success: false,
+                    msg: "No Data Found !!",
+                });
+
+            }
+
         });
     } catch (err) {
         // console.log(err)

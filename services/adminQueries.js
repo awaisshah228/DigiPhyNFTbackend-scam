@@ -8,14 +8,17 @@ module.exports = {
   getSettings: "select resale_charges,minting_fee,royalty_percent,commission_percent,receive_address,public_key,private_key, coin_value,maxcoinpercentage from settings where id=1",
   addUserCollectionFeatured: "update user_collection SET ? where id =?",
   user_delete:"update users SET is_deleted=1 where id=?",
+  getbankdetailinadmin :"SELECT ub.*,u.full_name FROM `user_bank_detail` as ub LEFT JOIN users as u on u.id=ub.user_id",
   
   getadmincollection:"Select uc.id as collection_id,u.id as user_id,u.full_name as user_name,u.email,uc.name as collection_name,uc.description,uc.is_featured,uc.profile_pic,uc.banner,uc.website,uc.facebook,uc.twitter,uc.insta,uc.telegram,uc.discord,date_format(uc.datetime,'%d-%M-%y')as create_date,CollectionNFTCount(uc.id) as nftCount from user_collection as uc left join users as u on u.id=uc.user_id WHERE uc.user_id=1 order by uc.id desc",
   insertadminCollection : "insert into user_collection SET ?",
+  updateBankAccountinadmin :"update user_bank_detail SET ? where user_id=?",
   updateadminCollection: "update user_collection SET ?  where id=?",
   getSingleadminCollection : "Select id as collection_id,user_id,name,description,nft_type_id from user_collection where id=? and user_id =?",
   adminconnectionid : "SELECT * FROM  user_collection where id=?",
   updateblockchainstatus :"update transaction SET ? where user_id =? and item_id=?",
-  getBulkNFT :  "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,i.local_image, i.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,bnm.folder_name,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join bulk_nft_master as bnm on i.bulk_nft_master_id=bnm.id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id  and bulk_nft_master_id > 0 in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
+  updateipfshash :"update item SET ?  where id=?",
+  getBulkNFT :  "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,i.local_image, i.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,bnm.folder_name,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join bulk_nft_master as bnm on i.bulk_nft_master_id=bnm.id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id  and bulk_nft_master_id > 0 and i.owner_id=? and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
 
   
   

@@ -3166,8 +3166,8 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     "user_collection_id": fields.user_collection_id,
                                                     "start_date": resExl.start_date,
                                                     "price": resExl.price,
-                                                    "owner_id": 1,
-                                                    "created_by": 1,
+                                                    "owner_id": fields.user_id,
+                                                    "created_by": fields.user_id,
                                                     "sell_type": resExl.sell_type,
                                                     "expiry_date": resExl.expiry_date,
                                                     "quantity": resExl.quantity,
@@ -3243,7 +3243,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                                     "edition_no": i,
                                                                     "item_id": data.insertId,
                                                                     "is_sold": 0,
-                                                                    "owner_id": 1,
+                                                                    "owner_id": fields.user_id,
                                                                     "user_collection_id": fields.user_collection_id,
                                                                     "start_date": resExl.start_date,
                                                                     "end_date": resExl.end_date,
@@ -3304,7 +3304,8 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
 
 
 exports.getBulkNFT = async (db, req, res) => {
-    await db.query(adminQueries.getBulkNFT, function (error, data) {
+    let user_id = req.body.user_id;
+    await db.query(adminQueries.getBulkNFT,[user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3330,6 +3331,7 @@ exports.getBulkNFT = async (db, req, res) => {
 exports.getLocalImageHash = async (db, req, res) => {
     console.log("in getLocalImageHash");
     var localImage = req.body.localImage
+    var id = req.body.id
     console.log(localImage);
 
     // return res.status(200).send({
@@ -3355,6 +3357,11 @@ exports.getLocalImageHash = async (db, req, res) => {
     const filedata = await response2.json();
     console.log('file',filedata)
     if (filedata.IpfsHash) {
+        let data  ={
+            image : filedata.IpfsHash
+        }
+        await db.query(adminQueries.updateipfshash,[data,id])
+        
         return res.status(200).send({
             success: true,
             msg: "Data get successfully!!",
@@ -3368,3 +3375,62 @@ exports.getLocalImageHash = async (db, req, res) => {
     }
 }
 
+
+exports.getBankDetailinAdmin = async (db, req, res) => {
+    await db.query(adminQueries.getbankdetailinadmin, function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error Occured!!",
+                error
+            });
+        }
+        if (data.length > 0) {
+            res.status(200).send({
+                success: true,
+                msg: "Get Bank Details",
+                response: data
+            });
+        } else {
+            res.status(200).send({
+                success: false,
+                msg: "No Data Found"
+            });
+        }
+    });
+}
+
+
+exports.updateBankAccountinadmin = async (db, req, res) => {
+
+    let user_id = req.body.user_id;
+    let account_id = req.body.account_id;
+
+    try{
+    let data1 ={
+        account_id: account_id
+    }
+
+
+    await db.query(adminQueries.updateBankAccountinadmin,[data1,user_id], function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error Occured!!",
+                error
+            });
+        }
+        if (data) {
+            res.status(200).send({
+                success: true,
+                msg: "Account id updated Successfully ! ",
+            });
+        } 
+    });
+}catch(err){
+    return res.status(400).send({
+        success: false,
+        msg: "Error occured!!"
+    });
+}
+}

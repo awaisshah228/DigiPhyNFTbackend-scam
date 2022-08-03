@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/espsofttech/infinity8_backend#readme",
   "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.13",
     "adm-zip": "^0.5.9",
     "axios": "^0.21.1",
     "blob": "^0.1.0",
@@ -43,6 +44,7 @@
     "qrcode": "^1.5.0",
     "request": "^2.88.2",
     "reverse-string": "0.0.6",
+    "solc": "^0.8.15",
     "speakeasy": "^2.0.0",
     "stripe": "^8.154.0",
     "uuid": "^8.3.2",

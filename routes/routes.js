@@ -70,7 +70,7 @@ const { pgpEncrypt } = require('../controllers/pgpEncription/pgpEncryption');
 
 
 //================================================  Aman routes User  =====================================================
-
+    
 
 router.post('/addNftByUser',addnftImage, marketplace.addNftByUser.bind(this,db));
 
@@ -118,7 +118,7 @@ router.post('/insertadminCollection', collectionImages, admin.insertadminCollect
 router.get('/adminconnectionid/:collection_id',admin.admin_connection_id.bind(this, db));
 router.post('/updateadminCollection',collectionImages,admin.updateadminCollection.bind(this,db))
 // router.post('/addNftByadmin',addnftImage, admin.addNftByadmin.bind(this,db));
-router.get('/getBulkNFT', admin.getBulkNFT.bind(this, db));
+router.post('/getBulkNFT', admin.getBulkNFT.bind(this, db));
 router.post('/getLocalImageHash', admin.getLocalImageHash.bind(this, db));
 
 
@@ -357,6 +357,10 @@ router.post('/adminprofilepic', admin.getProfilePic.bind(this, db));
 router.post('/adminpassword',ensureWebToken,admin.changePassword.bind(this, db));
 router.post('/updateWallet',ensureWebToken,admin.updateWallet.bind(this, db));
 router.post('/addBulkNftByAdmin' ,admin.addBulkNftByAdmin.bind(this, db));
+router.get('/getBankDetailinAdmin' ,admin.getBankDetailinAdmin.bind(this, db));
+router.post('/updateBankAccountinadmin' ,admin.updateBankAccountinadmin.bind(this, db));
+
+
 
 
 router.post('/register', signup.register.bind(this, db));
