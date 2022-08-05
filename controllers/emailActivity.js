@@ -133,6 +133,6 @@ exports.Activity = async function (email, subject, text, link, image) {
 
         }
     });
-    //     <a href="https://infinity8.io/nftdetail/${checktrx[0].item_edition_id}" style="background-color:#0d58c8;color:#ffffff;display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,Geneva,sans-serif;font-size:16px;font-weight:normal;line-height:40px;text-align:center;text-decoration:none;width:200px" target="_blank" >View your NFT</a>
+    
 
 }

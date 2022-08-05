@@ -49,12 +49,12 @@ var storage = multer.diskStorage({
     }
 });
 var upload = multer({storage: storage});
-var pageUpload = upload.fields([{ name: 'avatar', maxCount: 1 }])
+
 var userupload = upload.fields([{ name: 'profile_pic', maxCount: 1 }, { name: 'banner', maxCount: 8 }])
 var useruploadAdmin = upload.fields([{ name: 'profile_pic', maxCount: 1 }])
 
 var sliderUpload = upload.fields([{ name: 'slider1', maxCount: 1 }, { name: 'slider2', maxCount: 8 }, { name: 'slider3', maxCount: 8 }, { name: 'logo', maxCount: 8 }, { name: 'favicon', maxCount: 8 }, { name: 'realEstateImage', maxCount: 8 }])
-var realEstateImage = upload.fields([{ name: 'slider1', maxCount: 1 }, { name: 'slider2', maxCount: 8 }, { name: 'slider3', maxCount: 8 }])
+
 var collectionImages = upload.fields([{ name: 'profile_pic', maxCount: 1 }, { name: 'banner', maxCount: 1 }]);
 
 var addnftImage = upload.fields([{ name: 'image', maxCount: 1 }])
@@ -65,7 +65,6 @@ const login = require('../controllers/login');
 const admin = require('../controllers/admin/admin');
 const getFile = require('../controllers/getFile');
 const marketplace = require('../controllers/marketplace');
-const explorer = require('../controllers/infinity_explorer');
 const { pgpEncrypt } = require('../controllers/pgpEncription/pgpEncryption');
 
 
@@ -97,7 +96,6 @@ router.post('/deleteuser',admin.deleteUser.bind(this, db));
 router.get('/getadmincollection',admin.getAdminCollection.bind(this,db));
 router.post('/insertadminCollection', collectionImages, admin.insertadminCollection.bind(this, db));
 
-router.post('/deleteuser',admin.deleteUser.bind(this, db));
 router.post('/activateuser',admin.activateUser.bind(this, db));
 router.post('/loginType', login.loginType.bind(this, db));
 router.post('/getProfilePic', signup.getProfilePic.bind(this, db));
@@ -122,45 +120,9 @@ router.post('/getBulkNFT', admin.getBulkNFT.bind(this, db));
 router.post('/getLocalImageHash', admin.getLocalImageHash.bind(this, db));
 
 
-
-
-
-
-
-
-
-//====================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //==============Post Status API ===================================
 router.post('/adminlogin', admin.login.bind(this, db));
-router.get('/getfooter', admin.getFooter.bind(this, db));
 
-router.get('/getwebcontent', admin.getWebContent.bind(this, db));
-router.get('/getmarketplace', admin.getMarketPlace.bind(this, db));
-
-router.post('/insertmarketplace',ensureWebToken,admin.insertMarketPlace.bind(this,db));
-
-router.post('/updatefooter', ensureWebToken,admin.updateFooter.bind(this, db));
 router.post('/updatewebcontent', ensureWebToken,admin.updateWebContent.bind(this, db));
 
 
@@ -168,20 +130,12 @@ router.post('/updatewebcontent', ensureWebToken,admin.updateWebContent.bind(this
 router.post('/insertcategory', admin.insertCategory.bind(this, db));
 router.get('/getcategory', admin.getCategory.bind(this, db));
 router.get('/getDigitalCategory', admin.getDigitalCategory.bind(this, db));
-router.get('/getUserDigitalCategory', admin.getUserDigitalCategory.bind(this, db));
-router.get('/getRealEstateCategory', admin.getRealEstateCategory.bind(this, db));
-router.get('/getUserRealEstateCategory', admin.getUserRealEstateCategory.bind(this, db));
-router.post('/singlecategory', admin.singleCategory.bind(this, db));
 router.post('/singlecategory', admin.singleCategory.bind(this, db));
 router.get('/getNftType', admin.getNftType.bind(this, db));
 router.post('/updatecategory', admin.updateCategory.bind(this, db));
 router.post('/deletecategory', admin.deleteCategory.bind(this, db));
 router.get('/getuser',admin.getUsers.bind(this, db));
 router.get('/dashboarditem',admin.dashboardItem.bind(this, db));
-router.get('/getUserTelent',admin.getTelentUsers.bind(this, db));
-router.get('/getRealEstateUsers',admin.getRealEstateUsers.bind(this,db));
-
-
 /*--------- End Category ---------*/
 
 /*--------- Item  ---------*/
@@ -202,40 +156,19 @@ router.post('/listitem',admin.listItem.bind(this, db));
 router.post('/listAdminItem',admin.listAdminItem.bind(this, db));
 router.post('/listSingleItem',admin.listSingleItem.bind(this, db));
 router.get('/getWebImage',admin.getWebImage.bind(this, db));
-router.get('/getRealEstateImage',admin.getRealEstateImage.bind(this, db));
-//router.post('/updateWebImage',admin.updateWebImage.bind(this, db));
 router.post('/updateWebImage', sliderUpload, admin.updateWebImage.bind(this, db));
-router.post('/updateRealEstateImage', realEstateImage, ensureWebToken,admin.updateRealEstateImage.bind(this, db));
-
 
 /*--------- End Item ---------*/
 
 /*--------- Marketplace ---------*/
-router.post('/testmail',marketplace.testmail.bind(this, db));
 router.post('/test',marketplace.test.bind(this, db));
 
 
 router.post('/getjwttoken',marketplace.getJWTToken.bind(this, db));
 
-
-router.post('/addTelent',marketplace.addTelent.bind(this, db));
-router.post('/addRealEstateUser',ensureWebToken,marketplace.EstateUser.bind(this, db));
-
-router.post('/addWishlist',ensureWebToken,marketplace.addWishlist.bind(this, db));
-router.post('/listWishlist',marketplace.listWishlist.bind(this,db));
-router.post('/removeWishlist',ensureWebToken,marketplace.removeWishlist.bind(this,db));
-
-router.post('/addCart',ensureWebToken,marketplace.addCart.bind(this, db));
-router.post('/listCart',marketplace.listCart.bind(this,db));
-router.post('/removeCart',ensureWebToken,marketplace.removeCart.bind(this,db));
 router.post('/itemdetail',marketplace.itemDetails.bind(this,db));
 router.post('/ItemDetailForEdit',marketplace.ItemDetailForEdit.bind(this,db));
-router.post('/getUserTelent',marketplace.getUserTelent.bind(this,db));
-router.post('/getSingleUserCollection',marketplace.getSingleUserCollection.bind(this,db));
-router.post('/updateUserCollection',marketplace.updateUserCollection.bind(this,db));
 router.post('/deleteUserCollection',marketplace.deleteUserCollection.bind(this,db));
-router.post('/createMetadata', marketplace.createMetadata.bind(this, db));
-
 router.post('/getUserItem',marketplace.getUserItem.bind(this,db));
 router.post('/getUserownerItem',marketplace.getUserOwnerItem.bind(this,db));
 router.post('/updateblockchainstatus',marketplace.blockchainupdatetransaction.bind(this,db));
@@ -244,15 +177,8 @@ router.post('/updateblockchainstatus',marketplace.blockchainupdatetransaction.bi
 
 router.post('/updateTelentForApproved',marketplace.updateTelentForApproved.bind(this,db));
 router.post('/updateTelentForReject',marketplace.updateTelentForReject.bind(this,db));
-router.post('/realEstateUserReject',marketplace.realEstateUserReject.bind(this,db));
-router.post('/realEstateUserApprove',marketplace.realEstateUserApprove.bind(this,db));
-router.post('/getRealEstateStatus',marketplace.getRealEstateStatus.bind(this,db));
-
-router.post('/insertRealEstateCollection',ensureWebToken,marketplace.insertRealEstateCollection.bind(this,db));
-router.post('/getRealEstateCollection',marketplace.getRealEstateCollection.bind(this,db));
 router.post('/getPayoutAddress',marketplace.getPayoutAddress.bind(this,db));
 router.post('/getRoyaltyTransaction',marketplace.getRoyaltyTransaction.bind(this,db));
-router.get('/getAllRoyaltyTransaction',marketplace.getAllRoyaltyTransaction.bind(this,db));
 router.post('/resaleNFT',marketplace.resaleNFT.bind(this,db));
 
 
@@ -260,34 +186,20 @@ router.post('/resaleNFT',marketplace.resaleNFT.bind(this,db));
 router.post('/getQR',marketplace.getQR.bind(this,db));
 router.post('/twoAuthenticationVerify',marketplace.twoAuthenticationVerify.bind(this,db));
 router.post('/getCategoryById',marketplace.getCategoryById.bind(this,db));
-
-router.post('/allSearch',marketplace.allSearch.bind(this,db));
 router.post('/itemPurchase',marketplace.itemPurchase.bind(this,db));
 
-router.post('/insertBid',marketplace.insertBid.bind(this,db));
 router.post('/getBidDetail',marketplace.getBidDetail.bind(this,db));
 router.post('/bidAccept',marketplace.bidAccept.bind(this,db));
 router.post('/getTelentStatus',marketplace.getTelentStatus.bind(this,db));
 router.post('/cryptoTrxCanceled',ensureWebToken,marketplace.cryptoTrxCanceled.bind(this,db));
-router.post('/onlinetrx_start',ensureWebToken,marketplace.onlinetrx_start.bind(this,db));
-router.post('/nftTrx_start',ensureWebToken,marketplace.nftTrx_start.bind(this,db));
 router.post('/getUserBids',marketplace.getUserBids.bind(this,db));
-router.get('/getfaq',marketplace.getfaq.bind(this,db));
-//router.post('/stripe_success',marketplace.stripe_success.bind(this,db));
-router.post('/stripePayment',ensureWebToken,marketplace.stripePayment.bind(this,db));
-// router.post('/paypalMintPayment',marketplace.paypalMintPayment.bind(this,db));
-router.post('/circleMintPayment',marketplace.circleMintPayment.bind(this,db));
-// router.post('/paypalResalePayment',marketplace.paypalResalePayment.bind(this,db));
 router.post('/circleResalePayment',marketplace.circleResalePayment.bind(this,db));
-router.post('/walletPayment',ensureWebToken,marketplace.walletPayment.bind(this,db)); 
 router.post('/walletResalePayment',ensureWebToken,marketplace.walletResalePayment.bind(this,db)); 
 router.post('/getUserPurchase',marketplace.getUserPurchase.bind(this,db));
 router.post('/getUserSale',marketplace.getUserSale.bind(this,db));
 router.post('/myBidItem',marketplace.myBidItem.bind(this,db));
 router.get('/getRecentWorks',marketplace.getRecentWorks.bind(this,db));
-router.post('/allTalentList',marketplace.allTalentList.bind(this,db));
 router.post('/rejectBid',marketplace.rejectBid.bind(this,db));
-router.post('/itemView',marketplace.itemView.bind(this,db));
 router.post('/likeItem',marketplace.likeItem.bind(this,db));
 router.post('/getItemLikeCount',marketplace.getItemLikeCount.bind(this,db));
 router.post('/getWalletDetail',marketplace.getWalletDetail.bind(this,db));
@@ -295,44 +207,18 @@ router.post('/userWithdraw',marketplace.userWithdraw.bind(this,db));
 router.post('/insertContact',marketplace.insertContact.bind(this,db));
 router.get('/getContact',marketplace.getContact.bind(this,db));
 router.post('/transactionDetail',marketplace.transactionDetail.bind(this,db));
-router.get('/allCategoryItem',marketplace.allCategoryItem.bind(this,db));
-// router.post('/addRealEstate',marketplace.addRealEstate.bind(this,db));
-router.post('/getRealEstateItem',marketplace.getRealEstateItem.bind(this,db));
-router.get('/getAllRealEstateCollection',marketplace.getAllRealEstateCollection.bind(this,db));
-router.post('/updateRealEstateUser',ensureWebToken,marketplace.updateRealEstateUser.bind(this,db));
-router.post('/updateTalentUser',ensureWebToken,marketplace.updateTalentUser.bind(this,db));
-router.get('/getRealEstate',marketplace.getRealEstate.bind(this,db));
-router.post('/getUserRealEstate',marketplace.getUserRealEstate.bind(this,db));
-router.post('/getUserTalentById',marketplace.getUserTalentById.bind(this,db));
 router.post('/updatePayoutAddress',ensureWebToken,marketplace.updatePayoutAddress.bind(this, db));
-router.get('/getContractDeatils',marketplace.getContractDeatils.bind(this,db));
 router.get('/getRoyaltyList',marketplace.getRoyaltyList.bind(this,db));
 router.post('/getWalletTransaction',marketplace.getWalletTransaction.bind(this,db));
 router.post('/resaleTrxStart',ensureWebToken,marketplace.resaleTrxStart.bind(this,db));
 router.post('/getMarketActivity',marketplace.getMarketActivity.bind(this,db));
-//router.post('/imageSave',marketplace.imageSave.bind(this,db));
-router.post('/transferList', marketplace.transferList.bind(this, db));
 
 router.post('/insertbankdetaill', marketplace.insertBankDetail.bind(this, db));
 router.post('/getbankdetail', marketplace.getBankDetail.bind(this, db));
+router.post('/allSearch',marketplace.allSearch.bind(this,db));
 
 
 /*--------- End Marketplace ---------*/
-
-
-/*--------- explorer start ---------*/
-router.post('/listItemexplorer',explorer.listItemexplorer.bind(this,db));
-router.post('/itemdetails',explorer.itemdetails.bind(this,db));
-router.post('/userwallet',explorer.userwallet.bind(this,db));
-router.post('/useritem',explorer.useritem.bind(this,db));
-router.post('/getCreatorItem',explorer.getCreatorItem.bind(this,db));
-router.post('/userholder',explorer.userHolder.bind(this,db));
-router.post('/useritemdetail',explorer.userItems.bind(this,db));
-router.post('/getWalletTrx',explorer.getWalletTrx.bind(this,db));
-router.post('/hashdetail',explorer.hashDetail.bind(this,db));
-router.post('/explorerSearch',explorer.explorerSearch.bind(this,db));
-/*--------- End explorer ---------*/
-
 
 router.get("/uploads/:image", getFile.getImage);
 
@@ -355,7 +241,6 @@ router.post('/updateshippingaddress',signup.updateShippingAddress.bind(this, db)
 router.post('/updateprofilepicAdmin',useruploadAdmin, admin.insertProfilePic.bind(this, db));
 router.post('/adminprofilepic', admin.getProfilePic.bind(this, db));
 router.post('/adminpassword',ensureWebToken,admin.changePassword.bind(this, db));
-router.post('/updateWallet',ensureWebToken,admin.updateWallet.bind(this, db));
 router.post('/addBulkNftByAdmin' ,admin.addBulkNftByAdmin.bind(this, db));
 router.get('/getBankDetailinAdmin' ,admin.getBankDetailinAdmin.bind(this, db));
 router.post('/updateBankAccountinadmin' ,admin.updateBankAccountinadmin.bind(this, db));
@@ -368,40 +253,8 @@ router.post('/verifyAccount/:token', signup.activateAccount.bind(this, db));
 router.post('/login', login.login.bind(this, db));
 router.post('/forgot', signup.forgot.bind(this, db));
 router.post('/resetpassword/:token', signup.Resetpassword.bind(this, db));
-router.post('/getuserprofile', signup.getUserProfile.bind(this, db));
-router.post('/updateuserprofile', signup.userProfile.bind(this, db));
-router.post('/deactivate', ensureWebToken,signup.deActivateAccount.bind(this, db));
 router.post('/changepassword', ensureWebToken,signup.changePassword.bind(this, db));
 router.get('/getcountries', signup.getCountry.bind(this, db));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -8,6 +8,7 @@ const probe = require('probe-image-size');
 //const app = express();
 const FileType = require('file-type');
 const request = require('request');
+const config = require('../../config');
 
 async function download(url, dest) {
 
@@ -102,8 +103,8 @@ console.log("in image compress");
                     method: 'POST', headers: {
                         // 'Content-Type' : `application/json;boundary=${formdata._boundary}`,
                         'Content-Type': `multipart/form-data; boundary=${formdata._boundary}`,
-                        'pinata_api_key': '105327714c080a01a4b5',
-                        'pinata_secret_api_key': 'e18cf3c1a8a7376852a4674735896bda9b7870cb4e11cc05c9e614711f955b35'
+                        'pinata_api_key': config.pinata_api_key,
+                        'pinata_secret_api_key': config.pinata_secret_api_key
                     },
                     body: formdata
                 });

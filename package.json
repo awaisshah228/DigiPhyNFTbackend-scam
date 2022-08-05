@@ -1,5 +1,5 @@
 {
-  "name": "infinity8_backend",
+  "name": "digiphynftbackend",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
@@ -7,14 +7,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/espsofttech/infinity8_backend.git"
+    "url": "git+https://github.com/espsofttech/DigiPhyNFT_Backend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/espsofttech/infinity8_backend/issues"
+    "url": "https://github.com/espsofttech/DigiPhyNFT_Backend/issues"
   },
-  "homepage": "https://github.com/espsofttech/infinity8_backend#readme",
+  "homepage": "https://github.com/espsofttech/DigiPhyNFT_Backend#readme",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.13",
     "adm-zip": "^0.5.9",

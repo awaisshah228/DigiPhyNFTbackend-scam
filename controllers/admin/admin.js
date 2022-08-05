@@ -978,119 +978,10 @@ exports.login = async (db, req, res) => {
 
 }
 
-exports.getFooter = async (db, req, res) => {
-
-    await db.query(adminQueries.getFooter, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Footer details",
-                response: data[0]
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
 
 
-exports.updateFooter = async (db, req, res) => {
-
-    var description = req.body.description;
-    var email = req.body.email;
-    var contact = req.body.contact;
-
-    if (description == '') {
-        return res.status(400).send({
-            success: false,
-            msg: "Description required!!"
-        });
-    }
-
-    if (email == '') {
-        return res.status(400).send({
-            success: false,
-            msg: "Email required!!"
-        });
-    }
-    if (!validator.validate(email)) {
-        return res.status(400).send({
-            success: false,
-            msg: "Enter a valid email address!!"
-        });
-    }
-    if (contact == '') {
-        return res.status(400).send({
-            success: false,
-            msg: "Contact required!!"
-        });
-    }
-    if (contact.length == '') {
-        return res.status(400).send({
-            success: false,
-            msg: "Contact number length must be 10 digit!!"
-        });
-    }
 
 
-    await db.query(adminQueries.updateFooter, [description, email, contact], function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data) {
-            res.status(200).send({
-                success: true,
-                msg: "Footer Updated",
-
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
-
-
-exports.getWebContent = async (db, req, res) => {
-
-    await db.query(adminQueries.getWebContent, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Web Content Details",
-                response: data[0]
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data!!"
-            });
-        }
-    });
-}
 
 exports.updateWebContent = async (db, req, res) => {
 
@@ -1210,127 +1101,7 @@ exports.updateWebContent = async (db, req, res) => {
 
 }
 
-exports.insertMarketPlace = async (db, req, res) => {
 
-    try {
-
-        var form = new formidable.IncomingForm();
-        form.parse(req, async function (err, fields, files) {
-
-            if (item_image == '') {
-                return res.status(400).send({
-                    success: false,
-                    msg: "Item image required!!"
-                });
-            }
-            var item_image_upload = (!files.item_image) ? null : (!files.item_image.name) ? null : files.item_image;
-            if (fields.title == '') {
-                return res.status(400).send({
-                    success: false,
-                    msg: "Title required!!"
-                });
-            }
-            if (fields.price == '') {
-                return res.status(400).send({
-                    success: false,
-                    msg: "Price required!!"
-                });
-            }
-            if (!item_image_upload) {
-                var item_image = '';
-
-            } else {
-                var oldpath = files.item_image.path;
-
-                var filePath = "./uploads/"
-                let newfilename = filePath + files.item_image.name
-
-                // Read the file
-                await fs.readFile(oldpath, async function (err, data) {
-                    if (err) throw err;
-                    // Write the file
-                    await fs.writeFile(newfilename, data, function (err) {
-                        if (err) throw err;
-
-                    });
-                });
-                var item_image = files.item_image.name;
-
-            }
-            var title = fields.title;
-            var description = fields.description;
-            var author = fields.author;
-            var web_link = fields.web_link;
-            var price = fields.price;
-            var datetime = new Date();
-
-            var users = {
-                "title": title,
-                "author": author,
-                "description": description,
-                "item_image": item_image,
-                "web_link": web_link,
-                "price": price,
-                "datetime": datetime
-            }
-            db.query(adminQueries.insertMarketPlace, [users], function (error, result) {
-                if (error) {
-                    return res.status(400).send({
-                        success: false,
-                        msg: "Error occured!!",
-                        error
-                    });
-                }
-                if (result) {
-                    res.status(200).send({
-                        success: true,
-                        msg: "Inserted Successfully",
-                    });
-                } else {
-                    res.status(200).send({
-                        success: true,
-                        msg: "Insertion Failed",
-                    });
-                }
-            })
-        });
-
-    } catch (err) {
-        // console.log(err)
-        return res.status(400).send({
-            success: false,
-            msg: "Unexpected internal error!!",
-            err
-        });
-    }
-
-}
-
-exports.getMarketPlace = async (db, req, res) => {
-
-
-    await db.query(adminQueries.getMarketPlace, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Market Places",
-                response: data
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
 
 
 exports.listItem = async (db, req, res) => {
@@ -1389,7 +1160,7 @@ exports.listAdminItem = async (db, req, res) => {
         });
     }
 
-    var qry = `Select i.id,ie.id as item_edition_id, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.description,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.token_id,ie.price,coalesce(ie.start_date,ie.datetime) as start_date,i.end_date,ie.expiry_date,ie.edition_text,ie.edition_no,ie.is_sold,concat('${config.mailUrl}backend/infinity8_backend/uploads/',i.local_image) as local_image from item_edition as ie left join item as i on i.id=ie.item_id where (ie.owner_id=1 or (ie.owner_id in (select id from users where is_featured=1) and ie.is_sold=0 )) and i.is_active=1 and ie.is_sold=0 and ie.id in (select min(id) from item_edition group by item_id,owner_id,is_sold) and (ie.expiry_date >= now() or ie.expiry_date is null) and i.is_active=1`;
+    var qry = `Select i.id,ie.id as item_edition_id, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.description,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.token_id,ie.price,coalesce(ie.start_date,ie.datetime) as start_date,i.end_date,ie.expiry_date,ie.edition_text,ie.edition_no,ie.is_sold,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image from item_edition as ie left join item as i on i.id=ie.item_id where (ie.owner_id=1 or (ie.owner_id in (select id from users where is_featured=1) and ie.is_sold=0 )) and i.is_active=1 and ie.is_sold=0 and ie.id in (select min(id) from item_edition group by item_id,owner_id,is_sold) and (ie.expiry_date >= now() or ie.expiry_date is null) and i.is_active=1`;
 
     if (category_id != '0') {
         if (category_id === '-1') {
@@ -1543,77 +1314,10 @@ exports.getDigitalCategory = async (db, req, res) => {
     });
 }
 
-exports.getUserDigitalCategory = async (db, req, res) => {
-    await db.query(adminQueries.getUserDigitalCategory, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data) {
-            return res.status(200).send({
-                success: true,
-                msg: "Category Item Details",
-                response: data
-            });
-        } else {
-            res.status(200).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
 
-exports.getUserRealEstateCategory = async (db, req, res) => {
-    await db.query(adminQueries.getUserRealEstateCategory, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Category Item Details",
-                response: data
-            });
-        } else {
-            res.status(200).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
 
-exports.getRealEstateCategory = async (db, req, res) => {
-    await db.query(adminQueries.getRealEstateCategory, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Category Item Details",
-                response: data
-            });
-        } else {
-            res.status(200).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
+
+
 
 exports.singleCategory = async (db, req, res) => {
 
@@ -1982,12 +1686,12 @@ exports.insertItem = async (db, req, res) => {
             var filedata = await axios.post(url,
                 formdata,
                 {
-                    maxContentLength: 'Infinity', //this is needed to prevent axios from erroring out with large files
+                    maxContentLength: 'DigiPhyNFT', //this is needed to prevent axios from erroring out with large files
                     headers: {
                         // 'Content-Type' : `application/json;boundary=${formdata._boundary}`,
                         'Content-Type': `multipart/form-data; boundary=${formdata._boundary}`,
-                        'pinata_api_key': '105327714c080a01a4b5',
-                        'pinata_secret_api_key': 'e18cf3c1a8a7376852a4674735896bda9b7870cb4e11cc05c9e614711f955b35'
+                        'pinata_api_key': config.pinata_api_key,
+                        'pinata_secret_api_key': config.pinata_secret_api_key
                     }
                 }
             )
@@ -2175,39 +1879,6 @@ exports.getItem = async (db, req, res) => {
     });
 }
 
-exports.updateWallet = async (db, req, res) => {
-    var user_id = req.body.user_id;
-    var public = req.body.public;
-    var private = req.body.private;
-
-    var updateData = {
-        public: public,
-        private: private
-    }
-
-
-    await db.query(adminQueries.updateWallet, [updateData, user_id], function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data) {
-            res.status(200).send({
-                success: true,
-                msg: "Wallet Updated!!",
-
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "Something Wrong due to internal Error"
-            });
-        }
-    });
-}
 
 
 exports.updateItem = async (db, req, res) => {
@@ -2351,60 +2022,6 @@ exports.getUsers = async (db, req, res) => {
         }
     });
 }
-
-exports.getRealEstateUsers = async (db, req, res) => {
-
-    await db.query(adminQueries.getRealEstateUsers, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Real estate user Detail!!",
-                response: data
-            });
-        } else {
-            res.status(200).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
-
-exports.getTelentUsers = async (db, req, res) => {
-
-    await db.query(adminQueries.getTelentUsers, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Telent User Details",
-                response: data
-            });
-        } else {
-            res.status(200).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
-
-
-
-
 
 exports.dashboardItem = async (db, req, res) => {
 
@@ -2605,31 +2222,6 @@ exports.changePassword = async (db, req, res) => {
 }
 
 
-exports.getRealEstateImage = async (db, req, res) => {
-
-    await db.query(adminQueries.getRealEstateImage, function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            res.status(200).send({
-                success: true,
-                msg: "Real estate images!!",
-                response: data
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
-
 
 exports.updateWebImage = async (db, req, res) => {
 
@@ -2753,77 +2345,7 @@ exports.getWebImage = async (db, req, res) => {
     });
 }
 
-exports.updateRealEstateImage = async (db, req, res) => {
 
-    var id = req.body.id;
-    var slider1 = (!req.files['slider1']) ? null : req.files['slider1'][0].filename;
-    var slider2 = (!req.files['slider2']) ? null : req.files['slider2'][0].filename;
-    var slider3 = (!req.files['slider3']) ? null : req.files['slider3'][0].filename;
-    var text1 = req.body.text1;
-    var text2 = req.body.text2;
-    var text3 = req.body.text3;
-
-    await db.query(adminQueries.getRealEstateImage, async function (error, result1) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-
-        if (!slider1) {
-            slider1 = result1[0].slider1;
-        }
-        if (!slider2) {
-            slider2 = result1[0].slider2;
-        }
-        if (!slider3) {
-            slider3 = result1[0].slider3;
-        }
-
-        if (!text1) {
-            text1 = result1[0].text1;
-        }
-        if (!text2) {
-            text2 = result1[0].text2;
-        }
-        if (!text3) {
-            text3 = result1[0].text3;
-        }
-
-        var users = {
-            "slider1": slider1,
-            "slider2": slider2,
-            "slider3": slider3,
-            "text1": text1,
-            "text2": text2,
-            "text3": text3
-        }
-        //console.log(users)
-        await db.query(adminQueries.updateRealEstateImage, [users, id], function (error, data) {
-            if (error) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "Error occured!!",
-                    error
-                });
-            }
-            if (data) {
-                res.status(200).send({
-                    success: true,
-                    msg: "Real estate images and text updated!!",
-
-                });
-            } else {
-                res.status(400).send({
-                    success: false,
-                    msg: "No data found!!"
-                });
-            }
-        });
-    });
-}
 
 
 exports.addUserNftFeatured = async (db, req, res) => {
@@ -3349,8 +2871,8 @@ exports.getLocalImageHash = async (db, req, res) => {
         method: 'POST', headers: {
             // 'Content-Type' : `application/json;boundary=${formdata._boundary}`,
             'Content-Type': `multipart/form-data; boundary=${formdata._boundary}`,
-            'pinata_api_key': '105327714c080a01a4b5',
-            'pinata_secret_api_key': 'e18cf3c1a8a7376852a4674735896bda9b7870cb4e11cc05c9e614711f955b35'
+            'pinata_api_key': config.pinata_api_key,
+            'pinata_secret_api_key': config.pinata_secret_api_key
        },
         body: formdata
     });

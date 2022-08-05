@@ -794,120 +794,9 @@ exports.getCountry = async (db, req, res) => {
 
 }
 
-exports.getUserProfile = async (db, req, res) => {
-    console.log("in getUserProfile");
-    var email = req.body.email;
-    try {
-        db.query(authQueries.getUserProfile, [email], function (error, result) {
-            if (error) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured",
-                    error
-                });
-            }
-            if (result.length > 0) {
-                return res.status(200).send({
-                    success: true,
-                    msg: "UserProfile Details",
-                    response: result[0]
-                })
-            } else {
-                return res.status(400).send({
-                    success: false,
-                    msg: "No Data"
-                })
-            }
-        })
 
-    } catch (err) {
-        //   console.log(err)
-        return res.status(400).send({
-            success: false,
-            msg: "unexpected internal error",
-            err
-        });
-    }
 
-}
 
-exports.userProfile = async (db, req, res) => {
-    console.log("in userProfile");
-    var email = req.body.email;
-    var user_name = req.body.user_name;
-    var first_name = req.body.first_name;
-    var last_name = req.body.last_name;
-    var dob = req.body.dob;
-    var phone = req.body.phone;
-    var country_id = req.body.country_id;
-
-    try {
-        if (user_name == '') {
-            return res.status(200).send({
-                success: false,
-                msg: "User Name required "
-            });
-        }
-        if (first_name == '') {
-            return res.status(200).send({
-                success: false,
-                msg: "First Name required "
-            });
-        }
-        if (last_name == '') {
-            return res.status(200).send({
-                success: false,
-                msg: "Last Name required "
-            });
-        }
-
-        //     if (contact.length !=10) {
-        //       return res.status(400).send({
-        //           success: false,
-        //           msg: "Contact number must be 10 Digit number"
-        //       });
-        //   }
-
-        var users = {
-            "user_name": user_name,
-            "first_name": first_name,
-            "last_name": last_name,
-            "dob": dob,
-            "phone": phone,
-            "country_id": country_id
-        }
-
-        db.query(authQueries.updateUser, [users, email], function (error, result) {
-            if (error) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured",
-                    error
-                });
-            }
-            if (result) {
-                return res.status(200).send({
-                    success: true,
-                    msg: "User Profile Updated"
-                })
-            } else {
-                return res.status(400).send({
-                    success: false,
-                    msg: "User Profile Updation Failed due to Error"
-                })
-            }
-        })
-
-    } catch (err) {
-        // console.log(err)
-        return res.status(400).send({
-            success: false,
-            msg: "unexpected internal error",
-            err
-        });
-    }
-
-}
 
 
 exports.getProfilePic = async (db, req, res) => {
@@ -1056,41 +945,7 @@ exports.changePassword = async (db, req, res) => {
 
 }
 
-exports.deActivateAccount = async (db, req, res) => {
-    console.log("in deActivateAccount");
-    var email = req.body.email;
-    try {
-        db.query(authQueries.updateAccount, [email], function (error, result) {
-            if (error) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured",
-                    error
-                });
-            }
-            if (result) {
-                return res.status(200).send({
-                    success: true,
-                    msg: "You are Account Now Deactivated",
-                })
-            } else {
-                return res.status(400).send({
-                    success: false,
-                    msg: "No Data"
-                })
-            }
-        })
 
-    } catch (err) {
-        //   console.log(err)
-        return res.status(400).send({
-            success: false,
-            msg: "unexpected internal error",
-            err
-        });
-    }
-
-}
 
 
 exports.updateProfilePic = async (db, req, res) => {
