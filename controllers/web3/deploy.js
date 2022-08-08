@@ -15,6 +15,14 @@ web3.setProvider(
 
 exports.deploy = async (reqData) => {
     try {
+        const account = reqData.account;
+        const privateKey = reqData.privateKey;
+        const nftName = reqData.nftName;
+        const nftSymbol = reqData.nftSymbol;
+        const ownerAddress = reqData.ownerAddress;
+        const baseUri = reqData.baseUri;
+
+        
         const content = await fs.readFileSync('./controllers/web3/DigiphyNFT.sol', 'utf8');
         const input = {
             language: 'Solidity',
@@ -25,13 +33,6 @@ exports.deploy = async (reqData) => {
                 outputSelection: { '*': { '*': ['*'] } }
             }
         };
-        const account = reqData.account;
-        const privateKey = reqData.privateKey;
-        const nftName = reqData.nftName;
-        const nftSymbol = reqData.nftSymbol;
-        const ownerAddress = reqData.ownerAddress;
-        const baseUri = reqData.baseUri;
-
 
         const { contracts } = JSON.parse(
             solc.compile(JSON.stringify(input))
