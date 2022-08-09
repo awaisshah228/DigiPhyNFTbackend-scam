@@ -11,6 +11,7 @@ require("dotenv").config();
 const stripe = require("stripe")(`${config.stripe_key}`);
 //const bodyParser = require("body-parser");
 const cors = require("cors");
+const cron = require('node-cron');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -23,6 +24,13 @@ router.use(
         extended: true,
     })
 );     
+
+const cronControl = require('../cron/cronControl.js');
+cronControl.collectionTrack();
+cron.schedule('* * * * *', () => {
+    console.log('running a task every minute');
+    cronControl.collectionTrack();
+});
 
 
 var multer  = require('multer');
@@ -255,6 +263,7 @@ router.post('/forgot', signup.forgot.bind(this, db));
 router.post('/resetpassword/:token', signup.Resetpassword.bind(this, db));
 router.post('/changepassword', ensureWebToken,signup.changePassword.bind(this, db));
 router.get('/getcountries', signup.getCountry.bind(this, db));
+router.post('/coinTransfer' ,admin.coinTransfer.bind(this, db));
 
 
 

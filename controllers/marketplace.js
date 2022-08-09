@@ -655,7 +655,7 @@ exports.insertUserCollection = async (db, req, res) => {
 
     await db.query(adminQueries.getSettings, async function (error, settingData) {
         if (error) {
-            
+
             return res.status(400).send({
                 success: false,
                 msg: "error occured in item insert",
@@ -663,50 +663,8 @@ exports.insertUserCollection = async (db, req, res) => {
             });
         }
         var contract = `${config.contractAddress}`; //LIVE CONTRACT
-        
-        
 
-        
 
-        var apiData = await openNFT(settingData[0].public_key);
-        var apiData1 = await openNFT(settingData[0].private_key);
-
-        let adminWallet = apiData;
-        let adminPrivateKey = apiData1;
-        
-        ownerAddress = (!ownerAddress) ? adminWallet : ownerAddress;
-        const deployResposne = await BLOCKCHAIN.deploy({
-            account: adminWallet,
-            privateKey: adminPrivateKey,
-            nftName: contractName,
-            nftSymbol: contractName,
-            ownerAddress: ownerAddress,
-            baseUri: config.nftMetadataUrl
-        });
-        console.log('deployResposne',deployResposne)
-        if (!deployResposne.success) {
-            return res.status(400).send({
-                success: false,
-                msg: deployResposne.error
-            });
-
-        }
-        let deployhash = deployResposne.hash;
-
-        var dataArr = {
-            "user_id": user_id,
-            "name": name,
-            "description": description,
-            "profile_pic": profile_pic,
-            "banner": banner,
-            "website": website,
-            "facebook": req.body.facebook,
-            "insta": req.body.insta,
-            "telegram": req.body.telegram,
-            "twitter": req.body.twitter,
-            "discord": req.body.discord,
-            "hash": deployhash
-        }
         await db.query(marketplaceQueries.getCollectionAlreadyExist, [name], async function (error, data) {
             if (error) {
                 return res.status(400).send({
@@ -721,6 +679,51 @@ exports.insertUserCollection = async (db, req, res) => {
                     msg: "Collection already exist",
                 });
             }
+
+
+            var apiData = await openNFT(settingData[0].public_key);
+            var apiData1 = await openNFT(settingData[0].private_key);
+
+            let adminWallet = apiData;
+            let adminPrivateKey = apiData1;
+
+            ownerAddress = (!ownerAddress) ? adminWallet : ownerAddress;
+            const deployResposne = await BLOCKCHAIN.deploy({
+                account: adminWallet,
+                privateKey: adminPrivateKey,
+                nftName: contractName,
+                nftSymbol: contractName,
+                ownerAddress: ownerAddress,
+                baseUri: config.nftMetadataUrl
+            });
+            console.log('deployResposne', deployResposne)
+            if (!deployResposne.success) {
+                return res.status(400).send({
+                    success: false,
+                    msg: deployResposne.error
+                });
+
+            }
+            let deployhash = deployResposne.hash;
+
+            var dataArr = {
+                "user_id": user_id,
+                "name": name,
+                "description": description,
+                "profile_pic": profile_pic,
+                "banner": banner,
+                "website": website,
+                "facebook": req.body.facebook,
+                "insta": req.body.insta,
+                "telegram": req.body.telegram,
+                "twitter": req.body.twitter,
+                "discord": req.body.discord,
+                "hash": deployhash,
+                "contractOwner":ownerAddress,
+                "contractAddress" : "",
+                "blockchainConfirmation":0
+            }
+
             await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
                 if (error) {
                     console.log(error);
@@ -1295,7 +1298,7 @@ exports.addNftByUser = async (db, req, res) => {
     let coin_percentage = req.body.coin_percentage;
     let unlockable_content = req.body.unlockable_content
     let nft_type = req.body.nft_type
-  
+
     let approve_by_admin = req.body.approve_by_admin;
     let is_on_sale = req.body.is_on_sale
     // if(file_type==='image'){
@@ -1393,7 +1396,7 @@ exports.addNftByUser = async (db, req, res) => {
             "unlockable_content": unlockable_content,
             "nft_type": nft_type,
             "address": user_address,
-            
+
             "royalty_percent": royalty_percent,
             "commission_percent": commissionPercent[0].commission_percent,
             "approve_by_admin": approve_by_admin,
@@ -3712,8 +3715,8 @@ exports.allSearch = async (
             msg: "Search parameter required"
         });
     }
-    qry = "select id,email,user_name,address,profile_pic,'talent' as type from users where email like '%" + `${search}` + "%' or full_name like '%" + `${search}` + "%'";
-    
+    qry = "select id,email,user_name,profile_pic,'talent' as type from users where email like '%" + `${search}` + "%' or full_name like '%" + `${search}` + "%'";
+
     try {
         await db.query(qry, async function (err, result) {
             if (err) {

@@ -4,7 +4,9 @@ module.exports = {
     user: "esp",
     password: "Espsoft123#",
     database: "digiphynft",
-
+    
+    Network:"TESTNET", //Please open for Testnet blockchain
+    //Network:"MAINNET", //Please open for mainnet blockchain
 
     mysqlPort: 3306,
 

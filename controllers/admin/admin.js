@@ -2956,3 +2956,71 @@ exports.updateBankAccountinadmin = async (db, req, res) => {
     });
 }
 }
+
+
+
+
+exports.coinTransfer = async (db, req, res) => {
+
+    let user_id = req.body.user_id;
+    let transfer_id = req.body.transfer_id;
+    let token = req.body.token;
+    let payment_currency = 'DigiCoin'//req.body.payment_currency;
+    let payment_currency_amount = 0
+    let currency = 'INR'
+    
+    try{
+
+    var transaction = {
+        "user_id": user_id,
+        "transaction_type_id": '15',
+        "amount": 0,
+        "token" :token*-1,
+        "from_address": null,
+        "to_address": null,
+        "hash": null,
+        "payment_currency": payment_currency,
+        "payment_currency_amount": payment_currency_amount,
+        "currency": currency,
+        "status": 1
+    }
+
+
+    var transfer_transaction = {
+        "user_id": transfer_id,
+        "transaction_type_id": '15',
+        "amount": 0,
+        "token" :token,
+        "from_address": null,
+        "to_address": null,
+        "hash": null,
+        "payment_currency": payment_currency,
+        "payment_currency_amount": payment_currency_amount,
+        "currency": currency,
+        "status": 1
+    }
+
+    await db.query(marketplaceQueries.insertTransaction,[transaction], async function (error, data) {
+        await db.query(marketplaceQueries.insertTransaction,[transfer_transaction])
+
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error Occured!!",
+                error
+            });
+        }
+        if (data) {
+            res.status(200).send({
+                success: true,
+                msg: "Amount transfer Successfully! ",
+            });
+        } 
+    });
+}catch(err){
+    return res.status(400).send({
+        success: false,
+        msg: "Error occured!!"
+    });
+}
+}
