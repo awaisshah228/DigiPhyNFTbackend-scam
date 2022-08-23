@@ -7,8 +7,8 @@ exports.Activity = async function (email, subject, text, link, image) {
         port: 465,
         secure: true,
         auth: {
-            user: 'developer@espsofttech.com',
-            pass: 'Espsoft123#'
+            user: 'support@digiphynft.com',
+            pass: 'DigiPhyNFT@123#'
         },
         tls: {
             rejectUnauthorized: false
@@ -20,7 +20,7 @@ exports.Activity = async function (email, subject, text, link, image) {
 
     console.log('link', link);
     var mailOptions = {
-        from: 'developer@espsofttech.com',
+        from: 'support@digiphynft.com',
         to: email,
         subject: subject,
         html: ` 
@@ -51,7 +51,7 @@ exports.Activity = async function (email, subject, text, link, image) {
                         <td colspan="2" align="center" bgcolor="#333333" style="text-align:center;width:100%;padding:12px 0px;border-bottom:1px solid #eaeaea">
                             <div>
                                 <a href="#" target="_blank" >
-                                    <img align="left" alt="DigiPhyNFT Logo" src="https://espsofttech.in/digiphynft/backend/uploads/image-1654674806051.png" width="180" style="max-width:400px;padding-bottom:0;display:inline!important;float: inherit;vertical-align:bottom;border:0;height:auto;outline:none;text-decoration:none" class="CToWUd">                              </a>                          </div>
+                                    <img align="left" alt="DigiPhyNFT Logo" src="https://digiphynft.shop/backend/uploads/image-1656053820251.png" width="180" style="max-width:400px;padding-bottom:0;display:inline!important;float: inherit;vertical-align:bottom;border:0;height:auto;outline:none;text-decoration:none" class="CToWUd">                              </a>                          </div>
                         </td>
                       </tr>
                         <tr>

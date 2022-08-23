@@ -197,8 +197,8 @@ exports.register = async (db, req, res) => {
                 port: 465,
                 secure: true,
                 auth: {
-                    user: 'developer@espsofttech.com',
-                    pass: 'Espsoft123#'
+                    user: 'support@digiphynft.com',
+                    pass: 'DigiPhyNFT@123#'
                 },
                 tls: {
                     rejectUnauthorized: false
@@ -206,7 +206,7 @@ exports.register = async (db, req, res) => {
             });
 
             var mailOptions = {
-                from: 'developer@espsofttech.com',
+                from: 'support@digiphynft.com',
                 to: `${email}`,
                 subject: 'Account Activation Link',
                 html: `<div style="background-color:#f4f4f4">
@@ -236,7 +236,7 @@ exports.register = async (db, req, res) => {
                                         <tbody>
                                            <tr>
                                               <td style="width:126px">
-                                                 <img height="auto" src="https://espsofttech.in/digiphynft/backend/uploads/image-1654674806051.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px" width="150"  class="CToWUd">
+                                                 <img height="auto" src="https://digiphynft.shop/backend/uploads/image-1656053820251.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px" width="150"  class="CToWUd">
                                               </td>
                                            </tr>
                                         </tbody>
@@ -337,7 +337,7 @@ exports.register = async (db, req, res) => {
 
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
-                    //   console.log(error);
+                    console.log(error);
                 } else {
                     console.log('Email sent: ' + info.response);
                 }
@@ -496,8 +496,8 @@ exports.forgot = async (db, req, res) => {
                     port: 465,
                     secure: true,
                     auth: {
-                        user: 'developer@espsofttech.com',
-                        pass: 'Espsoft123#'
+                        user: 'support@digiphynft.com',
+                        pass: 'DigiPhyNFT@123#'
                     },
                     tls: {
                         rejectUnauthorized: false
@@ -513,7 +513,7 @@ exports.forgot = async (db, req, res) => {
                 //     });
 
                 var mailOptions = {
-                    from: 'developer@espsofttech.com',
+                    from: 'support@digiphynft.com',
                     // from : "bilal.espsofttech@gmail.com",
                     to: `${email}`,
                     subject: 'Reset Password Link',
@@ -543,7 +543,7 @@ exports.forgot = async (db, req, res) => {
                                        <tbody>
                                           <tr>
                                              <td style="width:126px">
-                                                <img height="auto" src="https://espsofttech.in/digiphynft/backend/uploads/image-1654674806051.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px" width="150" class="CToWUd">
+                                                <img height="auto" src="https://digiphynft.shop/backend/uploads/image-1656053820251.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px" width="150" class="CToWUd">
                                              </td>
                                           </tr>
                                        </tbody>
@@ -645,7 +645,7 @@ exports.forgot = async (db, req, res) => {
 
                 transporter.sendMail(mailOptions, function (error, info) {
                     if (error) {
-                        //    console.log(error);
+                            console.log(error);
                     } else {
                         console.log('Email sent: ' + info.response);
                     }
