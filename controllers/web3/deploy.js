@@ -21,8 +21,9 @@ exports.deploy = async (reqData) => {
         const nftSymbol = reqData.nftSymbol;
         const ownerAddress = reqData.ownerAddress;
         const baseUri = reqData.baseUri;
-
-        
+      
+        let bb = await web3.eth.getBalance(account);
+          console.log(bb)
         const content = await fs.readFileSync('./controllers/web3/DigiphyNFT.sol', 'utf8');
         const input = {
             language: 'Solidity',
@@ -30,7 +31,11 @@ exports.deploy = async (reqData) => {
                 'DigiphyNFT.sol': { content }
             },
             settings: {
-                outputSelection: { '*': { '*': ['*'] } }
+                outputSelection: { '*': { '*': ['*'] } },
+                optimizer: {
+                    "enabled": true,
+                    "runs": 200
+                }
             }
         };
 
@@ -68,7 +73,7 @@ exports.deploy = async (reqData) => {
             gasPrice: web3.utils.toHex(gasPrice),
             data: encoded_tx
         });
-
+        console.log({gasLimit,gasPrice,fee :gasLimit*gasPrice/10**18 })
         let transactionObject = {
             nonce: web3.utils.toHex(count),
             from: account,

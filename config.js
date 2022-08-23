@@ -14,7 +14,7 @@ module.exports = {
     SESSION_EXPIRES_IN: '24h', // Session will expire after 1 day of creation
     nftMetadataUrl : "https://espsofttech.in:6018/api/nft/metadata/",
     
-    walletApiUrl: "https://espsofttech.in:8001/api/erc1155/mainnet/createWallet",
+    // walletApiUrl: "https://espsofttech.in:8001/api/erc1155/mainnet/createWallet",
     blockchainApiUrl: 'https://espsofttech.in:8001/api/erc1155/matictest/', //testnet
     ethTransferApiUrl: 'https://espsofttech.in:8001/api/matic/testnet/transfer',
     contractAddress: '0xa133d14922c9ea05accc357526cf823f75401997',// test

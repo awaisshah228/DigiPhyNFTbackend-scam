@@ -1281,7 +1281,8 @@ contract DigiphyNFT is ERC1155, NFTMinterRole {
     constructor(string memory _name, string memory _symbol, address _owner, string memory _baseUri) Ownable(_owner) {
         name = _name;
         name = _symbol;
-        baseUri = _baseUri;        
+        baseUri = _baseUri;  
+        MinterRole[msg.sender] = true;     
     }
 
     modifier onlyMinter{

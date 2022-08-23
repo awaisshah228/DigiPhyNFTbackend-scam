@@ -252,6 +252,11 @@ router.post('/adminpassword',ensureWebToken,admin.changePassword.bind(this, db))
 router.post('/addBulkNftByAdmin' ,admin.addBulkNftByAdmin.bind(this, db));
 router.get('/getBankDetailinAdmin' ,admin.getBankDetailinAdmin.bind(this, db));
 router.post('/updateBankAccountinadmin' ,admin.updateBankAccountinadmin.bind(this, db));
+router.get('/transactionDetailAll',admin.transactionDetailAll.bind(this,db));
+router.get('/transactionTotalSum',admin.transactionTotalSum.bind(this,db));
+router.get('/transactionTotalBid',admin.transactionTotalBid.bind(this,db));
+
+
 
 
 
@@ -265,6 +270,8 @@ router.post('/changepassword', ensureWebToken,signup.changePassword.bind(this, d
 router.get('/getcountries', signup.getCountry.bind(this, db));
 router.post('/coinTransfer' ,admin.coinTransfer.bind(this, db));
 
+
+router.get('/nft/metadata/:id' ,marketplace.getMetadataJson.bind(this, db));
 
 
 router.get("/", function (request, response) {

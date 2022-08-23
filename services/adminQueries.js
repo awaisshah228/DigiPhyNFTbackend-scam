@@ -5,6 +5,7 @@ var db = require('../utils/connection');
 module.exports = {
   updateWallet: "update settings set ? where id=1",
   updateItemMarket: "update item set ? where id=?",
+  putOnSale: "update item_edition set is_on_sale=1 where item_id=? and owner_id=?",
   getSettings: "select resale_charges,minting_fee,royalty_percent,commission_percent,receive_address,public_key,private_key, coin_value,maxcoinpercentage from settings where id=1",
   addUserCollectionFeatured: "update user_collection SET ? where id =?",
   user_delete:"update users SET is_deleted=1 where id=?",
@@ -18,7 +19,7 @@ module.exports = {
   adminconnectionid : "SELECT * FROM  user_collection where id=?",
   updateblockchainstatus :"update transaction SET ? where user_id =? and item_id=?",
   updateipfshash :"update item SET ?  where id=?",
-  getBulkNFT :  "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,i.local_image, i.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,bnm.folder_name,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join bulk_nft_master as bnm on i.bulk_nft_master_id=bnm.id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id  and bulk_nft_master_id > 0 and i.owner_id=? and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
+  getBulkNFT :  "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,i.local_image,i.bulkNFT, ie.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,bnm.folder_name,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join bulk_nft_master as bnm on i.bulk_nft_master_id=bnm.id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id  and bulk_nft_master_id > 0 and i.owner_id=? and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
   
   getUsersEmail: "SELECT * FROM users WHERE email = ? and is_admin=1",
   
@@ -41,7 +42,7 @@ module.exports = {
   deleteItem: "Delete from item_edition where id =?",
   updateItem: "update item SET ? where id =?",
   getItem: "Select i.id,ie.id as item_edition_id,ie.edition_text,i.name,i.description,i.image,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join item_category as ic on ic.id=i.item_category_id where ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and i.is_active=1 and (ie.expiry_date >= now() or ie.expiry_date is null) and i.nft_type_id=1 and coalesce(ie.start_date,now())<=now() ORDER BY i.id DESC",
-  getAdminItem: "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,i.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
+  getAdminItem: "Select users.user_name as owner_name,i.id,ie.id as item_edition_id,ie.edition_text,cu.user_name as creator_name,i.name,ie.is_on_sale,i.description,i.royalty_percent,i.sell_type,i.approve_by_admin,i.address,i.image,i.is_featured,i.owner_id,i.created_by,i.file_type,i.owner,i.item_category_id,i.quantity,ic.name as item_category,i.token_id,ie.price,i.is_active,ie.is_sold,ie.expiry_date from item_edition as ie left join item as i on i.id=ie.item_id left join item_category as ic on ic.id=i.item_category_id left join users as cu on cu.id=i.created_by left JOIN users ON i.owner_id=users.id where ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id)  ORDER BY i.id DESC",
   
   listSingleItem: "Select ie.id as item_edition_id,i.id as item_id,i.name,i.description,i.image,i.file_type,i.owner,i.item_category_id,ic.name as category_name,i.token_id,i.price from item_edition as ie left join item as i on i.id=ie.item_id left join item_category as ic on ic.id=i.item_category_id where ie.id = ? and (ie.expiry_date >= now() or i.expiry_date is null)",
   dashItem: "select sum(category_count) as category_count,sum(user_count) as user_count,sum(item_count) as item_count,sum(sold_item) as sold_item,sum(trending_item) as trending_item,sum(sold_volume) as sold_volume from ( select count(id)as category_count,0 as user_count,0 as item_count, 0 as sold_item, 0 as trending_item,0 as sold_volume from item_category UNION ALL select 0 as category_count,count(id)as user_count,0 as item_count, 0 as sold_item, 0 as trending_item,0 as sold_volume from users where is_deleted=0 UNION ALL select 0 as category_count,0 as user_count,count(id)as item_count, sum(is_sold) as sold_item, 0 as trending_item,0 as sold_volume from item_edition union all select 0 as category_count,0 as user_count,0 as item_count,0 as sold_item, 0 as trending_item,sum(amount)as sold_volume from transaction where transaction_type_id=1 ) as dashboard_data",
@@ -70,6 +71,9 @@ module.exports = {
   updateTermsConditions: "UPDATE terms_conditions SET ? WHERE id = ?",
   getAbout: "SELECT * from about",
   updateAbout: "UPDATE about SET ? WHERE id = ?",
+  transactionDetailAll:"SELECT t.id as transaction_id,t.edition_text,tt.name as transaction_type,t.transaction_type_id,u.full_name,u.email,i.id as item_id,t.item_edition_id,i.name as item_name,i.description,i.image,t.amount,t.currency,date_format(t.datetime,'%d-%M-%y') as transaction_date  FROM transaction as t left join users as u on u.id=t.user_id left join item_edition as ie on ie.id=t.item_edition_id left join item as i on i.id=ie.item_id left join transaction_type as tt on tt.id=t.transaction_type_id where t.transaction_type_id=1 or t.transaction_type_id=4 order by t.id desc",
+  transactionTotalSum : "select sum(amount) as amount from transaction WHERE transaction_type_id = 1",
+  transactionTotalBid : "select sum(amount*-1) as amount from transaction WHERE transaction_type_id = 4"
 
 
 }

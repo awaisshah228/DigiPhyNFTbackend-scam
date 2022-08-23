@@ -75,16 +75,12 @@ function openNFT(code) {
 exports.updateItemMarket = async (db, req, res) => {
 
     var item_id = req.body.item_id;
-    let is_on_sale = 1;
+    var user_id = req.body.user_id;
+    var item_edition_id = req.body.item_edition_id
 
+    await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
 
-
-    let keys = {
-        // "item_id": item_id,
-        "is_on_sale": 1
-    }
-
-    db.query(adminQueries.updateItemMarket, [keys, item_id], function (error, data) {
+    db.query(adminQueries.putOnSale, [item_id, user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -1109,7 +1105,7 @@ exports.listItem = async (db, req, res) => {
     try {
 
 
-        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and i.is_on_sale=1 order by id desc `;
+        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`;
 
         console.log(qry);
         await db.query(qry, function (error, data) {
@@ -2703,8 +2699,9 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     "address": resExl.user_address,
                                                     "royalty_percent": resExl.royalty_percentage,
                                                     "commission_percent": commissionPercent[0].commission_percent,
-                                                    "approve_by_admin": 1,
-                                                    "is_on_sale": 1
+                                                    "approve_by_admin": 0,
+                                                    "is_on_sale": 0,
+                                                    "bulkNFT":0
 
                                                 }
 
@@ -2712,26 +2709,26 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
 
                                                 for (var s = 3; s < 1500; s++) {
                                                     var attr = Object.keys(resExl)
-                                                 
+
                                                     if (attr[s] != 'attributes_name_' + t) {
                                                         break
                                                     }
                                                     var key1 = attr[s]
-                                                     s = s + 1
-                                                    console.log('attr1111111111111',attr[s],key1)
+                                                    s = s + 1
+                                                    console.log('attr1111111111111', attr[s], key1)
 
-                                                   
+
                                                     if (attr[s] != 'attributes_value_' + t) {
                                                         break
                                                     }
-                                                 
 
-                                                
+
+
 
 
                                                     db.query(marketplaceQueries.insertItem, [singleData], async function (error, data) {
 
-                               
+
 
 
 
@@ -2749,9 +2746,9 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                                 'type': resExl[key1],
                                                                 'value': resExl[value]
                                                             }
-                                                         
 
-                                                    console.log('attr22222222222222',resExl[key1],resExl[value])
+
+                                                            console.log('attr22222222222222', resExl[key1], resExl[value])
 
                                                             await db.query(marketplaceQueries.insertItemAttr, [attrArr]);
 
@@ -2786,7 +2783,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                             }
                                                             await db.query(adminQueries.updateItem, [updateData, data.insertId])
 
-                                                           
+
                                                             p++;
                                                             if (p == sheets.length) {
                                                                 return res.status(200).send({
@@ -2827,7 +2824,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
 
 exports.getBulkNFT = async (db, req, res) => {
     let user_id = req.body.user_id;
-    await db.query(adminQueries.getBulkNFT,[user_id], function (error, data) {
+    await db.query(adminQueries.getBulkNFT, [user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -2854,8 +2851,12 @@ exports.getLocalImageHash = async (db, req, res) => {
     console.log("in getLocalImageHash");
     var localImage = req.body.localImage
     var id = req.body.id
+    var bulkNFT = 1
     console.log(localImage);
-
+    let data ={
+        bulkNFT : bulkNFT
+    }
+    await db.query(adminQueries.updateItem, [data,id])
     // return res.status(200).send({
     //     success: true, 
     //     msg: "Data get successfully!!",
@@ -2865,7 +2866,7 @@ exports.getLocalImageHash = async (db, req, res) => {
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
     let formdata = new FormData();
     formdata.append('file', fs.createReadStream(localImage))
-  
+
 
     const response2 = await fetch(url, {
         method: 'POST', headers: {
@@ -2873,17 +2874,17 @@ exports.getLocalImageHash = async (db, req, res) => {
             'Content-Type': `multipart/form-data; boundary=${formdata._boundary}`,
             'pinata_api_key': config.pinata_api_key,
             'pinata_secret_api_key': config.pinata_secret_api_key
-       },
+        },
         body: formdata
     });
     const filedata = await response2.json();
-    console.log('file',filedata)
+    console.log('file', filedata)
     if (filedata.IpfsHash) {
-        let data  ={
-            image : filedata.IpfsHash
+        let data = {
+            image: filedata.IpfsHash
         }
-        await db.query(adminQueries.updateipfshash,[data,id])
-        
+        await db.query(adminQueries.updateipfshash, [data, id])
+
         return res.status(200).send({
             success: true,
             msg: "Data get successfully!!",
@@ -2928,33 +2929,33 @@ exports.updateBankAccountinadmin = async (db, req, res) => {
     let user_id = req.body.user_id;
     let account_id = req.body.account_id;
 
-    try{
-    let data1 ={
-        account_id: account_id
-    }
-
-
-    await db.query(adminQueries.updateBankAccountinadmin,[data1,user_id], function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error Occured!!",
-                error
-            });
+    try {
+        let data1 = {
+            account_id: account_id
         }
-        if (data) {
-            res.status(200).send({
-                success: true,
-                msg: "Account id updated Successfully ! ",
-            });
-        } 
-    });
-}catch(err){
-    return res.status(400).send({
-        success: false,
-        msg: "Error occured!!"
-    });
-}
+
+
+        await db.query(adminQueries.updateBankAccountinadmin, [data1, user_id], function (error, data) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error Occured!!",
+                    error
+                });
+            }
+            if (data) {
+                res.status(200).send({
+                    success: true,
+                    msg: "Account id updated Successfully ! ",
+                });
+            }
+        });
+    } catch (err) {
+        return res.status(400).send({
+            success: false,
+            msg: "Error occured!!"
+        });
+    }
 }
 
 
@@ -2968,59 +2969,132 @@ exports.coinTransfer = async (db, req, res) => {
     let payment_currency = 'DigiCoin'//req.body.payment_currency;
     let payment_currency_amount = 0
     let currency = 'INR'
-    
-    try{
 
-    var transaction = {
-        "user_id": user_id,
-        "transaction_type_id": '15',
-        "amount": 0,
-        "token" :token*-1,
-        "from_address": null,
-        "to_address": null,
-        "hash": null,
-        "payment_currency": payment_currency,
-        "payment_currency_amount": payment_currency_amount,
-        "currency": currency,
-        "status": 1
+    try {
+
+        var transaction = {
+            "user_id": user_id,
+            "transaction_type_id": '15',
+            "amount": 0,
+            "token": token * -1,
+            "from_address": null,
+            "to_address": null,
+            "hash": null,
+            "payment_currency": payment_currency,
+            "payment_currency_amount": payment_currency_amount,
+            "currency": currency,
+            "status": 1
+        }
+
+
+        var transfer_transaction = {
+            "user_id": transfer_id,
+            "transaction_type_id": '15',
+            "amount": 0,
+            "token": token,
+            "from_address": null,
+            "to_address": null,
+            "hash": null,
+            "payment_currency": payment_currency,
+            "payment_currency_amount": payment_currency_amount,
+            "currency": currency,
+            "status": 1
+        }
+
+        await db.query(marketplaceQueries.insertTransaction, [transaction], async function (error, data) {
+            await db.query(marketplaceQueries.insertTransaction, [transfer_transaction])
+
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error Occured!!",
+                    error
+                });
+            }
+            if (data) {
+                res.status(200).send({
+                    success: true,
+                    msg: "Amount transfer Successfully! ",
+                });
+            }
+        });
+    } catch (err) {
+        return res.status(400).send({
+            success: false,
+            msg: "Error occured!!"
+        });
     }
+}
 
+//==========================================  Get Admin transactions  ===================
 
-    var transfer_transaction = {
-        "user_id": transfer_id,
-        "transaction_type_id": '15',
-        "amount": 0,
-        "token" :token,
-        "from_address": null,
-        "to_address": null,
-        "hash": null,
-        "payment_currency": payment_currency,
-        "payment_currency_amount": payment_currency_amount,
-        "currency": currency,
-        "status": 1
-    }
+exports.transactionDetailAll = async (db, req, res) => {
 
-    await db.query(marketplaceQueries.insertTransaction,[transaction], async function (error, data) {
-        await db.query(marketplaceQueries.insertTransaction,[transfer_transaction])
+    await db.query(adminQueries.transactionDetailAll, async function (error, data) {
 
         if (error) {
             return res.status(400).send({
                 success: false,
-                msg: "Error Occured!!",
+                msg: "Error occured!!",
                 error
             });
         }
-        if (data) {
-            res.status(200).send({
-                success: true,
-                msg: "Amount transfer Successfully! ",
-            });
-        } 
-    });
-}catch(err){
-    return res.status(400).send({
-        success: false,
-        msg: "Error occured!!"
-    });
+
+        res.status(200).send({
+            success: true,
+            msg: "Transactions Detail",
+            response: data
+        });
+
+    })
+
 }
+
+
+//==========================================  Total Sum transactions  ===================
+
+exports.transactionTotalSum = async (db, req, res) => {
+
+    await db.query(adminQueries.transactionTotalSum, async function (error, data) {
+
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error occured!!",
+                error
+            });
+        }
+        
+        res.status(200).send({
+            success: true,
+            msg: "Transactions Sum",
+            response: data[0]
+        });
+
+    })
+
+}
+
+//==========================================  Total Sum transactions  ===================
+
+exports.transactionTotalBid = async (db, req, res) => {
+
+    await db.query(adminQueries.transactionTotalBid, async function (error, data) {
+
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error occured!!",
+                error
+            });
+        }
+        
+        res.status(200).send({
+            success: true,
+            msg: "Transactions Sum",
+            response: data[0]
+        });
+
+    })
+
 }

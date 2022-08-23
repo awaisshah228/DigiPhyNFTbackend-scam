@@ -370,37 +370,37 @@ exports.register = async (db, req, res) => {
                             error
                         });
                     }
-                    const response1 = await fetch(config.walletApiUrl, {
-                        method: 'GET', headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    const data1 = await response1.json();
-                    //console.log(data1);
-                    if (!data1.wallet.privateKey) {
-                        return res.status(400).send({
-                            success: false,
-                            msg: "error occured in wallet creation",
-                            error
-                        });
-                    }
+                    // const response1 = await fetch(config.walletApiUrl, {
+                    //     method: 'GET', headers: {
+                    //         'Accept': 'application/json',
+                    //         'Content-Type': 'application/json'
+                    //     }
+                    // });
+                    // const data1 = await response1.json();
+                    // console.log(data1);
+                    // if (!data1?.wallet?.private) {
+                    //     return res.status(400).send({
+                    //         success: false,
+                    //         msg: "error occured in wallet creation",
+                    //         error
+                    //     });
+                    // }
 
-                    var insertData = {
-                        "user_id": result.insertId,
-                        "coin_id": 1,
-                        "public": data1.wallet.address,
-                        "private": data1.wallet.privateKey
-                    }
-                    await db.query(adminQueries.createUserWallet, [insertData], async function (error, data) {
-                        if (error) {
-                            return res.status(400).send({
-                                success: false,
-                                msg: "error occured",
-                                error
-                            });
-                        }
-                    })
+                    // var insertData = {
+                    //     "user_id": result.insertId,
+                    //     "coin_id": 1,
+                    //     "public": data1.wallet.address,
+                    //     "private": data1.wallet.private
+                    // }
+                    // await db.query(adminQueries.createUserWallet, [insertData], async function (error, data) {
+                    //     if (error) {
+                    //         return res.status(400).send({
+                    //             success: false,
+                    //             msg: "error occured",
+                    //             error
+                    //         });
+                    //     }
+                    // })
 
                     return res.status(200).send({
                         success: true,

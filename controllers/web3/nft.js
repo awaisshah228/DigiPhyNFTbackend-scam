@@ -97,7 +97,7 @@ exports.mint = async (reqData) => {
     } catch (e) {
         return {
             success: false,
-            error: ee.toString() + ', Please contact support for creating a new item.'
+            error: e.toString() + ', Please contact support for creating a new item.'
         }
     }
 }
@@ -110,7 +110,7 @@ exports.transfer = async (reqData) => {
     const to_address = reqData.to_address;
     const tokenId = reqData.tokenId;
     const qty = reqData.qty;
-    const item_owner_address = reqData.item_owner_address;
+    const item_owner_address = reqData.current_owner_address;
 
     const getFee = reqData.getFee; // bool
 
@@ -190,7 +190,7 @@ exports.transfer = async (reqData) => {
                 });
         });
         return trxPromise;
-    } catch (e) {
+    } catch (ee) {
         return {
             success: false,
             error: ee.toString() + ', Please contact support for transfer item.'

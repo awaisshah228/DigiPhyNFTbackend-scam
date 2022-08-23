@@ -84,39 +84,39 @@ exports.login = async (db, req, res) => {
                     }, config.JWT_SECRET_KEY)
 
             /* ---------- check and generate wallet of user */
-                    if(user[0].wallet_id===0){
-                        const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                          }
-                        });
-                        const data1 = await response1.json();
-                        console.log(data1);
-                        if(!data1.wallet.privateKey){
-                            return res.status(400).send({
-                                success: false,
-                                msg: "error occured in wallet creation",
-                                error
-                            });
-                        }
+                    // if(user[0].wallet_id===0){
+                    //     const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
+                    //         'Accept': 'application/json',
+                    //         'Content-Type': 'application/json'
+                    //       }
+                    //     });
+                    //     const data1 = await response1.json();
+                    //     console.log(data1);
+                    //     if(!data1.wallet.privateKey){
+                    //         return res.status(400).send({
+                    //             success: false,
+                    //             msg: "error occured in wallet creation",
+                    //             error
+                    //         });
+                    //     }
                         
-                        var insertData = {
-                            "user_id":user[0].id,
-                            "coin_id":1,
-                            "public":data1.wallet.address,
-                            "private":data1.wallet.privateKey
-                        }
-                        console.log(insertData);
-                        await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
-                            if(error){
-                            return res.status(400).send({
-                                success: false,
-                                msg: "error occured",
-                                error
-                            });
-                        }
-                    })
-                    }
+                    //     var insertData = {
+                    //         "user_id":user[0].id,
+                    //         "coin_id":1,
+                    //         "public":data1.wallet.address,
+                    //         "private":data1.wallet.privateKey
+                    //     }
+                    //     console.log(insertData);
+                    //     await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
+                    //         if(error){
+                    //         return res.status(400).send({
+                    //             success: false,
+                    //             msg: "error occured",
+                    //             error
+                    //         });
+                    //     }
+                    // })
+                    // }
             /* ----------------------------------------------- */
             await db.query(authQueries.getUsersEmail,[email],async function(error,data){
                 if(error){
@@ -190,39 +190,39 @@ exports.loginType = async (db, req, res) => {
                             msg: "User Already Register",
                         });
                     } else {
-                        if(results[0].wallet_id===0){
-                            const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                              }
-                            });
-                            const data1 = await response1.json();
-                            console.log(data1);
-                            if(!data1.wallet.privateKey){
-                                return res.status(400).send({
-                                    success: false,
-                                    msg: "error occured in wallet creation",
-                                    error
-                                });
-                            }
+                        // if(results[0].wallet_id===0){
+                        //     const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
+                        //         'Accept': 'application/json',
+                        //         'Content-Type': 'application/json'
+                        //       }
+                        //     });
+                        //     const data1 = await response1.json();
+                        //     console.log(data1);
+                        //     if(!data1.wallet.privateKey){
+                        //         return res.status(400).send({
+                        //             success: false,
+                        //             msg: "error occured in wallet creation",
+                        //             error
+                        //         });
+                        //     }
                             
-                            var insertData = {
-                                "user_id":results[0].id,
-                                "coin_id":1,
-                                "public":data1.wallet.address,
-                                "private":data1.wallet.privateKey
-                            }
-                            console.log(insertData);
-                            await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
-                                if(error){
-                                return res.status(400).send({
-                                    success: false,
-                                    msg: "error occured",
-                                    error
-                                });
-                            }
-                        })
-                        }
+                        //     var insertData = {
+                        //         "user_id":results[0].id,
+                        //         "coin_id":1,
+                        //         "public":data1.wallet.address,
+                        //         "private":data1.wallet.privateKey
+                        //     }
+                        //     console.log(insertData);
+                        //     await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
+                        //         if(error){
+                        //         return res.status(400).send({
+                        //             success: false,
+                        //             msg: "error occured",
+                        //             error
+                        //         });
+                        //     }
+                        // })
+                        // }
                         
                         const jwtToken = jwt.sign({
                             email: req.body.email
@@ -272,39 +272,39 @@ exports.loginType = async (db, req, res) => {
 
                     db.query(authQueries.getUsersloginEmail, [email], async function (error, newResult) {
                         if (newResult.length > 0) {
-                            if(newResult[0].wallet_id===0){
-                                const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                  }
-                                });
-                                const data1 = await response1.json();
-                                console.log(data1);
-                                if(!data1.wallet.privateKey){
-                                    return res.status(400).send({
-                                        success: false,
-                                        msg: "error occured in wallet creation",
-                                        error
-                                    });
-                                }
+                            // if(newResult[0].wallet_id===0){
+                            //     const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
+                            //         'Accept': 'application/json',
+                            //         'Content-Type': 'application/json'
+                            //       }
+                            //     });
+                            //     const data1 = await response1.json();
+                            //     console.log(data1);
+                            //     if(!data1.wallet.privateKey){
+                            //         return res.status(400).send({
+                            //             success: false,
+                            //             msg: "error occured in wallet creation",
+                            //             error
+                            //         });
+                            //     }
                                 
-                                var insertData = {
-                                    "user_id":newResult[0].id,
-                                    "coin_id":1,
-                                    "public":data1.wallet.address,
-                                    "private":data1.wallet.privateKey
-                                }
-                                console.log(insertData);
-                                await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
-                                    if(error){
-                                    return res.status(400).send({
-                                        success: false,
-                                        msg: "error occured",
-                                        error
-                                    });
-                                }
-                            })
-                            }
+                            //     var insertData = {
+                            //         "user_id":newResult[0].id,
+                            //         "coin_id":1,
+                            //         "public":data1.wallet.address,
+                            //         "private":data1.wallet.privateKey
+                            //     }
+                            //     console.log(insertData);
+                            //     await db.query(authQueries.createUserWallet,[insertData],async function(error,data){
+                            //         if(error){
+                            //         return res.status(400).send({
+                            //             success: false,
+                            //             msg: "error occured",
+                            //             error
+                            //         });
+                            //     }
+                            // })
+                            // }
                             
                             const jwtToken = jwt.sign({
                                 email: req.body.email

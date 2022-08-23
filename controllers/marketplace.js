@@ -105,6 +105,45 @@ exports.test = async (db, req, res) => {
 }
 
 
+
+exports.getMetadataJson = async (db, req, res) => {
+    let id =req.params.id;
+    if(!id){
+        return res.json({
+            name : "#"+id,
+            image: "NO IMAGE",
+            description: "NO DESCRIPTION",
+        });
+    }
+
+    const [item,] = await promisePool.query("SELECT id, image, name, description, external_link FROM `item` WHERE token_id = ?",[id]);
+    if(item.length  == 0){
+        return res.json({
+            name : "#"+id,
+            image: "NO IMAGE",
+            description: "NO DESCRIPTION",
+        });
+    }
+    const attributes = [];
+    const [itemAttr,] = await promisePool.query("SELECT * FROM `item_properties` WHERE item_id = ?",[item[0].id]);
+    if(itemAttr.length > 0){
+        for(let i=0; i < itemAttr.length; i++){
+            let newAttr = {
+                "trait_type" : itemAttr[i].type,
+                "value" : itemAttr[i].value,
+            }
+            attributes.push(newAttr);
+        }
+    }
+    return  res.json({
+        "name": item[0].name,
+        "description": item[0].description,
+        "external_url": item[0].external_link,
+        "image": item[0].image,
+        "attributes" : attributes
+    })
+}
+
 exports.swapDigiphyCoin = async (db, req, res) => {
     console.log("in swapDigiphyCoin");
 
@@ -320,7 +359,7 @@ exports.TrendingNfts = async (db, req, res) => {
 exports.recentNfts = async (db, req, res) => {
     let login_user_id = req.body.login_user_id;
     try {
-        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.description,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and i.is_on_sale=1 order by id desc`
+        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.description,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`
 
         await db.query(qry, function (error, data) {
             if (error) {
@@ -890,7 +929,7 @@ exports.getUserItem = async (db, req, res) => {
     var user_collection_id = req.body.user_collection_id;
     var limit = req.body.limit;
     try {
-        var qry = `Select it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,it.name,it.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
 
         if (user_id > 0) {
             qry = qry + ` and it.created_by=${user_id}`;
@@ -1755,6 +1794,7 @@ exports.bidAccept = async (db, req, res) => {
                 var from = apiData2;
                 var fromprivate = apiData;
                 const [editionResult,] = await promisePool.query(`SELECT isMinted from item_edition WHERE isMinted = 0 AND id = ?`, [item_edition_id]);
+                const [editionResultOfItem,] = await promisePool.query(`SELECT count(id) as qty from item_edition WHERE isMinted = 0 AND item_id = ?`, [item_id]);
                 if (editionResult.length > 0) {
                     const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
                     if (collectiosResult.length > 0) {
@@ -1764,15 +1804,15 @@ exports.bidAccept = async (db, req, res) => {
                             contractAddress: collectiosResult[0].contractAddress,
                             to_address: from,
                             tokenId: collectiosResult[0].token_id,
-                            qty: 1,
+                            qty: editionResultOfItem[0].qty,
                             getFee: false,
                         });
                         if (mintRes.hash) {
-                            await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                            await promisePool.query(`UPDATE item_edition SET ? WHERE item_id = ?`, [{
                                 isMinted: 1,
                                 hash: mintRes.hash,
                                 current_owner: from,
-                            }, item_edition_id]);
+                            }, item_id]);
                         }
                     }
                 }
@@ -2106,88 +2146,102 @@ exports.getUserBids = async (db, req, res) => {
 exports.blockchainupdatetransaction = async (db, req, res) => {
 
     let user_id = req.body.user_id;
-    let token_owner_address = req.body.token_owner_address;
+    let new_owner_address = req.body.new_owner_address;
     let item_id = req.body.item_id;
-    let user_address = req.body.user_address;
-    let purchased_quantity = req.body.purchased_quantity;
+    let item_edition_id = req.body.item_edition_id;
+    
+    if (!new_owner_address) {
+        return res.status(400).send({
+            success: false,
+            msg: "New owner address required"
+        });
+    }
 
-    await db.query(adminQueries.getSettings, async function (error, settingData) {
-        var apiData = await openNFT(settingData[0].private_key);
-        var apiData2 = await openNFT(settingData[0].public_key);
+    const [settingData,] = await promisePool.query(adminQueries.getSettings);
+    var apiData = await openNFT(settingData[0].private_key);
+    var apiData2 = await openNFT(settingData[0].public_key);
 
-        var from = apiData2;
-        var fromprivate = apiData;
-        let data1hash = '';
-        if (!user_address || user_address == null || user_address == 'null' || user_address == "") {
+    var from = apiData2;
+    var fromprivate = apiData;
+    const [editionResult,] = await promisePool.query(`SELECT * from item_edition WHERE id = ?`, [item_edition_id]);
 
-        } else {
-            console.log({
-                "from_address": `${from}`,
-                "from_private_key": `${fromprivate}`,
-                "contract_address": `${config.contractAddress}`,
-                "to_address": user_address,
-                "token_owner_address": token_owner_address,
-                "tokenId": `${item_id}`,
-                "amount": purchased_quantity
-            })
+    if (editionResult.length == 0) {
+        return res.status(400).send({
+            success: false,
+            msg: "Item Edition : Something went wrong, Please contact support for claim item.",
+        });
+    }
 
-            const response1 = await fetch(`${config.blockchainApiUrl}transfer`, {
-                method: 'POST', headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "from_address": `${from}`,
-                    "from_private_key": `${fromprivate}`,
-                    "contract_address": `${config.contractAddress}`,
-                    "to_address": user_address,
-                    "token_owner_address": token_owner_address,
-                    "tokenId": `${item_id}`,
-                    "amount": purchased_quantity
-                })
+    const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
+    if (collectiosResult.length > 0) {
+
+        let mintRes;
+        if (editionResult[0].isMinted == 0) {
+            
+            mintRes = await NFT.mint({
+                account: from,
+                privateKey: fromprivate,
+                contractAddress: collectiosResult[0].contractAddress,
+                to_address: new_owner_address,
+                tokenId: collectiosResult[0].token_id,
+                qty: 1,
+                getFee: false,
             });
-            const data1 = await response1.json();
-
-            // console.log('hello', data1, response1.json(), data1.hash)
-
-            if (!data1.hash) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured in ownership transfer",
-                    apidata: data1
-                });
-            }
-
-            data1hash = data1.hash
+            console.log("mintRes",mintRes)
+        } else {
+            mintRes = await NFT.transfer({
+                account: from,
+                privateKey: fromprivate,
+                contractAddress: collectiosResult[0].contractAddress,
+                current_owner_address: editionResult[0].current_owner, //current owner
+                to_address: new_owner_address, // new owner
+                tokenId: collectiosResult[0].token_id,
+                qty: 1,
+                getFee: false,
+            });
+        }
+        if (!mintRes.success) {
+            return res.status(400).send({
+                success: false,
+                msg: mintRes.error,
+            });
+        }
+        if (mintRes.hash) {
+            await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                isMinted: 1,
+                isClaimed: 1,
+                hash: mintRes.hash,
+                current_owner: new_owner_address, // new owner update
+            }, item_edition_id]);
 
             let data = {
                 from_address: from,
-                to_address: user_address,
-                hash: data1.hash,
+                to_address: new_owner_address,
+                hash: mintRes.hash,
                 blockchain_status: 1
             }
 
-            await db.query(adminQueries.updateblockchainstatus, [data, user_id, item_id], async function (error, trx) {
+            await promisePool.query(adminQueries.updateblockchainstatus, [data, user_id, item_id]);
 
-                if (error) {
-                    return res.status(400).send({
-                        success: false,
-                        msg: "error occured in transfer NFT",
-                        error
-                    });
-                }
+            return res.status(200).send({
+                success: true,
+                msg: "Item Claimed successfully"
+            });
 
-                if (trx) {
-                    return res.status(200).send({
-                        success: true,
-                        msg: "Ownership changed successfully",
-                        // transaction_id: buydata.insertId
-                    });
-                }
-            })
 
+        } else {
+            return res.status(400).send({
+                success: false,
+                msg: mintRes.error,
+            });
         }
-    })
+    } else {
+        return res.status(400).send({
+            success: false,
+            msg: "Item Collection : Something went wrong, Please contact support for claim item.",
+        });
+
+    }
 }
 
 
@@ -2204,6 +2258,8 @@ exports.itemPurchase = async (db, req, res) => {
     var royalty_percent = req.body.royalty_percent;
     var token_owner_address = req.body.token_owner_address
     let token = req.body.coin_percentage
+    let isClaimed = 0
+    let transferNft = req.body.transferNft
     try {
 
 
@@ -2219,6 +2275,7 @@ exports.itemPurchase = async (db, req, res) => {
             var from = apiData2;
             var fromprivate = apiData;
             const [editionResult,] = await promisePool.query(`SELECT isMinted from item_edition WHERE isMinted = 0 AND id = ?`, [item_edition_id]);
+            const [editionResultOfItem,] = await promisePool.query(`SELECT count(id) as qty from item_edition WHERE isMinted = 0 AND item_id = ?`, [item_id]);
             if (editionResult.length > 0) {
                 const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
                 if (collectiosResult.length > 0) {
@@ -2228,15 +2285,15 @@ exports.itemPurchase = async (db, req, res) => {
                         contractAddress: collectiosResult[0].contractAddress,
                         to_address: from,
                         tokenId: collectiosResult[0].token_id,
-                        qty: 1,
+                        qty: editionResultOfItem[0].qty,
                         getFee: false,
                     });
                     if (mintRes.hash) {
-                        await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                        await promisePool.query(`UPDATE item_edition SET ? WHERE item_id = ?`, [{
                             isMinted: 1,
                             hash: mintRes.hash,
                             current_owner: from,
-                        }, item_edition_id]);
+                        }, item_id]);
                     }
                 }
             }
@@ -2287,6 +2344,7 @@ exports.itemPurchase = async (db, req, res) => {
                         "amount": 0,
                         "from_address": user_address,
                         "to_address": token_owner_address,
+                        "isClaimed":isClaimed,
                         "token": token,
                         "payment_currency": 0,
                         "payment_currency_amount": 0,
@@ -2296,8 +2354,11 @@ exports.itemPurchase = async (db, req, res) => {
 
                     await db.query(marketplaceQueries.insertTransaction, [trx2])
                 }
-
-                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [user_id, parseFloat(token) * -1, parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
+                var ttype=6;
+                if(transferNft==1){
+                    ttype=14;
+                }
+                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [user_id, parseFloat(token) * -1,ttype,parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2305,6 +2366,7 @@ exports.itemPurchase = async (db, req, res) => {
                             error
                         });
                     }
+                    let data1hash = '';
 
                     var qry = `select id from item_edition where item_id=${item_id} and owner_id=getOwnerId(${item_edition_id}) order by id limit ${purchased_quantity}`;
                     await db.query(qry, async function (error, loop1) {
@@ -2796,9 +2858,7 @@ exports.userWithdraw = async (db, req, res) => {
     console.log("in userWithdraw");
     var user_id = req.body.user_id;
     var amount = req.body.amount;
-    var amount_usd = req.body.amount_usd;
-    var address = req.body.address;
-    var datetime = new Date();
+   
 
     if (!user_id) {
         res.status(400).send({
@@ -2812,19 +2872,7 @@ exports.userWithdraw = async (db, req, res) => {
             msg: "amount required!!"
         });
     }
-    if (!amount_usd) {
-        res.status(400).send({
-            success: false,
-            msg: "amount_usd required!!"
-        });
-    }
-    if (!address) {
-        res.status(400).send({
-            success: false,
-            msg: "address required!!"
-        });
-    }
-
+  
     await db.query(adminQueries.getSettings, async function (error, settingData) {
         if (error) {
             return res.status(400).send({
@@ -2842,60 +2890,24 @@ exports.userWithdraw = async (db, req, res) => {
                 });
             }
 
-            if (walletData[0].balance <= amount_usd) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "You don't have sufficient balance to withdraw!!",
-                    error
-                });
-            }
-            var apiData = await openNFT(settingData[0].public_key);
-            var apiData2 = await openNFT(settingData[0].private_key);
-            console.log({
-                "from_address": apiData, //Admin Public Address
-                "from_private_key": apiData2,  //Admin Private Address
-                "to_address": address, //User To Address        
-                "value": amount
-            });
-            const response1 = await fetch(`${config.ethTransferApiUrl}`, {
-                method: 'POST', headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "from_address": apiData, //Admin Public Address
-                    "from_private_key": apiData2,  //Admin Private Address
-                    "to_address": address, //User To Address        
-                    "value": amount
-                })
-
-            });
-            const data2 = await response1.json();
-
-            console.log("data2 ", data2);
-            if (!data2.hash) {
-
-                return res.status(400).send({
-                    success: false,
-                    msg: "Error in withdraw!!",
-                    apidata: data2
-                });
-            }
+           
             var transaction = {
-                user_id: user_id,
-                transaction_type_id: "3",
-                from_address: apiData,//Admin From Address
-                to_address: address, // User To Address
-                hash: data2.hash,
-                amount: amount_usd * -1,
-                status: 1,
-                datetime: datetime,
-                currency: "ETH"
+                "user_id": user_id,
+                "transaction_type_id": '3',
+                "amount": -1 * amount,
+                "from_address": '',
+                "to_address": '',
+                "hash": '',
+                "token": 0,
+                "payment_currency": 'INR',
+                "payment_currency_amount": '',
+                "currency": 'INR',
+                "status": 1
             }
 
             await db.query(marketplaceQueries.insertTransaction, transaction)
 
-            if (data2) {
+            if (walletData) {
                 res.status(200).send({
                     success: true,
                     msg: "User Withdraw Succesfull",
@@ -3291,15 +3303,19 @@ exports.getCollectionById = async (db, req, res) => {
     console.log("in getCollectionById");
     var collection_id = req.body.collection_id;
     var login_user_id = req.body.login_user_id;
+    console.log('collection_id:', collection_id)
     if (!login_user_id) {
         login_user_id = 0;
     }
 
-
-    var qry = `Select uc.id as collection_id,uc.profile_pic as collection_profile_pic,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.name = '${collection_id}' group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
-
+    var qry1 = `SELECT * FROM user_collection WHERE name='${collection_id}' ORDER BY id  DESC`
+    await db.query(qry1, async function (error, collectionData1) {
+        // console.log('collectionData1',collectionData1[0].id)
+  
+    var qry = `Select uc.id as collection_id,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
+    console.log('qry', qry)
     await db.query(qry, async function (error, collectionData) {
-        console.log(collectionData[0]);
+        console.log('wwww', collectionData);
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3307,7 +3323,7 @@ exports.getCollectionById = async (db, req, res) => {
                 error
             });
         }
-        var qry = `Select i.id,ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(i.id) as like_count,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where i.user_collection_id=${collectionData[0].collection_id} and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and i.is_on_sale=1 order by id desc`;
+        var qry = `Select i.id,ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(i.id) as like_count,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where i.user_collection_id=${collectionData1[0].id} and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  order by id desc`;
         console.log('qry111111111111', qry)
         await db.query(qry, async function (error, collectionItem) {
             if (error) {
@@ -3333,6 +3349,7 @@ exports.getCollectionById = async (db, req, res) => {
             }
         });
     });
+});
 }
 
 

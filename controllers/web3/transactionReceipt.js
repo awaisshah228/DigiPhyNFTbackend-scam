@@ -10,7 +10,11 @@ web3.setProvider(
 
 exports.getCollectionTransactionReceipt = async(hash) =>{
     const trx = await web3.eth.getTransactionReceipt(hash);
-    
+    if(!trx){
+        return {
+            status : "Pending",
+        };
+    }
     if(trx.status == undefined){
         return {
             status : "Pending",
