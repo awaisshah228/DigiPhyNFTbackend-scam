@@ -3050,6 +3050,30 @@ exports.transactionDetailAll = async (db, req, res) => {
 
 }
 
+//==========================================  Get Admin Withdraw transactions  ===================
+
+exports.transactionDetailAllWithdraw = async (db, req, res) => {
+
+    await db.query(adminQueries.transactionDetailAllWithdraw, async function (error, data) {
+
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error occured!!",
+                error
+            });
+        }
+
+        res.status(200).send({
+            success: true,
+            msg: "Transactions Detail",
+            response: data
+        });
+
+    })
+
+}
+
 
 //==========================================  Total Sum transactions  ===================
 

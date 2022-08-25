@@ -255,6 +255,7 @@ router.post('/updateBankAccountinadmin' ,admin.updateBankAccountinadmin.bind(thi
 router.get('/transactionDetailAll',admin.transactionDetailAll.bind(this,db));
 router.get('/transactionTotalSum',admin.transactionTotalSum.bind(this,db));
 router.get('/transactionTotalBid',admin.transactionTotalBid.bind(this,db));
+router.get('/transactionDetailAllWithdraw',admin.transactionDetailAllWithdraw.bind(this,db));
 
 
 
