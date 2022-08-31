@@ -2,11 +2,15 @@ const CryptoJS = require("crypto-js");
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const authQueries = require("../services/authQueries");
+const marketplaceQueries = require("../services/marketplaceQueries");
 var validator = require("email-validator");
 var fetch = require('node-fetch');
 var QRCode = require('qrcode');
 var speakeasy = require("speakeasy");
-
+const mysql = require('mysql2');
+const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, password: config.password, database: config.database, port: config.mysqlPort });
+// now get a Promise wrapped instance of that pool
+const promisePool = pool.promise();
 // Login User
 
 
@@ -126,6 +130,38 @@ exports.login = async (db, req, res) => {
                     error
                 });
             }
+            //////////////// NFT AIRDROP START
+            if(data[0].airdrop_claimed==0){
+            const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, ['Airdrop-1', 'Airdrop-1', 'KDCRAFT_v2']);
+            console.log("itemData-> ",itemData);
+            if (itemData.length == 0) {
+                console.log("itemData lenght 0")
+
+            } else {
+
+                var transaction = {
+                    "user_id": data[0].id,
+                    "transaction_type_id": '16',
+                    "item_id": itemData[0].item_id,
+                    "item_edition_id": itemData[0].item_edition_id,
+                    "amount": itemData[0].price,
+                    "from_address": itemData[0].owner_address,
+                    "token": 0,
+                    "edition_text":itemData[0].edition_text,
+                    "purchased_quantity":1,
+                    "payment_currency": 'DigiPhyNFT',
+                    "payment_currency_amount": '0',
+                    "currency": 'DigiPhyNFT',
+                    "status": 1,
+                }
+                console.log("transaction data", transaction);
+                await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+
+                await promisePool.query(marketplaceQueries.updateSold2, [1,data[0].id, '', '', itemData[0].item_edition_id]);
+                const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
+            }
+        }
+            /////////////////////////
         
                     return res.status(200).send({
                         success: true,

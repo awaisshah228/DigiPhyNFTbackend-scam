@@ -66,7 +66,7 @@ exports.deploy = async (reqData) => {
 
         let encoded_tx = deployData;
         let gasPrice = await web3.eth.getGasPrice();
-        let count = await web3.eth.getTransactionCount(account);
+        let count = await web3.eth.getTransactionCount(account,'pending');
         let gasLimit = await web3.eth.estimateGas({
             from: account,
             nonce: web3.utils.toHex(count),

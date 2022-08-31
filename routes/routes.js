@@ -32,6 +32,10 @@ cron.schedule('* * * * *', () => {
     cronControl.collectionTrack();
 });
 
+cron.schedule('* * * * *', () => {
+    console.log('TransferList cron is running');
+    admin.transferList(db);
+});
 
 var multer  = require('multer');
 var storage = multer.diskStorage({
@@ -92,7 +96,13 @@ router.post('/updateprivacyAndPolicy', admin.updateprivacyAndPolicy.bind(this, d
 router.get('/getTermsConditions', admin.getTermsConditions.bind(this, db));
 router.post('/updateTermsConditions', admin.updateTermsConditions.bind(this, db));
 router.get('/getAbout', admin.getAbout.bind(this, db));
+router.get('/getproduct_pricing', admin.getproduct_pricing.bind(this, db));
+
 router.post('/updateAbout', admin.updateAbout.bind(this, db));
+router.post('/updateproduct_pricing', admin.updateproduct_pricing.bind(this, db));
+
+
+
 router.post('/receiveWalletUpdate', admin.receiveWalletUpdate.bind(this, db));
 router.post('/getSettings', admin.getSettings.bind(this, db));
 router.post('/adminWalletUpdate', admin.adminWalletUpdate.bind(this, db));
@@ -270,6 +280,9 @@ router.post('/resetpassword/:token', signup.Resetpassword.bind(this, db));
 router.post('/changepassword', ensureWebToken,signup.changePassword.bind(this, db));
 router.get('/getcountries', signup.getCountry.bind(this, db));
 router.post('/coinTransfer' ,admin.coinTransfer.bind(this, db));
+router.post('/transferList' ,admin.transferList.bind(this, db));
+router.post('/getAdminTokenBalance' ,admin.getAdminTokenBalance.bind(this, db));
+
 
 
 router.get('/nft/metadata/:id' ,marketplace.getMetadataJson.bind(this, db));

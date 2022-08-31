@@ -929,7 +929,7 @@ exports.getUserItem = async (db, req, res) => {
     var user_collection_id = req.body.user_collection_id;
     var limit = req.body.limit;
     try {
-        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
 
         if (user_id > 0) {
             qry = qry + ` and it.created_by=${user_id}`;
@@ -2415,9 +2415,10 @@ exports.itemPurchase = async (db, req, res) => {
                             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
                             console.log(qry);
                             await db.query(qry, async function (error, mailData) {
-                                await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].name} in $ ${amount}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                console.log('mailData',mailData)
+                                await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in $ ${amount}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                 /// SEND MAIL ENDS    
                                 return res.status(200).send({
@@ -3547,7 +3548,7 @@ exports.allSearch = async (
             msg: "Search parameter required"
         });
     }
-    qry = "select id,email,user_name,profile_pic,'talent' as type from users where email like '%" + `${search}` + "%' or full_name like '%" + `${search}` + "%'";
+    qry = "select id,email,user_name,full_name,profile_pic,'talent' as type from users where email like '%" + `${search}` + "%' or full_name like '%" + `${search}` + "%'";
 
     try {
         await db.query(qry, async function (err, result) {
