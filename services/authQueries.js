@@ -12,8 +12,9 @@ module.exports = {
     getUserDetailData: "Select u.id as user_id,u.full_name,u.user_name,u.full_name,u.profile_pic,u.banner,u.email,follower_count(u.id) as follower_count,following_count(u.id) as folling_count,view_count(u.id) as view_count, date_format(u.dob,'%Y-%m-%d') as dob,u.phone,u.country_id,c.name as country_name,u.description,u.facebook,u.insta,u.twitter,u.pinterest,u.website,u.youtube,u.artstation,u.behance,u.steemit from users as u left join country as c on c.id=u.country_id where u.id=?",
     getPassword: "Select password from users where email =?",
     
-    updateProfile: "update users SET full_name=?,email=?,profile_pic=?,banner=?  where email=?",
+    updateProfile: "update users SET full_name=?,email=?,profile_pic=?,banner=?,user_name=?  where email=?",
     getProfile: "Select full_name,address,profile_pic,banner,email,user_name from users where email=?",
+    checkUserName : "SELECT id FROM users WHERE user_name=?",
     list: "Select title,author,price,item_image,price from marketplace ",
     aboutDetail: "Select description,facebook,insta,twitter,pinterest,website,youtube,artstation,behance,steemit from users where email = ?",
     updateaboutDetail: "Update users SET  description=?,facebook=?,insta=?,twitter=?,pinterest=?,website=?,youtube=?,artstation=?,behance=?,steemit=?  where email = ?",

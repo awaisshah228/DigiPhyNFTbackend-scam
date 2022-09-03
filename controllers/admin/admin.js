@@ -86,7 +86,7 @@ exports.updateItemMarket = async (db, req, res) => {
 
     //await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
     try {
-        db.query(adminQueries.checkEditionQty, [item_id, user_id, quantity], async function (error, checkData) {
+        db.query(adminQueries.checkEditionQty, [item_id, user_id, parseInt(quantity)], async function (error, checkData) {
             if (error) {
                 return res.status(400).send({
                     success: false,
@@ -193,12 +193,12 @@ exports.updateadminCollection = async (db, req, res) => {
     var description = req.body.description;
     var website = req.body.website;
     if (!profile_pic) {
-        console.log('1');
+        //console.log('1');
         profile_pic = old_profile_pic
     }
 
     if (!banner) {
-        console.log('12');
+        //console.log('12');
 
         banner = old_banner
     }
@@ -214,7 +214,7 @@ exports.updateadminCollection = async (db, req, res) => {
         "twitter": req.body.twitter,
         "discord": req.body.discord,
     }
-    console.log(users);
+    //console.log(users);
 
     db.query(adminQueries.updateadminCollection, [users, id], function (error, data) {
         if (error) {
@@ -791,7 +791,7 @@ exports.receiveWalletUpdate = async (db, req, res) => {
     let keys = {
         "receive_address": receive_address_enc
     }
-    console.log(keys);
+    //console.log(keys);
     db.query(adminQueries.updateWallet, [keys], function (error, data) {
         if (error) {
             return res.status(400).send({
@@ -1250,7 +1250,7 @@ exports.listItem = async (db, req, res) => {
 
         var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,case when length(COALESCE(ou.full_name,''))=0 then ou.user_name else ou.full_name end  as owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,uc.name as collection_name,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id LEFT JOIN user_collection as uc ON i.user_collection_id=uc.id left join users as cu on cu.id=i.created_by left join users as ou on ou.id=ie.owner_id where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`;
 
-        console.log(qry);
+        //console.log(qry);
         await db.query(qry, function (error, data) {
             if (error) {
                 return res.status(400).send({
@@ -1800,7 +1800,7 @@ exports.insertItem = async (db, req, res) => {
             "image": 'ipfs://' + image
         }
         var userfile = 'item_'.concat(data.insertId, '.json');
-        console.log(userfile);
+        //console.log(userfile);
 
 
         fs.writeFile(`./metadata/${userfile}`, JSON.stringify(additem), async (err, fd) => {
@@ -1901,16 +1901,16 @@ exports.insertItem = async (db, req, res) => {
                     // create NFT and update into table /
                     var apiData = await openNFT(settingData[0].public_key);
                     var apiData2 = await openNFT(settingData[0].private_key);
-                    console.log(({
-                        "from_address": `${apiData}`,
-                        "from_private_key": `${apiData2}`,
-                        "contract_address": `${config.contractAddress}`,
-                        "to_address": `${config.contractOwnerAddress}`,
-                        "MetaDataHash": `${filedata.data.IpfsHash}`,
-                        "TokenName": `${name}`,
-                        "TokenId": `${data.insertId}`,
-                        "totalSupply": `${quantity}`
-                    }));
+                    // console.log(({
+                    //     "from_address": `${apiData}`,
+                    //     "from_private_key": `${apiData2}`,
+                    //     "contract_address": `${config.contractAddress}`,
+                    //     "to_address": `${config.contractOwnerAddress}`,
+                    //     "MetaDataHash": `${filedata.data.IpfsHash}`,
+                    //     "TokenName": `${name}`,
+                    //     "TokenId": `${data.insertId}`,
+                    //     "totalSupply": `${quantity}`
+                    // }));
                     const response1 = await fetch(`${config.blockchainApiUrl}mint`, {
                         method: 'POST', headers: {
                             'Accept': 'application/json',
@@ -2350,7 +2350,7 @@ exports.changePassword = async (db, req, res) => {
         });
     }
     catch (err) {
-        //  console.log(err)
+          console.log(err)
         return res.status(400).send({
             success: false,
             msg: "Unexpected internal error!!",
@@ -2490,7 +2490,7 @@ exports.getWebImage = async (db, req, res) => {
 exports.addUserNftFeatured = async (db, req, res) => {
     var id = req.body.id;
     var is_featured = req.body.is_featured;
-    console.log('is_featured', is_featured)
+    //console.log('is_featured', is_featured)
     if (!id) {
         return res.status(400).send({
             success: false,
@@ -2572,7 +2572,7 @@ exports.insertadminCollection = async (db, req, res) => {
 }
 //===============================getadmin collection===========================================//
 exports.getAdminCollection = async (db, req, res) => {
-    // console.log("in getAllUserCollection");
+     console.log("in getAllUserCollection");
     await db.query(adminQueries.getadmincollection, function (error, data) {
         if (error) {
             return res.status(400).send({
@@ -2601,7 +2601,7 @@ exports.getAdminCollection = async (db, req, res) => {
 
 
 exports.updateUserCollection = async (db, req, res) => {
-    // console.log("in updateUserCollection");
+     console.log("in updateUserCollection");
     var user_id = req.body.user_id;
     var collection_id = req.body.collection_id;
     var name = req.body.name;
@@ -2858,7 +2858,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     }
                                                     var key1 = attr[s]
                                                     s = s + 1
-                                                    console.log('attr1111111111111', attr[s], key1)
+                                                    //console.log('attr1111111111111', attr[s], key1)
 
 
                                                     if (attr[s] != 'attributes_value_' + t) {
@@ -2891,14 +2891,14 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                             }
 
 
-                                                            console.log('attr22222222222222', resExl[key1], resExl[value])
+                                                            //console.log('attr22222222222222', resExl[key1], resExl[value])
 
                                                             await db.query(marketplaceQueries.insertItemAttr, [attrArr]);
 
                                                             /*  -----------------------------------Insertinto Edition */
 
                                                             for (var i = 1; i <= resExl.quantity; i++) {
-                                                                console.log('1111');
+                                                                //console.log('1111');
 
                                                                 var item_ed = {
                                                                     "edition_text": `${i} of ${resExl.quantity}`,
@@ -2920,7 +2920,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
 
                                                                 await db.query(marketplaceQueries.insertEdition, [item_ed])
                                                             }
-                                                            console.log('InsertId:', data.insertId);
+                                                            //console.log('InsertId:', data.insertId);
                                                             var updateData = {
                                                                 "token_id": data.insertId
                                                             }
@@ -2995,7 +2995,7 @@ exports.getLocalImageHash = async (db, req, res) => {
     var localImage = req.body.localImage
     var id = req.body.id
     var bulkNFT = 1
-    console.log(localImage);
+    //console.log(localImage);
     let data = {
         bulkNFT: bulkNFT
     }
@@ -3021,7 +3021,7 @@ exports.getLocalImageHash = async (db, req, res) => {
         body: formdata
     });
     const filedata = await response2.json();
-    console.log('file', filedata)
+    //console.log('file', filedata)
     if (filedata.IpfsHash) {
         let data = {
             image: filedata.IpfsHash
@@ -3278,19 +3278,19 @@ exports.transferList = async (db, req, res) => {
     const [transferList, fields] = await promisePool.query(`select * from transfer_list where status=0`);
 
     while (i < transferList.length) {
-        console.log("value of i", i);
+        //console.log("value of i", i);
         const [data,] = await promisePool.query(marketplaceQueries.checkUser, [transferList[i].email]);
 
 
         if (data.length == 0) {
-            console.log("data.length : ", data.length)
+           // console.log("data.length : ", data.length)
 
         }
         else {
             const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, [transferList[i].productId, transferList[i].productId, transferList[i].collectionName]);
-            console.log("itemData-> ", itemData);
+          //  console.log("itemData-> ", itemData);
             if (itemData.length == 0) {
-                console.log("itemData lenght 0")
+                //console.log("itemData lenght 0")
 
             } else {
 
@@ -3310,12 +3310,12 @@ exports.transferList = async (db, req, res) => {
                     "currency": 'DigiPhyNFT',
                     "status": 1,
                 }
-                console.log("transaction data", transaction);
+              //  console.log("transaction data", transaction);
                 await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
 
                 await promisePool.query(marketplaceQueries.updateSold2, [1, data[0].id, '', data[0].address, itemData[0].item_edition_id]);
                 const [updateTransferList, fields] = await promisePool.query(`UPDATE transfer_list SET status=1,item_edition_id= ${itemData[0].item_edition_id} WHERE id=${transferList[i].id}`);
-                console.log("List data inserted successfully!!")
+              //  console.log("List data inserted successfully!!")
 
             }
         }
@@ -3329,7 +3329,7 @@ exports.transferList = async (db, req, res) => {
 
 
 exports.getAdminTokenBalance = async (db, req, res) => {
-    console.log("in itemPurchase");
+    console.log("in getAdminTokenBalance");
     const address = req.body.address;
     const contractAddress = req.body.contractAddress;
     try {
@@ -3337,7 +3337,7 @@ exports.getAdminTokenBalance = async (db, req, res) => {
             'address': address,
             'contractAddress': contractAddress,
         });
-        console.log('adminToken', adminToken)
+        //console.log('adminToken', adminToken)
         if (adminToken.success == true) {
             return res.json({
                 success: true,
@@ -3353,6 +3353,63 @@ exports.getAdminTokenBalance = async (db, req, res) => {
         }
 
 
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(400).send({
+            success: false,
+            msg: "Unexpected internal error!!",
+            err
+        });
+    }
+}
+
+exports.transferToken = async (db, req, res) => {
+    console.log("in transferToken");
+    
+    const to_address = req.body.to_address;
+    const token = req.body.token;
+    try {
+        db.query(adminQueries.getSettings, async function (error, settingData) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error : Server not responding please try again later! ",
+                    error
+                });
+            }
+            var apiData = await openNFT(settingData[0].public_key);
+            var apiData2 = await openNFT(settingData[0].private_key);
+
+            const fromAddress =apiData;
+            const privateKey = apiData2;
+            const contractAddress = settingData[0].contractAddress;
+
+        const adminToken = await erc20.transfer({
+            'account': fromAddress,
+            'privateKey' : privateKey,
+            'contractAddress': contractAddress,
+            'to_address' : to_address,
+            'token' : token,
+            'getFee':false
+        });
+
+        //console.log('adminToken', adminToken)
+        if (adminToken.success == true) {
+            return res.json({
+                success: true,
+                msg: "Token Transfered",
+                data: adminToken.hash,
+            })
+        }
+        else if (adminToken.success == false) {
+            return res.json({
+                success: false,
+                msg: adminToken.error,
+            })
+        }
+
+    });
     }
     catch (err) {
         console.log(err)

@@ -333,7 +333,7 @@ exports.TrendingNfts = async (db, req, res) => {
                 });
             }
             if (data.length > 0) {
-                console.log('qry', qry, data)
+                //console.log('qry', qry, data)
                 return res.status(200).send({
                     success: true,
                     msg: "User Item Details",
@@ -434,7 +434,7 @@ exports.itemDetails = async (db, req, res) => {
     }
 
     await db.query(marketplaceQueries.itemdetail, [item_edition_id, user_id, item_edition_id, item_edition_id], async function (error, data) {
-        console.log('data', data[0])
+        //console.log('data', data[0])
 
         if (error) {
             return res.status(400).send({
@@ -735,7 +735,7 @@ exports.insertUserCollection = async (db, req, res) => {
                 ownerAddress: ownerAddress,
                 baseUri: config.nftMetadataUrl
             });
-            console.log('deployResposne', deployResposne)
+            //console.log('deployResposne', deployResposne)
             if (!deployResposne.success) {
                 return res.status(400).send({
                     success: false,
@@ -833,7 +833,7 @@ exports.getUserCollection = async (db, req, res) => {
 exports.getUserOwnerItem = async (db, req, res) => {
     console.log("in getUserCollection owner");
     var user_id = req.body.user_id;
-    await db.query(marketplaceQueries.getUserOwnerItem, [user_id], function (error, data) {
+    await db.query(marketplaceQueries.getUserOwnerItem, [user_id,user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -945,7 +945,7 @@ exports.getUserItem = async (db, req, res) => {
             qry = qry + ` GROUP BY it.id order by ie.datetime desc `;
         }
 
-        console.log('qry', qry);
+        //console.log('qry', qry);
         await db.query(qry, function (error, data) {
             if (error) {
                 return res.status(400).send({
@@ -1342,19 +1342,19 @@ exports.addNftByUser = async (db, req, res) => {
     let is_on_sale = req.body.is_on_sale
     // if(file_type==='image'){
     let recCompress = await ipfsCompress.compressImages(["https://digiphy.mypinata.cloud/ipfs/" + image], file_type);
-    console.log(recCompress.images[0]);
+    //console.log(recCompress.images[0]);
     // return res.status(400).send({
     //     recCompress
     // })
     if (recCompress.success == false) {
-        console.log("compress false");
+        //console.log("compress false");
         // return res.status(400).send({
         //     success: false,
         //     msg: "Image compress issue "
         // });
         var image_low = image;
     } else {
-        console.log("compressed")
+        //console.log("compressed")
         var image_low = recCompress.imageHash[0];
     }
 
@@ -2188,7 +2188,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
                 qty: claimQuantity,
                 getFee: false,
             });
-            console.log("mintRes",mintRes)
+            //console.log("mintRes",mintRes)
         } else {
             mintRes = await NFT.transfer({
                 account: from,
@@ -2258,7 +2258,7 @@ exports.itemPurchase = async (db, req, res) => {
     var item_id = req.body.item_id
     var item_edition_id = req.body.item_edition_id
     var sell_type = req.body.sell_type
-    var user_address = req.body.user_address;
+    var user_address = req.body.user_address ;
     var purchased_quantity = req.body.purchased_quantity;
     var royalty_percent = req.body.royalty_percent;
     var token_owner_address = req.body.token_owner_address
@@ -2266,8 +2266,18 @@ exports.itemPurchase = async (db, req, res) => {
     let isClaimed = 0
     let transferNft = req.body.transferNft
 
+
     try {
 
+        if(!user_address){
+            user_address=null;
+        }
+        if(!token_owner_address){
+            token_owner_address=null
+        }
+        if(!amount){
+            amount=0;
+        }
 
 
         if (sell_type === 'Price') {
@@ -2319,7 +2329,7 @@ exports.itemPurchase = async (db, req, res) => {
                 else {
                     var sellerPercent = 100 - trx[0].royalty_percent;
                     ///////// INSERT ROYALTY TRX
-                    console.log("insert royalty trx", trx[0].price, purchased_quantity, sellerPercent);
+                    //console.log("insert royalty trx", trx[0].price, purchased_quantity, sellerPercent);
                     await db.query(marketplaceQueries.insertRoyaltyTransactionByItemId, [trx[0].price * purchased_quantity * trx[0].royalty_percent / 100, trx[0].item_edition_id], async function (error, selldata) {
                         if (error) {
                             return res.status(400).send({
@@ -2375,11 +2385,11 @@ exports.itemPurchase = async (db, req, res) => {
                     let data1hash = '';
 
                     var qry = `select id from item_edition where item_id=${item_id} and owner_id=getOwnerId(${item_edition_id}) order by id limit ${purchased_quantity}`;
-                    console.log(qry)
+                    //console.log(qry)
                     await db.query(qry, async function (error, loop1) {
 
                         for (var i = 0; i < loop1.length; i++) {
-                            console.log("item edition update ",i)
+                            //console.log("item edition update ",i)
                             await db.query(marketplaceQueries.updateSold2, [1, user_id, data1hash, user_address, loop1[i].id]);
 
                             var qry2 = `insert into transaction_edition_purchase(transaction_id,item_edition_id)values(${buydata.insertId},${loop1[i].id})`;
@@ -2392,7 +2402,7 @@ exports.itemPurchase = async (db, req, res) => {
                     await db.query(qry2);
 
                     //console.log('updating updateSold-edition_id' + item_edition_id);
-                    console.log("updtesoldpaypal");
+                    //console.log("updtesoldpaypal");
                     await db.query(marketplaceQueries.updateSoldPaypal, [1, user_id, item_edition_id], async function (error, data) {
                         if (error) {
                             return res.status(400).send({
@@ -2404,7 +2414,7 @@ exports.itemPurchase = async (db, req, res) => {
 
 
 
-                        console.log("updateTransferHash");
+                        //console.log("updateTransferHash");
                         await db.query(marketplaceQueries.updateTransferHash, [data1hash, item_edition_id], async function (error, data) {
                             if (error) {
                                 return res.status(400).send({
@@ -2423,7 +2433,7 @@ exports.itemPurchase = async (db, req, res) => {
                             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
                             console.log(qry);
                             await db.query(qry, async function (error, mailData) {
-                                console.log('mailData',mailData)
+                                //console.log('mailData',mailData)
                                 await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                 await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
@@ -2457,7 +2467,7 @@ exports.itemPurchase = async (db, req, res) => {
                         error
                     });
                 }
-                console.log("bidData ", bidData);
+                //console.log("bidData ", bidData);
                 // reject last bid
                 if (bidData.length > 0) {
                     await db.query(marketplaceQueries.rejectBid, bidData[0].id, async function (error, data) {
@@ -2471,7 +2481,7 @@ exports.itemPurchase = async (db, req, res) => {
                     });
                     /// refund amount
                     var qry = `Insert into transaction (user_id,item_edition_id,transaction_type_id,amount,currency,item_edition_bid_id,status) select user_id,item_edition_id,12 as transaction_type_id,bid_price,'MATIC' AS currency,id,1 as status from item_edition_bid where id=${bidData[0].id} `;
-                    console.log(qry)
+                    //console.log(qry)
                     await db.query(qry, async function (error, data) {
                         if (error) {
                             return res.status(400).send({
@@ -2524,7 +2534,7 @@ exports.itemPurchase = async (db, req, res) => {
                                     }
                                     /// SEND MAIL STARTS
                                     qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
-                                    console.log(qry);
+                                    //console.log(qry);
                                     await db.query(qry, async function (error, mailData) {
                                         emailActivity.Activity(mailData[0].ownerEmail, 'Bid Placed', `Bid Placed on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
 
@@ -2556,7 +2566,7 @@ exports.itemPurchase = async (db, req, res) => {
         return res.status(400).send({
             success: false,
             msg: "Unexpected internal error!!",
-            err
+            error :err
         });
     }
 }
@@ -2630,7 +2640,7 @@ exports.getUserPurchase = async (db, req, res) => {
                         }
                     });
                     const usdPrice = await response2.json();
-                    console.log(settingData[0]);
+                    //console.log(settingData[0]);
                     return res.status(200).send({
                         success: true,
                         msg: "User purchase detail",
@@ -2745,7 +2755,7 @@ exports.rejectBid = async (db, req, res) => {
         if (data) {
             /// SEND MAIL STARTS
             qry = `select i.name,i.description,ieb.bid_price,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail from item_edition_bid as ieb left join item_edition  as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
-            console.log(qry);
+            //console.log(qry);
             await db.query(qry, async function (error, mailData) {
                 emailActivity.Activity(mailData[0].ownerEmail, 'Bid Cancelled', `Bid Cancelled on  ${mailData[0].name} for $${mailData[0].bid_price}.`, `salehistory`, `https://ipfs.io/ipfs/${mailData[0].image}`);
                 emailActivity.Activity(mailData[0].bidderEmail, 'You have cancelled a bid', `You have cancelled bid ${mailData[0].name} for $${mailData[0].bid_price}.`, `yourpurchase`, `https://ipfs.io/ipfs/${mailData[0].image}`);
@@ -3224,10 +3234,10 @@ exports.resaleNFT = async (db, req, res) => {
             msg: "transaction_id required!!"
         });
     }
-    console.log("transaction_id=", transaction_id);
+    //console.log("transaction_id=", transaction_id);
     var qry = `select id from item_edition where id in (select item_edition_id from transaction_edition_purchase where transaction_id=${transaction_id}) and owner_id=${user_id} and is_sold=1 order by id limit ${resale_quantity}`;
     await db.query(qry, async function (error, loop1) {
-        console.log(loop1.length);
+        //console.log(loop1.length);
         for (var i = 0; i < loop1.length; i++) {
 
             var updateData = {
@@ -3244,7 +3254,7 @@ exports.resaleNFT = async (db, req, res) => {
             await db.query(marketplaceQueries.resaleNFT, [updateData, loop1[i].id]);
             var qry2 = `insert into transaction_edition_resale(transaction_id,item_edition_id)values(${transaction_id},${loop1[i].id})`;
             db.query(qry2);
-            console.log("Resale ie_id ", loop1[i].id);
+            //console.log("Resale ie_id ", loop1[i].id);
 
         }
 
@@ -3254,7 +3264,7 @@ exports.resaleNFT = async (db, req, res) => {
 
             /// SEND MAIL STARTS
             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
-            console.log(qry);
+            //console.log(qry);
             await db.query(qry, async function (error, mailData) {
                 emailActivity.Activity(mailData[0].ownerEmail, 'NFT published for resell.', `Your NFT ${mailData[0].name} if published for resell in $${price}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
             });
@@ -3312,7 +3322,7 @@ exports.getCollectionById = async (db, req, res) => {
     console.log("in getCollectionById");
     var collection_id = req.body.collection_id;
     var login_user_id = req.body.login_user_id;
-    console.log('collection_id:', collection_id)
+    //console.log('collection_id:', collection_id)
     if (!login_user_id) {
         login_user_id = 0;
     }
@@ -3322,9 +3332,9 @@ exports.getCollectionById = async (db, req, res) => {
         // console.log('collectionData1',collectionData1[0].id)
   
     var qry = `Select uc.id as collection_id,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
-    console.log('qry', qry)
+    //console.log('qry', qry)
     await db.query(qry, async function (error, collectionData) {
-        console.log('wwww', collectionData);
+        //console.log('wwww', collectionData);
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3333,7 +3343,7 @@ exports.getCollectionById = async (db, req, res) => {
             });
         }
         var qry = `Select i.id,ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(i.id) as like_count,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where i.user_collection_id=${collectionData1[0].id} and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  order by id desc`;
-        console.log('qry111111111111', qry)
+        //console.log('qry111111111111', qry)
         await db.query(qry, async function (error, collectionItem) {
             if (error) {
                 return res.status(400).send({

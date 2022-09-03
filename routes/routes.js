@@ -282,6 +282,7 @@ router.post('/resetpassword/:token', signup.Resetpassword.bind(this, db));
 router.post('/changepassword', ensureWebToken,signup.changePassword.bind(this, db));
 router.get('/getcountries', signup.getCountry.bind(this, db));
 router.post('/coinTransfer' ,admin.coinTransfer.bind(this, db));
+router.post('/transferToken' ,admin.transferToken.bind(this, db));
 router.post('/transferList' ,admin.transferList.bind(this, db));
 router.post('/getAdminTokenBalance' ,admin.getAdminTokenBalance.bind(this, db));
 

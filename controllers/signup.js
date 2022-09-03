@@ -954,6 +954,7 @@ exports.updateProfilePic = async (db, req, res) => {
     console.log("in updateProfilePic");
     var full_name = req.body.full_name;
     var email = req.body.email;
+    var user_name=req.body.user_name;
     var profile_pic = (!req.files['profile_pic']) ? null : req.files['profile_pic'][0].filename;
     var banner = (!req.files['banner']) ? null : req.files['banner'][0].filename;
 
@@ -966,6 +967,20 @@ exports.updateProfilePic = async (db, req, res) => {
                 error
             });
         }
+        db.query(authQueries.checkUserName, [user_name], function (error, checkUserName) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "error occured!",
+                    error
+                });
+            }
+        if(checkUserName.length>0){
+            return res.status(400).send({
+                success: false,
+                msg: "User name already exists!"
+            });
+        }
 
         if (!profile_pic) {
             profile_pic = result1[0].profile_pic;
@@ -975,11 +990,11 @@ exports.updateProfilePic = async (db, req, res) => {
         }
 
 
-        db.query(authQueries.updateProfile, [full_name, email, profile_pic, banner, email], function (error, result) {
+        db.query(authQueries.updateProfile, [full_name, email, profile_pic, banner, user_name, email], function (error, result) {
             if (error) {
                 return res.status(400).send({
                     success: false,
-                    msg: "error occured",
+                    msg: "error occured!",
                     error
                 });
             }
@@ -996,6 +1011,7 @@ exports.updateProfilePic = async (db, req, res) => {
             }
         })
     });
+});
 }
 
 
