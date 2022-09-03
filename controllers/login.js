@@ -20,16 +20,16 @@ exports.login = async (db, req, res) => {
     console.log("in login");
     var email = req.body.email;
     var password = req.body.password;
-      
+
 
     try {
-        if (email=='') {
+        if (email == '') {
             return res.status(400).send({
                 success: false,
                 msg: "Email required "
             });
         }
-        if (password=='') {
+        if (password == '') {
             return res.status(400).send({
                 success: false,
                 msg: "password required"
@@ -42,8 +42,8 @@ exports.login = async (db, req, res) => {
             });
         }
 
-     
-    db.query(authQueries.getUsersEmail,email, async function (error, user) {
+
+        db.query(authQueries.getUsersEmail, email, async function (error, user) {
             console.log(user);
             if (error) {
                 return res.status(400).send({
@@ -56,24 +56,24 @@ exports.login = async (db, req, res) => {
                     success: false,
                     msg: "No User found"
                 });
-               }
-              else if(user[0].is_email_verify===0){
+            }
+            else if (user[0].is_email_verify === 0) {
                 return res.status(400).send({
                     success: false,
                     msg: "Please verify your Account"
                 });
-              }   
-              else if(user[0].deactivate_account==1){
+            }
+            else if (user[0].deactivate_account == 1) {
                 return res.status(400).send({
                     success: false,
                     msg: "You are Account is Deactivated,Please contact to Admin"
                 });
-              }
-             else {
-                
+            }
+            else {
+
                 var hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
-                if (user[0].password === hash){
-                
+                if (user[0].password === hash) {
+
 
                     // const jwtToken = jwt.sign({
                     //     email: req.body.email,
@@ -87,7 +87,7 @@ exports.login = async (db, req, res) => {
                         id: user[0].id,
                     }, config.JWT_SECRET_KEY)
 
-            /* ---------- check and generate wallet of user */
+                    /* ---------- check and generate wallet of user */
                     // if(user[0].wallet_id===0){
                     //     const response1 = await fetch(config.walletApiUrl,{ method:'GET', headers: {
                     //         'Accept': 'application/json',
@@ -103,7 +103,7 @@ exports.login = async (db, req, res) => {
                     //             error
                     //         });
                     //     }
-                        
+
                     //     var insertData = {
                     //         "user_id":user[0].id,
                     //         "coin_id":1,
@@ -121,63 +121,65 @@ exports.login = async (db, req, res) => {
                     //     }
                     // })
                     // }
-            /* ----------------------------------------------- */
-            await db.query(authQueries.getUsersEmail,[email],async function(error,data){
-                if(error){
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured",
-                    error
-                });
-            }
-            //////////////// NFT AIRDROP START
-            if(data[0].airdrop_claimed==0){
-            const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, ['Airdrop-1', 'Airdrop-1', 'KDCRAFT_v2']);
-            console.log("itemData-> ",itemData);
-            if (itemData.length == 0) {
-                console.log("itemData lenght 0")
+                    /* ----------------------------------------------- */
+                    await db.query(authQueries.getUsersEmail, [email], async function (error, data) {
+                        if (error) {
+                            return res.status(400).send({
+                                success: false,
+                                msg: "error occured",
+                                error
+                            });
+                        }
+                        //////////////// NFT AIRDROP START
+                        if (data[0].airdrop_claimed == 0) {
+                            const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, ['Itsuki0001', 'Itsuki0001', 'KDCRAFT_v2']);
+                            console.log("itemData-> ", itemData);
+                            if (itemData.length == 0) {
+                                console.log("itemData lenght 0")
 
-            } else {
+                            } else {
 
-                var transaction = {
-                    "user_id": data[0].id,
-                    "transaction_type_id": '16',
-                    "item_id": itemData[0].item_id,
-                    "item_edition_id": itemData[0].item_edition_id,
-                    "amount": itemData[0].price,
-                    "from_address": itemData[0].owner_address,
-                    "token": 0,
-                    "edition_text":itemData[0].edition_text,
-                    "purchased_quantity":1,
-                    "payment_currency": 'DigiPhyNFT',
-                    "payment_currency_amount": '0',
-                    "currency": 'DigiPhyNFT',
-                    "status": 1,
-                }
-                console.log("transaction data", transaction);
-                await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+                                var transaction = {
+                                    "user_id": data[0].id,
+                                    "transaction_type_id": '16',
+                                    "item_id": itemData[0].item_id,
+                                    "item_edition_id": itemData[0].item_edition_id,
+                                    "blockchain_status":'0',
+                                    "amount": itemData[0].price,
+                                    "from_address": itemData[0].owner_address,
+                                    "token": 0,
+                                    "edition_text": itemData[0].edition_text,
+                                    "purchased_quantity": 1,
+                                    "payment_currency": 'DigiPhyNFT',
+                                    "payment_currency_amount": '0',
+                                    "currency": 'DigiPhyNFT',
+                                    "status": 1,
+                                }
+                                console.log("transaction data", transaction);
+                                const [insertTrx,] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+                                await promisePool.query(marketplaceQueries.updateAirdropNFT, [1, data[0].id, '', '', itemData[0].item_edition_id]);
+                                qry=`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
+                                await promisePool.query(qry);
+                                const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
+                            }
+                        }
+                        /////////////////////////
 
-                await promisePool.query(marketplaceQueries.updateSold2, [1,data[0].id, '', '', itemData[0].item_edition_id]);
-                const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
-            }
-        }
-            /////////////////////////
-        
-                    return res.status(200).send({
-                        success: true,
-                         msg: "Login Successfully",
-                        Token : jwtToken,
-                        data : {
-                            id : user[0].id,
-                            user_email : user[0].email,
-                            user_name : user[0].user_name,
-                            full_name : user[0].full_name,  
-                            user_address : data[0].public,
-                            telent_status: user[0].telent_status,  
-                            enableTwoFactor : user[0].enableTwoFactor
-                          }
-                    });
-                })
+                        return res.status(200).send({
+                            success: true,
+                            msg: "Login Successfully",
+                            Token: jwtToken,
+                            data: {
+                                id: user[0].id,
+                                user_email: user[0].email,
+                                user_name: user[0].user_name,
+                                full_name: user[0].full_name,
+                                user_address: data[0].public,
+                                telent_status: user[0].telent_status,
+                                enableTwoFactor: user[0].enableTwoFactor
+                            }
+                        });
+                    })
                 } else {
                     return res.status(400).send({
                         success: false,
@@ -186,7 +188,7 @@ exports.login = async (db, req, res) => {
                 }
 
             }
-          })    
+        })
     } catch (err) {
         console.log(err)
         return res.status(400).send({
@@ -241,7 +243,7 @@ exports.loginType = async (db, req, res) => {
                         //             error
                         //         });
                         //     }
-                            
+
                         //     var insertData = {
                         //         "user_id":results[0].id,
                         //         "coin_id":1,
@@ -259,7 +261,7 @@ exports.loginType = async (db, req, res) => {
                         //     }
                         // })
                         // }
-                        
+
                         const jwtToken = jwt.sign({
                             email: req.body.email
                         }, config.JWT_SECRET_KEY)
@@ -267,7 +269,7 @@ exports.loginType = async (db, req, res) => {
                         return res.status(200).send({
                             success: true,
                             msg: "Login Successfull.",
-                            Token : jwtToken,
+                            Token: jwtToken,
                             data: {
                                 id: results[0].id,
                                 user_email: results[0].email,
@@ -298,6 +300,41 @@ exports.loginType = async (db, req, res) => {
                     "login_type": login_type
                 }
                 db.query(authQueries.insertUserData, users, async function (error, result) {
+
+                    //////////////// NFT AIRDROP START
+                    if (data[0].airdrop_claimed == 0) {
+                        const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, ['Itsuki0001', 'Itsuki0001', 'KDCRAFT_v2']);
+                        console.log("itemData-> ", itemData);
+                        if (itemData.length == 0) {
+                            console.log("itemData lenght 0")
+
+                        } else {
+
+                            var transaction = {
+                                "user_id": data[0].id,
+                                "transaction_type_id": '16',
+                                "item_id": itemData[0].item_id,
+                                "item_edition_id": itemData[0].item_edition_id,
+                                "blockchain_status":'0',
+                                "amount": itemData[0].price,
+                                "from_address": itemData[0].owner_address,
+                                "token": 0,
+                                "edition_text": itemData[0].edition_text,
+                                "purchased_quantity": 1,
+                                "payment_currency": 'DigiPhyNFT',
+                                "payment_currency_amount": '0',
+                                "currency": 'DigiPhyNFT',
+                                "status": 1,
+                            }
+                            console.log("transaction data", transaction);
+                            const [insertTrx,] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+                            await promisePool.query(marketplaceQueries.updateAirdropNFT, [1, data[0].id, '', '', itemData[0].item_edition_id]);
+                            qry=`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
+                            await promisePool.query(qry);
+                            const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
+                        }
+                    }
+
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -323,7 +360,7 @@ exports.loginType = async (db, req, res) => {
                             //             error
                             //         });
                             //     }
-                                
+
                             //     var insertData = {
                             //         "user_id":newResult[0].id,
                             //         "coin_id":1,
@@ -341,7 +378,7 @@ exports.loginType = async (db, req, res) => {
                             //     }
                             // })
                             // }
-                            
+
                             const jwtToken = jwt.sign({
                                 email: req.body.email
                             }, config.JWT_SECRET_KEY)

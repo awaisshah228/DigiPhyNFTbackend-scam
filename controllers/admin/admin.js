@@ -81,30 +81,44 @@ exports.updateItemMarket = async (db, req, res) => {
 
     var item_id = req.body.item_id;
     var user_id = req.body.user_id;
-    var item_edition_id = req.body.item_edition_id
+    var quantity = req.body.quantity;
+    var price = req.body.price;
 
     //await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
+    try {
+        db.query(adminQueries.checkEditionQty, [item_id, user_id, quantity], async function (error, checkData) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error : Server not responding please try again later! ",
+                    error
+                });
+            }
 
-    db.query(adminQueries.putOnSale, [item_id, user_id], function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error : Server not responding please try again later! ",
-                error
-            });
-        }
-        if (data) {
+            if (checkData.length < quantity) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "You have only" + checkData.length + " editions.!!",
+                    error
+                });
+            }
+            var i = 0;
+            while (i < checkData.length) {
+                const [data,] = await promisePool.query(adminQueries.putOnSale, [price, checkData[i].id]);
+                i++;
+            }
             res.status(200).send({
                 success: true,
                 msg: "Item updated successfully",
             });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No Data"
-            });
-        }
-    });
+
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            msg: error
+        });
+    }
 }
 
 //============================================  Update on market place ====================================
@@ -691,6 +705,68 @@ exports.updateproduct_pricing = async (db, req, res) => {
 }
 
 
+exports.getrefund_pricing = async (db, req, res) => {
+    await db.query(adminQueries.getrefund_pricing, function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error Occured",
+                error
+            });
+        }
+        if (data.length > 0) {
+            res.status(200).send({
+                success: true,
+                msg: "Data",
+                response: data
+            });
+        } else {
+            res.status(200).send({
+                success: false,
+                msg: "No Data found!!"
+            });
+        }
+    });
+}
+
+exports.updaterefund_pricing = async (db, req, res) => {
+    var id = 1;
+    var refund_pricing = req.body.refund_pricing;
+
+    try {
+        var arr = {
+            'refund_pricing': refund_pricing
+        }
+        let updated = await db.query(adminQueries.updaterefund_pricing, [arr, id]);
+        if (updated) {
+            try {
+                return res.status(200).send({
+                    success: true,
+                    msg: "Content updated!!"
+                });
+
+            } catch (e) {
+                return res.status(500).send({
+                    success: false,
+                    msg: e
+                });
+            }
+        } else {
+            return res.status(400).send({
+                success: false,
+                msg: "Content not update due to internal error"
+            });
+        }
+
+    } catch (err) {
+        return res.status(500).send({
+            success: false,
+            msg: "Content not update due to internal error"
+        });
+    }
+}
+
+
 exports.receiveWalletUpdate = async (db, req, res) => {
 
     var email = req.body.email;
@@ -1172,7 +1248,7 @@ exports.listItem = async (db, req, res) => {
     try {
 
 
-        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,uc.name as collection_name,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id LEFT JOIN user_collection as uc ON i.user_collection_id=uc.id left join users as cu on cu.id=i.created_by where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`;
+        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,case when length(COALESCE(ou.full_name,''))=0 then ou.user_name else ou.full_name end  as owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,uc.name as collection_name,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id LEFT JOIN user_collection as uc ON i.user_collection_id=uc.id left join users as cu on cu.id=i.created_by left join users as ou on ou.id=ie.owner_id where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`;
 
         console.log(qry);
         await db.query(qry, function (error, data) {
@@ -2383,21 +2459,21 @@ exports.getWebImage = async (db, req, res) => {
             });
         }
         if (data.length > 0) {
-            const t1 = data[0].text1.replace(/(<([^>]+)>)/gi, "");
-            const t2 = data[0].text2.replace(/(<([^>]+)>)/gi, "");
-            const t3 = data[0].text3.replace(/(<([^>]+)>)/gi, "");
+            // const t1 = data[0].text1.replace(/(<([^>]+)>)/gi, "");
+            // const t2 = data[0].text2.replace(/(<([^>]+)>)/gi, "");
+            // const t3 = data[0].text3.replace(/(<([^>]+)>)/gi, "");
             res.status(200).send({
                 success: true,
                 msg: "Web Images",
                 response: data,
-                id: data[0].id,
-                slider1: data[0].slider1,
-                slider2: data[0].slider2,
-                slider3: data[0].slider3,
-                text1: t1,
-                text2: t2,
-                text3: t3,
-                logo: data[0].logo
+                // id: data[0].id,
+                // slider1: data[0].slider1,
+                // slider2: data[0].slider2,
+                // slider3: data[0].slider3,
+                // text1: t1,
+                // text2: t2,
+                // text3: t3,
+                // logo: data[0].logo
             });
         } else {
             res.status(400).send({
@@ -3254,14 +3330,28 @@ exports.transferList = async (db, req, res) => {
 
 exports.getAdminTokenBalance = async (db, req, res) => {
     console.log("in itemPurchase");
-    const address = reqData.address;
-    const contractAddress = reqData.contractAddress;
+    const address = req.body.address;
+    const contractAddress = req.body.contractAddress;
     try {
         const adminToken = await erc20.getTokenBalance({
             'address': address,
             'contractAddress': contractAddress,
         });
         console.log('adminToken', adminToken)
+        if (adminToken.success == true) {
+            return res.json({
+                success: true,
+                msg: "Token Balance",
+                data: adminToken.token,
+            })
+        }
+        else if (adminToken.success == false) {
+            return res.json({
+                success: false,
+                msg: adminToken.error,
+            })
+        }
+
 
     }
     catch (err) {

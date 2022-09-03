@@ -67,33 +67,21 @@ exports.register = async (db, req, res) => {
 
 
     try {
-        if (!num2.test(password)) {
-            return res.status(400).send({
-                success: false,
-                msg: "password should include one numeric character"
-            });
-        }
-
-        if (!format.test(password)) {
-            return res.status(400).send({
-                success: false,
-                msg: "password should include one special character"
-            });
-        }
+      
 
 
-        if (!full_name) {
-            return res.status(400).send({
-                success: false,
-                msg: "Full Name required "
-            });
-        }
-        if (!user_name) {
-            return res.status(400).send({
-                success: false,
-                msg: "User Name required "
-            });
-        }
+        // if (!full_name) {
+        //     return res.status(400).send({
+        //         success: false,
+        //         msg: "Full Name required "
+        //     });
+        // }
+        // if (!user_name) {
+        //     return res.status(400).send({
+        //         success: false,
+        //         msg: "User Name required "
+        //     });
+        // }
         if (!email) {
             return res.status(400).send({
                 success: false,
@@ -113,25 +101,39 @@ exports.register = async (db, req, res) => {
             });
         }
 
-        if (!confirm_email) {
-            return res.status(400).send({
-                success: false,
-                msg: "Confirm email required"
-            });
-        }
+        // if (!confirm_email) {
+        //     return res.status(400).send({
+        //         success: false,
+        //         msg: "Confirm email required"
+        //     });
+        // }
 
 
-        if (email !== confirm_email) {
-            return res.status(400).send({
-                success: false,
-                msg: "email not match"
-            });
-        }
+        // if (email !== confirm_email) {
+        //     return res.status(400).send({
+        //         success: false,
+        //         msg: "email not match"
+        //     });
+        // }
 
         if (password.length < 8) {
             return res.status(400).send({
                 success: false,
                 msg: "password length should be 8 characters or more"
+            });
+        }
+
+        if (!num2.test(password)) {
+            return res.status(400).send({
+                success: false,
+                msg: "password should include one numeric character"
+            });
+        }
+
+        if (!format.test(password)) {
+            return res.status(400).send({
+                success: false,
+                msg: "password should include one special character"
             });
         }
 

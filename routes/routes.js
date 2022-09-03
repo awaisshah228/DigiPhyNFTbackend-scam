@@ -100,6 +100,8 @@ router.get('/getproduct_pricing', admin.getproduct_pricing.bind(this, db));
 
 router.post('/updateAbout', admin.updateAbout.bind(this, db));
 router.post('/updateproduct_pricing', admin.updateproduct_pricing.bind(this, db));
+router.get('/getrefund_pricing', admin.getrefund_pricing.bind(this, db));
+router.post('/updaterefund_pricing', admin.updaterefund_pricing.bind(this, db));
 
 
 

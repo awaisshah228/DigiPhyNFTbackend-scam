@@ -929,8 +929,8 @@ exports.getUserItem = async (db, req, res) => {
     var user_collection_id = req.body.user_collection_id;
     var limit = req.body.limit;
     try {
-        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
-
+        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+        
         if (user_id > 0) {
             qry = qry + ` and it.created_by=${user_id}`;
         }
@@ -2149,6 +2149,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
     let new_owner_address = req.body.new_owner_address;
     let item_id = req.body.item_id;
     let item_edition_id = req.body.item_edition_id;
+    let claimQuantity = req.body.claimQuantity;
     
     if (!new_owner_address) {
         return res.status(400).send({
@@ -2163,12 +2164,12 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
 
     var from = apiData2;
     var fromprivate = apiData;
-    const [editionResult,] = await promisePool.query(`SELECT * from item_edition WHERE id = ?`, [item_edition_id]);
+    const [editionResult,] = await promisePool.query(`SELECT * from item_edition WHERE item_id = ? and owner_id=? and isClaimed=0 limit ?`, [item_id,user_id,parseInt(claimQuantity)]);
 
-    if (editionResult.length == 0) {
+    if (editionResult.length < claimQuantity) {
         return res.status(400).send({
             success: false,
-            msg: "Item Edition : Something went wrong, Please contact support for claim item.",
+            msg: "Item Edition : You have only "+ editionResult.length + " NFTs available for claim!",
         });
     }
 
@@ -2184,7 +2185,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
                 contractAddress: collectiosResult[0].contractAddress,
                 to_address: new_owner_address,
                 tokenId: collectiosResult[0].token_id,
-                qty: 1,
+                qty: claimQuantity,
                 getFee: false,
             });
             console.log("mintRes",mintRes)
@@ -2196,7 +2197,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
                 current_owner_address: editionResult[0].current_owner, //current owner
                 to_address: new_owner_address, // new owner
                 tokenId: collectiosResult[0].token_id,
-                qty: 1,
+                qty: claimQuantity,
                 getFee: false,
             });
         }
@@ -2207,12 +2208,16 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             });
         }
         if (mintRes.hash) {
+            var i =0;
+            while (i<editionResult.length){
             await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
                 isMinted: 1,
                 isClaimed: 1,
                 hash: mintRes.hash,
                 current_owner: new_owner_address, // new owner update
-            }, item_edition_id]);
+            }, editionResult[i].id]);
+            i++;
+        }
 
             let data = {
                 from_address: from,
@@ -2260,6 +2265,7 @@ exports.itemPurchase = async (db, req, res) => {
     let token = req.body.coin_percentage
     let isClaimed = 0
     let transferNft = req.body.transferNft
+
     try {
 
 
@@ -2369,9 +2375,11 @@ exports.itemPurchase = async (db, req, res) => {
                     let data1hash = '';
 
                     var qry = `select id from item_edition where item_id=${item_id} and owner_id=getOwnerId(${item_edition_id}) order by id limit ${purchased_quantity}`;
+                    console.log(qry)
                     await db.query(qry, async function (error, loop1) {
 
                         for (var i = 0; i < loop1.length; i++) {
+                            console.log("item edition update ",i)
                             await db.query(marketplaceQueries.updateSold2, [1, user_id, data1hash, user_address, loop1[i].id]);
 
                             var qry2 = `insert into transaction_edition_purchase(transaction_id,item_edition_id)values(${buydata.insertId},${loop1[i].id})`;
