@@ -3603,3 +3603,80 @@ exports.allSearch = async (
         });
     }
 }
+
+exports.transferTokenToMetamaskWallet = async (db, req, res) => {
+    console.log("in transferTokensss");
+    
+    const user_id = req.body.user_id;
+    const to_address = req.body.to_address;
+    const token = req.body.token;
+    let payment_currency = 'DigiCoin'//req.body.payment_currency;
+    let payment_currency_amount = 0
+    let currency = 'INR'
+    try {
+        db.query(adminQueries.getSettings, async function (error, settingData) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error : Server not responding please try again later! ",
+                    error
+                });
+            }
+            var apiData = await openNFT(settingData[0].public_key);
+            var apiData2 = await openNFT(settingData[0].private_key);
+
+            const fromAddress =apiData;
+            const privateKey = apiData2;
+            const contractAddress = settingData[0].contractAddress;
+
+        const adminToken = await erc20.transfer({
+            'account': fromAddress,
+            'privateKey' : privateKey,
+            'contractAddress': contractAddress,
+            'to_address' : to_address,
+            'token' : token,
+            'getFee':false
+        });
+
+        console.log('adminToken', adminToken)
+        if (adminToken.success == true) {
+
+            var transaction = {
+                "user_id": user_id,
+                "transaction_type_id": '17',
+                "amount": 0,
+                "token": token * -1,
+                "from_address": fromAddress,
+                "to_address": to_address,
+                "hash": adminToken.hash,
+                "payment_currency": payment_currency,
+                "payment_currency_amount": payment_currency_amount,
+                "currency": currency,
+                "status": 1
+            }
+
+            await db.query(marketplaceQueries.insertTransaction, [transaction])
+                return res.json({
+                success: true,
+                msg: "Token Transfered",
+                data: adminToken.hash,
+            })
+        }
+        else if (adminToken.success == false) {
+            return res.json({
+                success: false,
+                msg: adminToken.error,
+            })
+        }
+
+    });
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(400).send({
+            success: false,
+            msg: "Unexpected internal error!!",
+            err
+        });
+    }
+}

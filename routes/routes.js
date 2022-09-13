@@ -192,6 +192,7 @@ router.post('/deleteUserCollection',marketplace.deleteUserCollection.bind(this,d
 router.post('/getUserItem',marketplace.getUserItem.bind(this,db));
 router.post('/getUserownerItem',marketplace.getUserOwnerItem.bind(this,db));
 router.post('/updateblockchainstatus',marketplace.blockchainupdatetransaction.bind(this,db));
+router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
 
 
 
