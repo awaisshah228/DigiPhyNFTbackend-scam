@@ -213,17 +213,13 @@ exports.register = async (db, req, res) => {
                 subject: 'Account Activation Link',
                 html: `
                 
-                <table cellspacing="0" cellpadding="0" width="100%" class="digiphyemail" style=" max-width: 600px;
-         background: linear-gradient(rgb(18 27 34 / 34%), rgb(18 27 34 / 98%)) ,top/cover no-repeat url(https://digiphynft.shop/images/email/music.jpg),#0c091b;
-         margin: auto;
-         font-family: Inter,sans-serif;
-         font-size: 14px;">
+        <table cellspacing="0" cellpadding="0" width="100%" class="digiphyemail" style=" max-width: 600px;margin: auto;font-family: Inter,sans-serif;font-size: 14px; background-image:url('https://digiphynft.shop/images/email/music.png');  background-size:cover;background-repeat:no-repeat ">
          <tbody>
             <tr>
                <td style="padding:25px 35px">
                   <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="https://digiphynft.shop/images/email/logo.png" width="150" class="CToWUd" data-bit="iit"></a>
                   <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
-                  <span style="margin-top:30px;width:100%;display:block;height:1px;background:center/cover no-repeat url(bgbtn.jpg)"></span>
+                  <span style="margin-top:30px;width:100%;display:block;height:1px;background-image: url('https://digiphynft.shop/images/email/bgbtn.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center;"></span>
                </td>
             </tr>
             <tr>
@@ -234,7 +230,7 @@ exports.register = async (db, req, res) => {
             </tr>
             <tr>
                <td style="padding:15px" align="center">
-                  <a href="#" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background:center/cover no-repeat url(bgsmall.jpg);border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+               <a href='${config.mailUrl}verifyAccount/${Token}' style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >click here to activate your account</a>
                </td>
             </tr>
             <tr>
@@ -244,30 +240,32 @@ exports.register = async (db, req, res) => {
             </tr>
             <tr>
                <td style="padding:20px 15px" align="center">
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
+                  <a href="https://www.facebook.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank">
                   <img src="https://digiphynft.shop/images/email/facebook.png" width="34" class="CToWUd" data-bit="iit">
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <a href="https://twitter.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank" >
                   <img src="https://digiphynft.shop/images/email/twitter.png" width="34" class="CToWUd" data-bit="iit">
                   </a>
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <a href="https://www.instagram.com/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank" >
                   <img src="https://digiphynft.shop/images/email/instagram.png" width="34" class="CToWUd" data-bit="iit">
                   </a>
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <a href="https://discord.com/invite/GuymFFY2NF" style="display:inline-block;margin:0 15px" target="_blank" >
                   <img src="https://digiphynft.shop/images/email/discord.png" width="34" class="CToWUd" data-bit="iit">
                   </a>
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
-                  <img src="https://digiphynft.shop/images/email/telegram.png" width="34" class="CToWUd" data-bit="iit">
+                  <a href="https://www.reddit.com/r/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank">
+                  <img src="https://digiphynft.shop/images/email/reddit.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  <a href="https://www.linkedin.com/company/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank">
+                  <img src="https://digiphynft.shop/images/email/linkedin.png" width="34" class="CToWUd" data-bit="iit">
                   </a>
                   
                   
                   
                   </a>
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <a href="https://www.youtube.com/channel/UC878bT4K6sZqjqKarlZa8Qw
+                  " style="display:inline-block;margin:0 15px" target="_blank" >
                   <img src="https://digiphynft.shop/images/email/youtube.png" width="34" class="CToWUd" data-bit="iit">
                   </a>
-                  <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                  <img src="https://digiphynft.shop/images/email/medium.png" width="34" class="CToWUd" >
-                  </a>
+       
                </td>
             </tr>
             <tr>
