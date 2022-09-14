@@ -1800,6 +1800,16 @@ exports.bidAccept = async (db, req, res) => {
                 if (editionResult.length > 0) {
                     const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
                     if (collectiosResult.length > 0) {
+                       
+                        const gas_fee= await NFT.mint({
+                            account: from,
+                            privateKey: fromprivate,
+                            contractAddress: collectiosResult[0].contractAddress,
+                            to_address: from,
+                            tokenId: collectiosResult[0].token_id,
+                            qty: editionResultOfItem[0].qty,
+                            getFee: true,
+                        });
                         const mintRes = await NFT.mint({
                             account: from,
                             privateKey: fromprivate,
@@ -2179,8 +2189,18 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
     if (collectiosResult.length > 0) {
 
         let mintRes;
+        let gas_fee;
         if (editionResult[0].isMinted == 0) {
             
+            gas_fee = await NFT.mint({
+                account: from,
+                privateKey: fromprivate,
+                contractAddress: collectiosResult[0].contractAddress,
+                to_address: new_owner_address,
+                tokenId: collectiosResult[0].token_id,
+                qty: claimQuantity,
+                getFee: true,
+            });
             mintRes = await NFT.mint({
                 account: from,
                 privateKey: fromprivate,
@@ -2192,6 +2212,17 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             });
             //console.log("mintRes",mintRes)
         } else {
+
+            gas_fee = await NFT.transfer({
+                account: from,
+                privateKey: fromprivate,
+                contractAddress: collectiosResult[0].contractAddress,
+                current_owner_address: editionResult[0].current_owner, //current owner
+                to_address: new_owner_address, // new owner
+                tokenId: collectiosResult[0].token_id,
+                qty: claimQuantity,
+                getFee: true,
+            });
             mintRes = await NFT.transfer({
                 account: from,
                 privateKey: fromprivate,
@@ -2225,6 +2256,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
                 from_address: from,
                 to_address: new_owner_address,
                 hash: mintRes.hash,
+                gas_fee : gas_fee,
                 blockchain_status: 1
             }
 
@@ -2267,7 +2299,7 @@ exports.itemPurchase = async (db, req, res) => {
     let token = req.body.coin_percentage
     let isClaimed = 0
     let transferNft = req.body.transferNft
-
+    let gas_fee = req.body.gas_fee;
 
     try {
 
@@ -2344,7 +2376,7 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
 
-                await db.query(marketplaceQueries.insertSellTransactionByItemId, [saleAmount, user_address, settingData[0].commission_percent, trx[0].price * settingData[0].commission_percent / 100, item_edition_id], async function (error, selldata) {
+                await db.query(marketplaceQueries.insertSellTransactionByItemId, [gas_fee,saleAmount, user_address, settingData[0].commission_percent, trx[0].price * settingData[0].commission_percent / 100, item_edition_id], async function (error, selldata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2376,7 +2408,7 @@ exports.itemPurchase = async (db, req, res) => {
                 if(transferNft==1){
                     ttype=14;
                 }
-                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [user_id, parseFloat(token) * -1,ttype,parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
+                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, parseFloat(token) * -1,ttype,parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2510,7 +2542,7 @@ exports.itemPurchase = async (db, req, res) => {
                     }
                     else {
 
-                        await db.query(marketplaceQueries.insertBidTransactionByItemId, [trxdata.insertId], async function (error, dataId) {
+                        await db.query(marketplaceQueries.insertBidTransactionByItemId, [gas_fee, trxdata.insertId], async function (error, dataId) {
                             if (error) {
                                 return res.status(400).send({
                                     success: false,
