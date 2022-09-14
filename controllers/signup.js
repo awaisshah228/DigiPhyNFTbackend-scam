@@ -211,130 +211,78 @@ exports.register = async (db, req, res) => {
                 from: 'support@digiphynft.com',
                 to: `${email}`,
                 subject: 'Account Activation Link',
-                html: `<div style="background-color:#f4f4f4">
-        <div>
-           <div style="margin:0px auto;max-width:800px">
-              <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%">
-                 <tbody>
-                    <tr>
-                       <td style="direction:ltr;font-size:0px;padding:10px 0px;text-align:center">
-                       </td>
-                    </tr>
-                 </tbody>
-              </table>
-           
-           </div>
-       <div style="background:black;background-color:#6f43ec;margin:0px auto;border-radius:5px;max-width:800px">
-          <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-radius:5px">
-             <tbody>
-                <tr>
-                   <td style="direction:ltr;font-size:0px;padding:8px 0;text-align:center">
-                      <div style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%">
-                         <table border="0" cellpadding="0" cellspacing="0" style="vertical-align:top" width="100%">
-                            <tbody>
-                               <tr>
-                                  <td align="center" style="font-size:0px;padding:0px 25px 0px 25px;word-break:break-word">
-                                     <table border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-spacing:0px">
-                                        <tbody>
-                                           <tr>
-                                              <td style="width:126px">
-                                                 <img height="auto" src="https://digiphynft.shop/backend/uploads/image-1656053820251.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px" width="150"  class="CToWUd">
-                                              </td>
-                                           </tr>
-                                        </tbody>
-                                     </table>
-                                  </td>
-                               </tr>
-                            </tbody>
-                         </table>
-                      </div>
-                   </td>
-                </tr>
-             </tbody>
-          </table>
-       </div>
-           <div style="height:20px">
-              &nbsp;
-           </div>
-           <div style="background:#fff;margin:0px auto;border-radius:5px;max-width:800px">
-              <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-radius:5px">
-                 <tbody>
-                    <tr>
-                       <td style="direction:ltr;font-size:0px;padding:0px;text-align:center">
-                          <div style="margin:0px auto;max-width:800px">
-                             <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%">
-                                <tbody>
-                                   <tr>
-                                      <td style="direction:ltr;font-size:0px;padding:20px 0;text-align:center">
-                                         <div style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%">
-                                            <table border="0" cellpadding="0" cellspacing="0" style="vertical-align:top" width="100%">
-                 <tbody>
-                    <tr>
-                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word">
-                          <div style="font-family:Arial,sans-serif;font-size:15px;line-height:1;text-align:left;color:#000"><b>Dear ${user_name},</b></div>
-                       </td>
-                    </tr>
-                    <tr>
-                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word">
-                          <div style="font-family:Arial,sans-serif;font-size:15px;line-height:25px;text-align:left;color:#000">
-                          <h2>Please <a href='${config.mailUrl}verifyAccount/${Token}'>click here </a> to activate your account</h2>
-                           
-                            </div>
-                       </td>
-                    </tr>
-                    <tr>
-                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word">
-                          <div style="font-family:Arial,sans-serif;font-size:15px;line-height:25px;text-align:left;color:#000">
-                            Thanks <br>
-                            DigiPhyNFT Team
-                          </div>
-                       </td>
-                    </tr>
-                    
-                 </tbody>
-                </table>
-                                         </div>
-                                      </td>
-                                   </tr>
-                                </tbody>
-                             </table>
-                          </div>
-                       </td>
-                    </tr>
-                 </tbody>
-              </table>
-           </div>
-           <div style="height:20px">
-              &nbsp;
-           </div>
-           <div style="background:#000;background-color:#000;margin:0px auto;border-radius:5px;max-width:800px">
-              <font color="#888888">
-                    </font><font color="#888888">
-                 </font><font color="#888888">
-              </font><table align="center" border="0" cellpadding="0" cellspacing="0" style="background:#b09af7;background-color:#000;width:100%;border-radius:5px">
-                 <tbody>
-                    <tr>
-                       <td style="direction:ltr;font-size:0px;padding:20px 0;text-align:center">
-                          <div style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%">
-                             <font color="#888888">
-                                   </font><font color="#888888">
-                                </font><font color="#888888">
-                             </font><table border="0" cellpadding="0" cellspacing="0" style="vertical-align:top" width="100%">
-                                <tbody>
-                                   <tr>
-                                      <td align="center" style="font-size:0px;padding:0px 25px;word-break:break-word">
-                                         <div style="font-family:Arial,sans-serif;font-size:13px;line-height:25px;text-align:left;color:#fff"><b>DigiPhyNFT Team
-
-                                         </b></div>
-                                      </td>
-                                      <td align="center" style="font-size:0px;padding:0px 25px;word-break:break-word">
-                                         <div style="font-family:Arial,sans-serif;font-size:13px;line-height:25px;text-align:right;color:#fff"><b style="color:white"><a href="mailto:support@DigiPhyNFT.io" target="_blank">support@DigiPhyNFT.io</a></b></div><font color="#888888">
-                                      </font></td></tr></tbody></table><font color="#888888">
-                          </font></div><font color="#888888">
-                       </font></td></tr></tbody></table><font color="#888888">
-           </font></div><font color="#888888">
-        </font></div><font color="#888888">
-     </font></div>`
+                html: `
+                <style type="text/css">
+                .digiphyemail{
+                max-width: 600px;
+                background: linear-gradient(rgb(18 27 34 / 34%), rgb(18 27 34 / 98%)) ,top/cover no-repeat url(music.jpg),#0c091b;
+                margin: auto;
+                font-family: Inter,sans-serif;
+                font-size: 14px;
+                }
+             </style>
+                <table cellspacing="0" cellpadding="0" width="100%" class="digiphyemail" >
+                <tbody>
+                   <tr>
+                      <td style="padding:25px 35px">
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="logo.png" width="150" class="CToWUd" data-bit="iit"></a>
+                         <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
+                         <span style="margin-top:30px;width:100%;display:block;height:1px;background:center/cover no-repeat url(bgbtn.jpg)"></span>
+                      </td>
+                   </tr>
+                   <tr>
+                      <td style="padding:15px 36px" align="left">
+                         <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear ${user_name},</p>
+                         <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">We're glad to have you on board.Digiphy is the "India's First Music NFT Marketplace".Digiphy empowers Artists to build fan communities and enable fans to play a role to supercharge growth of Artists by buying Music NFTs and help them capture more value from their work. These music NFTs give the fans a chance to be part of an exclusive community with the Artist and get special privileges and earn royalty*, special privileges like early access to exclusive behind the scenes content, meet-n-greet opportunities, unreleased music, backstage access to concerts etc to strengthen direct engagement and loyalty with fans.</p>
+                      </td>
+                   </tr>
+                   <tr>
+                      <td style="padding:15px" align="center">
+                         <a href="#" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background:center/cover no-repeat url(bgsmall.jpg);border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+                      </td>
+                   </tr>
+                   <tr>
+                      <td style="padding:15px 36px" align="left">
+                         <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>TeamDigiphy</p>
+                      </td>
+                   </tr>
+                   <tr>
+                      <td style="padding:20px 15px" align="center">
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
+                         <img src="images/email/facebook.png" width="34" class="CToWUd" data-bit="iit">
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                         <img src="twitter.png" width="34" class="CToWUd" data-bit="iit">
+                         </a>
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                         <img src="images/email/instagram.png" width="34" class="CToWUd" data-bit="iit">
+                         </a>
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                         <img src="images/email/discord.png" width="34" class="CToWUd" data-bit="iit">
+                         </a>
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
+                         <img src="images/email/telegram.png" width="34" class="CToWUd" data-bit="iit">
+                         </a>
+                         
+                         
+                         
+                         </a>
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                         <img src="images/email/youtube.png" width="34" class="CToWUd" data-bit="iit">
+                         </a>
+                         <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                         <img src="images/email/medium.png" width="34" class="CToWUd" >
+                         </a>
+                      </td>
+                   </tr>
+                   <tr>
+                      <td style="background:#19132a;padding:15px" align="center">
+                         <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+                         <font color="#888888">
+                         </font>
+                      </td>
+                   </tr>
+                </tbody>
+             </table>`
             };
 
             transporter.sendMail(mailOptions, function (error, info) {

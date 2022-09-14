@@ -1,6 +1,6 @@
 {
   "name": "image-thumbnail",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Generate an image thumbnail.",
   "main": "index.js",
   "scripts": {
@@ -30,7 +30,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "image-size": "^1.0.0",
-    "sharp": "^0.28",
+    "sharp": "^0.30.4",
     "validator": "^13.0.0"
   },
   "jest": {
