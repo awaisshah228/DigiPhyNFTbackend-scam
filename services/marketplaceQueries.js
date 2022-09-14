@@ -79,7 +79,6 @@ module.exports = {
     
     getItemDetails : "Select i.created_by,i.edition_type,ie.id as item_edition_id,ie.is_sold,ie.expiry_date,ie.id as id,u.user_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN users as u ON i.created_by=u.id where ie.id =?  and (ie.expiry_date >= now() or ie.expiry_date is null)",
    
-    insertOwnerHistory : "insert into product_owner_history SET ?",
     getBidRecord : "select ieb.*,isResale(ieb.item_edition_id) as is_resale,u.address from item_edition_bid as ieb left join users as u on u.id=ieb.user_id where ieb.id =?",
     getTelentStatus : "Select telent_status from users where id =?",
     

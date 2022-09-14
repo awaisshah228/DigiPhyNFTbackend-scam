@@ -192,6 +192,7 @@ router.post('/deleteUserCollection',marketplace.deleteUserCollection.bind(this,d
 router.post('/getUserItem',marketplace.getUserItem.bind(this,db));
 router.post('/getUserownerItem',marketplace.getUserOwnerItem.bind(this,db));
 router.post('/updateblockchainstatus',marketplace.blockchainupdatetransaction.bind(this,db));
+router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
 
 
 
@@ -245,8 +246,7 @@ router.get("/uploads/:image", getFile.getImage);
 router.post('/updateProfilePic', userupload, signup.updateProfilePic.bind(this, db));
 router.post('/getAboutDetail',signup.getAboutDetail.bind(this,db));
 router.post('/updateAboutDetail',signup.updateAboutDetail.bind(this,db));
-router.post('/follow',signup.follow.bind(this, db))
-router.post('/insertView',signup.insertView.bind(this, db))
+
 router.post('/getUserDetail',signup.getUserDetail.bind(this, db))
 router.post('/addSubscriber',signup.addSubscriber.bind(this, db));
 router.get('/getSubscriber',signup.getSubscriber.bind(this, db));
