@@ -909,7 +909,7 @@ exports.updateProfilePic = async (db, req, res) => {
                 error
             });
         }
-        db.query(authQueries.checkUserName, [user_name], function (error, checkUserName) {
+        db.query(authQueries.checkUserName, [user_name,email], function (error, checkUserName) {
             if (error) {
                 return res.status(400).send({
                     success: false,

@@ -3311,10 +3311,12 @@ exports.transferList = async (db, req, res) => {
                     "status": 1,
                 }
               //  console.log("transaction data", transaction);
-                await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+              const [trxData, fields1] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
 
                 await promisePool.query(marketplaceQueries.updateSold2, [1, data[0].id, '', data[0].address, itemData[0].item_edition_id]);
                 const [updateTransferList, fields] = await promisePool.query(`UPDATE transfer_list SET status=1,item_edition_id= ${itemData[0].item_edition_id} WHERE id=${transferList[i].id}`);
+                const [trxEditionPurchase, fields3] = await promisePool.query(`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id) values(${trxData.insertId}, ${itemData[0].item_edition_id})`);
+
               //  console.log("List data inserted successfully!!")
 
             }

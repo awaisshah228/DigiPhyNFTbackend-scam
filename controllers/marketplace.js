@@ -2943,7 +2943,22 @@ exports.userWithdraw = async (db, req, res) => {
                 });
             }
 
-           
+            await db.query(marketplaceQueries.getbankdetail, [user_id], async function (error, bankData) {
+                if (error) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "error occured",
+                        error
+                    });
+                }
+
+                if(bankData.length==0){
+                  return  res.status(400).send({
+                        success: false,
+                        msg: "Please Enter your Bank detail !!"
+                    });
+                }
+
             var transaction = {
                 "user_id": user_id,
                 "transaction_type_id": '3',
@@ -2974,6 +2989,7 @@ exports.userWithdraw = async (db, req, res) => {
             }
         });
     });
+});
 }
 
 exports.insertContact = async (db, req, res) => {
@@ -3213,6 +3229,42 @@ exports.getRoyaltyTransaction = async (db, req, res) => {
 exports.getWalletTransaction = async (db, req, res) => {
     console.log("in getWalletTransaction");
     var user_id = req.body.user_id;
+    var type_id = req.body.type_id;
+    if(type_id >0){
+        console.log('rtesse',type_id)
+        await db.query(marketplaceQueries.getWalletTransactionbyType, [user_id,type_id], async function (error, data) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error occured!!",
+                    error
+                });
+            }
+
+            if (data.length > 0) {
+                const response2 = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/buy', {
+                    method: 'GET', headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const usdPrice = await response2.json();
+     console.log('rtesse',data)
+       
+                res.status(200).send({
+                    success: true,
+                    msg: "Wallet transaction details!!",
+                    eth_usd_price: usdPrice['data']['amount'],
+                    response: data
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    msg: "No data found!!"
+                });
+            }
+        });      
+    }else{
     await db.query(marketplaceQueries.getWalletTransaction, [user_id], async function (error, data) {
         if (error) {
             return res.status(400).send({
@@ -3243,6 +3295,7 @@ exports.getWalletTransaction = async (db, req, res) => {
             });
         }
     });
+}
 }
 
 

@@ -14,7 +14,7 @@ module.exports = {
     
     updateProfile: "update users SET full_name=?,email=?,profile_pic=?,banner=?,user_name=?  where email=?",
     getProfile: "Select full_name,address,profile_pic,banner,email,user_name from users where email=?",
-    checkUserName : "SELECT id FROM users WHERE user_name=?",
+    checkUserName : "SELECT id FROM users WHERE user_name=? and email<>?",
     list: "Select title,author,price,item_image,price from marketplace ",
     aboutDetail: "Select description,facebook,insta,twitter,pinterest,website,youtube,artstation,behance,steemit from users where email = ?",
     updateaboutDetail: "Update users SET  description=?,facebook=?,insta=?,twitter=?,pinterest=?,website=?,youtube=?,artstation=?,behance=?,steemit=?  where email = ?",
