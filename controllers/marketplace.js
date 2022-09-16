@@ -1332,7 +1332,7 @@ exports.addNftByUser = async (db, req, res) => {
     var image_low = req.body.image;
     let user_address = req.body.address;
     let transaction_id = req.body.transaction_id;
-    let royalty_percent = req.body.royalty_percent;
+    //let royalty_percent = req.body.royalty_percent;
     let tokenId = req.body.tokenId;
     let productId = req.body.productId;
     let attributes = JSON.parse(req.body.attributes);
