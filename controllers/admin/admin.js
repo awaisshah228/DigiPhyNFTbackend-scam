@@ -2527,6 +2527,7 @@ exports.insertadminCollection = async (db, req, res) => {
     var user_id = req.body.user_id;
     var website = req.body.website;
     var games_category = req.body.games_category;
+    var royalty_percent =req.body.royalty_percent;
 
     // if(!games_category){
     //     res.status(400).send({
@@ -2547,6 +2548,7 @@ exports.insertadminCollection = async (db, req, res) => {
         "telegram": req.body.telegram,
         "twitter": req.body.twitter,
         "discord": req.body.discord,
+        "royalty_percent":royalty_percent
     }
     await db.query(adminQueries.insertadminCollection, [dataArr], function (error, data) {
         if (error) {

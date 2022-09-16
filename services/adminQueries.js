@@ -8,6 +8,7 @@ module.exports = {
   putOnSale: "update item_edition set is_on_sale=1,is_sold=0,price=? where id=?",
   checkEditionQty: "SELECT id FROM item_edition where item_id=? and owner_id=? and is_on_sale=0 ORDER BY id limit ?",
   getSettings: "select resale_charges,minting_fee,royalty_percent,commission_percent,receive_address,public_key,private_key, coin_value,maxcoinpercentage,contractAddress from settings where id=1",
+  getCollectionRoyaltyPercent:"SELECT royalty_percent from user_collection WHERE id=?",
   addUserCollectionFeatured: "update user_collection SET ? where id =?",
   user_delete:"update users SET is_deleted=1 where id=?",
   getbankdetailinadmin :"SELECT ub.*,u.full_name FROM `user_bank_detail` as ub LEFT JOIN users as u on u.id=ub.user_id",

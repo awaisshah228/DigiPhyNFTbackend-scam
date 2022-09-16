@@ -277,7 +277,7 @@ exports.imageSave = async (db, req, res) => {
     var qry = `select * from item where image is not null and local_image is null ORDER BY id`;
     await db.query(qry, async function (error, data) {
         if (error) {
-            // https://ipfs.io/ipfs/QmWBB2sY9CYKehoKRmjhZgJ7UHhrFNfBjDKzcToM1S7yTQ
+            // https://digiphy.mypinata.cloud/ipfs/QmWBB2sY9CYKehoKRmjhZgJ7UHhrFNfBjDKzcToM1S7yTQ
             return res.status(400).send({
                 success: false,
                 msg: "Error occured!!",
@@ -290,7 +290,7 @@ exports.imageSave = async (db, req, res) => {
 
 
             var img = data[i].image;
-            const resData = await ipfsCompress.compressImages1('https://ipfs.io/ipfs/' + img);
+            const resData = await ipfsCompress.compressImages1('https://digiphy.mypinata.cloud/ipfs/' + img);
 
             let local_image = resData.images[0];
             await db.query(`UPDATE item set local_image='${local_image}' WHERE id = ${data[i].id}`);
@@ -690,6 +690,7 @@ exports.insertUserCollection = async (db, req, res) => {
     var user_id = req.body.user_id;
     var website = req.body.website;
     var games_category = req.body.games_category;
+    var royalty_percent = royalty_percent;
 
     let ownerAddress = req.body.ownerAddress; // optional
     let contractName = req.body.contractName; // required  || olny string
@@ -762,7 +763,8 @@ exports.insertUserCollection = async (db, req, res) => {
                 "hash": deployhash,
                 "contractOwner": ownerAddress,
                 "contractAddress": "",
-                "blockchainConfirmation": 0
+                "blockchainConfirmation": 0,
+                "royalty_percent":royalty_percent
             }
 
             await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
@@ -1404,6 +1406,16 @@ exports.addNftByUser = async (db, req, res) => {
         });
     }
 
+    await db.query(adminQueries.getCollectionRoyaltyPercent,[user_collection_id],async function (error, collectionRoyalty) {
+        if (error) {
+
+            return res.status(400).send({
+                success: false,
+                msg: "error occured in item insert",
+                error
+            });
+        }
+
     await db.query(adminQueries.getSettings, async function (error, commissionPercent) {
         if (error) {
 
@@ -1438,7 +1450,7 @@ exports.addNftByUser = async (db, req, res) => {
             "nft_type": nft_type,
             "address": user_address,
 
-            "royalty_percent": royalty_percent,
+            "royalty_percent": collectionRoyalty[0].royalty_percent,
             "commission_percent": commissionPercent[0].commission_percent,
             "approve_by_admin": approve_by_admin,
             "is_on_sale": is_on_sale
@@ -1533,7 +1545,7 @@ exports.addNftByUser = async (db, req, res) => {
                             let qry = `select * from users where id =${user_id}`;
 
                             await db.query(qry, async function (error, mailData) {
-                                emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for $${price}.`, `featurescreator/${user_id}`, `https://ipfs.io/ipfs/${image}`);
+                                emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for $${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
 
                             });
                             /// SEND MAIL ENDS    
@@ -1552,6 +1564,7 @@ exports.addNftByUser = async (db, req, res) => {
                         });
                     }
                 });
+                
 
             } catch (e) {
                 return res.status(400).send({
@@ -1563,6 +1576,7 @@ exports.addNftByUser = async (db, req, res) => {
 
         });
     });
+});
 
 }
 
@@ -1907,9 +1921,9 @@ exports.bidAccept = async (db, req, res) => {
                                         qry = `select i.name,i.description,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(${user_id}) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail,ieb.bid_price from item_edition_bid as ieb left join item_edition as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
 
                                         await db.query(qry, async function (error, mailData) {
-                                            emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                            emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                            emailActivity.Activity(mailData[0].bidderEmail, 'Bid Accepted', `Your bid has been accepted for $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                            emailActivity.Activity(mailData[0].bidderEmail, 'Bid Accepted', `Your bid has been accepted for $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                         });
                                         /// SEND MAIL ENDS    
 
@@ -2570,9 +2584,9 @@ exports.itemPurchase = async (db, req, res) => {
                                     qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
                                     //console.log(qry);
                                     await db.query(qry, async function (error, mailData) {
-                                        emailActivity.Activity(mailData[0].ownerEmail, 'Bid Placed', `Bid Placed on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                        emailActivity.Activity(mailData[0].ownerEmail, 'Bid Placed', `Bid Placed on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                        emailActivity.Activity(mailData[0].bidderEmail, 'Bid Placed', `You have placed bid on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                                        emailActivity.Activity(mailData[0].bidderEmail, 'Bid Placed', `You have placed bid on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                     });
                                     /// SEND MAIL ENDS
                                 });
@@ -2791,8 +2805,8 @@ exports.rejectBid = async (db, req, res) => {
             qry = `select i.name,i.description,ieb.bid_price,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail from item_edition_bid as ieb left join item_edition  as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
             //console.log(qry);
             await db.query(qry, async function (error, mailData) {
-                emailActivity.Activity(mailData[0].ownerEmail, 'Bid Cancelled', `Bid Cancelled on  ${mailData[0].name} for $${mailData[0].bid_price}.`, `salehistory`, `https://ipfs.io/ipfs/${mailData[0].image}`);
-                emailActivity.Activity(mailData[0].bidderEmail, 'You have cancelled a bid', `You have cancelled bid ${mailData[0].name} for $${mailData[0].bid_price}.`, `yourpurchase`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                emailActivity.Activity(mailData[0].ownerEmail, 'Bid Cancelled', `Bid Cancelled on  ${mailData[0].name} for $${mailData[0].bid_price}.`, `salehistory`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                emailActivity.Activity(mailData[0].bidderEmail, 'You have cancelled a bid', `You have cancelled bid ${mailData[0].name} for $${mailData[0].bid_price}.`, `yourpurchase`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
             });
             /// SEND MAIL ENDS    
             return res.status(200).send({
@@ -3353,7 +3367,7 @@ exports.resaleNFT = async (db, req, res) => {
             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
             //console.log(qry);
             await db.query(qry, async function (error, mailData) {
-                emailActivity.Activity(mailData[0].ownerEmail, 'NFT published for resell.', `Your NFT ${mailData[0].name} if published for resell in $${price}.`, `nftdetail/${item_edition_id}`, `https://ipfs.io/ipfs/${mailData[0].image}`);
+                emailActivity.Activity(mailData[0].ownerEmail, 'NFT published for resell.', `Your NFT ${mailData[0].name} if published for resell in $${price}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
             });
             /// SEND MAIL ENDS    
 
