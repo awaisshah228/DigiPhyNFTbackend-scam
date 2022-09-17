@@ -690,7 +690,7 @@ exports.insertUserCollection = async (db, req, res) => {
     var user_id = req.body.user_id;
     var website = req.body.website;
     var games_category = req.body.games_category;
-    var royalty_percent = royalty_percent;
+    var royalty_percent = req.body.royalty_percent;
 
     let ownerAddress = req.body.ownerAddress; // optional
     let contractName = req.body.contractName; // required  || olny string
