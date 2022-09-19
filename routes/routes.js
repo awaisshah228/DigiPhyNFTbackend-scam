@@ -112,6 +112,9 @@ router.post('/updateFee', admin.updateFee.bind(this, db));
 router.post('/updateItemMarket', admin.updateItemMarket.bind(this, db));
 router.post('/updateItemAdmin', admin.updateItemAdmin.bind(this, db));
 
+router.post('/updatePlateformFee', admin.updatePlateformFee.bind(this, db));
+
+
 router.post('/deleteuser',admin.deleteUser.bind(this, db));
 router.get('/getadmincollection',admin.getAdminCollection.bind(this,db));
 router.post('/insertadminCollection', collectionImages, admin.insertadminCollection.bind(this, db));
