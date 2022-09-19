@@ -194,6 +194,7 @@ router.post('/getUserownerItem',marketplace.getUserOwnerItem.bind(this,db));
 router.post('/updateblockchainstatus',marketplace.blockchainupdatetransaction.bind(this,db));
 router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
 
+router.post('/itemView' ,marketplace.insertView.bind(this, db));
 
 
 router.post('/updateTelentForApproved',marketplace.updateTelentForApproved.bind(this,db));

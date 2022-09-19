@@ -3781,3 +3781,41 @@ exports.transferTokenToMetamaskWallet = async (db, req, res) => {
         });
     }
 }
+
+exports.insertView = async (db, req, res) => {
+    console.log("in insertView");
+    var user_id = req.body.user_id;
+    var item_edition_id = req.body.item_edition_id;
+    var ip = null;
+    var datetime = new Date();
+
+
+    var views = {
+        "user_id": user_id,
+        'item_edition_id': item_edition_id,
+        "ip": ip,
+        "datetime": datetime,
+    }
+
+
+    await db.query(marketplaceQueries.insertview, [views], function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "error occured",
+                error
+            });
+        }
+        if (data) {
+            res.status(200).send({
+                success: true,
+                msg: "Insert View Successfully",
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "Error in Insertion"
+            });
+        }
+    });
+}
