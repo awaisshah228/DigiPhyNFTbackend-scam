@@ -3461,3 +3461,112 @@ exports.transferToken = async (db, req, res) => {
         });
     }
 }
+
+
+exports.getWithdrawInr = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getWithdrawInr,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}
+
+exports.getCoinTransferToUser = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getCoinTransferToUser,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}
+
+exports.getWithdrawl = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getWithdrawl,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}

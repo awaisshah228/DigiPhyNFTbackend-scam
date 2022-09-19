@@ -15,6 +15,10 @@ module.exports = {
   
   // updateWallet: "update settings set ? where id=1",
 
+  getWithdrawInr: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=17 and t.user_id =?",
+  getCoinTransferToUser: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=15 and t.user_id =?",
+  getWithdrawl: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=3 and t.user_id =?",
+
 
 
   getadmincollection:"Select uc.id as collection_id,u.id as user_id,u.full_name as user_name,u.email,uc.name as collection_name,uc.description,uc.is_featured,uc.profile_pic,uc.banner,uc.website,uc.facebook,uc.twitter,uc.insta,uc.telegram,uc.discord,date_format(uc.datetime,'%d-%M-%y')as create_date,CollectionNFTCount(uc.id) as nftCount from user_collection as uc left join users as u on u.id=uc.user_id WHERE uc.user_id=1 order by uc.id desc",

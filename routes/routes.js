@@ -142,6 +142,10 @@ router.post('/updateadminCollection',collectionImages,admin.updateadminCollectio
 router.post('/getBulkNFT', admin.getBulkNFT.bind(this, db));
 router.post('/getLocalImageHash', admin.getLocalImageHash.bind(this, db));
 
+router.post('/getWithdrawInr', admin.getWithdrawInr.bind(this, db));
+router.post('/getCoinTransferToUser', admin.getCoinTransferToUser.bind(this, db));
+router.post('/getWithdrawl', admin.getWithdrawl.bind(this, db));
+
 
 //==============Post Status API ===================================
 router.post('/adminlogin', admin.login.bind(this, db));
