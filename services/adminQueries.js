@@ -17,7 +17,7 @@ module.exports = {
 
   getWithdrawInr: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=17 and t.user_id =?",
   getCoinTransferToUser: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=15 and t.user_id =?",
-  getWithdrawl: "SELECT t.id as transaction_id,date_format(t.datetime,'%d-%b-%Y') as date,t.token,u.user_name,u.email FROM transaction as t left join users as u on u.id=t.user_id where t.transaction_type_id=3 and t.user_id =?",
+  getWithdrawl: "SELECT t.*,u.email,u.full_name,ub.account_name,ub.account_number,ub.ifsc_code,ub.bank_name FROM `transaction` as t LEFT JOIN users as u on u.id=t.user_id LEFT JOIN user_bank_detail as ub on ub.user_id=t.user_id WHERE t.transaction_type_id=3 AND t.user_id=?",
 
 
 
