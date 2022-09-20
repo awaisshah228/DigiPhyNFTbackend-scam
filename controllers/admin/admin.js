@@ -132,7 +132,7 @@ exports.updateItemAdmin = async (db, req, res) => {
 
     let keys = {
         // "item_id": item_id,
-        "approve_by_admin": 1
+        "is_approved": 1
     }
 
     db.query(adminQueries.updateItemMarket, [keys, item_id], function (error, data) {
@@ -1285,7 +1285,7 @@ exports.listItem = async (db, req, res) => {
     try {
 
 
-        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,case when length(COALESCE(ou.full_name,''))=0 then ou.user_name else ou.full_name end  as owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,uc.name as collection_name,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id LEFT JOIN user_collection as uc ON i.user_collection_id=uc.id left join users as cu on cu.id=i.created_by left join users as ou on ou.id=ie.owner_id where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 order by id desc`;
+        var qry = `Select i.id,i.nft_type as nft_type, ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.user_name as full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(ie.id) as like_count,isLiked(ie.id,${login_user_id}) as is_liked,i.image,i.file_type,case when length(COALESCE(ou.full_name,''))=0 then ou.user_name else ou.full_name end  as owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,uc.name as collection_name,ie.expiry_date,concat('${config.mailUrl}backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id LEFT JOIN user_collection as uc ON i.user_collection_id=uc.id left join users as cu on cu.id=i.created_by left join users as ou on ou.id=ie.owner_id where ie.is_sold=0 and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  and ie.is_on_sale=1 and uc.is_approved=1 order by id desc`;
 
         //console.log(qry);
         await db.query(qry, function (error, data) {

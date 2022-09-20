@@ -125,6 +125,7 @@ router.post('/getProfilePic', signup.getProfilePic.bind(this, db));
 router.post('/insertUserCollection', collectionImages, marketplace.insertUserCollection.bind(this, db));
 router.post('/getUserCollection',marketplace.getUserCollection.bind(this,db));
 router.get('/getAllUserCollection',marketplace.getAllUserCollection.bind(this,db));
+router.get('/getAdminAllUserCollection',marketplace.getAdminAllUserCollection.bind(this,db));
 router.post('/TrendingNfts', marketplace.TrendingNfts.bind(this, db));
 router.post('/recentNfts', marketplace.recentNfts.bind(this, db));
 

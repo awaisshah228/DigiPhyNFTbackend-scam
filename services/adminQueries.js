@@ -4,7 +4,7 @@ var db = require('../utils/connection');
 
 module.exports = {
   updateWallet: "update settings set ? where id=1",
-  updateItemMarket: "update item set ? where id=?",
+  updateItemMarket: "update user_collection set ? where id=?",
   putOnSale: "update item_edition set is_on_sale=1,is_sold=0,price=? where id=?",
   checkEditionQty: "SELECT id FROM item_edition where item_id=? and owner_id=? and is_on_sale=0 ORDER BY id limit ?",
   getSettings: "select resale_charges,minting_fee,royalty_percent,commission_percent,receive_address,public_key,private_key, coin_value,maxcoinpercentage,contractAddress, platform_fee from settings where id=1",

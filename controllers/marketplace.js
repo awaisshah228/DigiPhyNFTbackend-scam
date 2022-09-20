@@ -885,6 +885,30 @@ exports.getAllUserCollection = async (db, req, res) => {
     });
 }
 
+exports.getAdminAllUserCollection = async (db, req, res) => {
+    console.log("in getAdminAllUserCollection");
+    await db.query(marketplaceQueries.getAdminAllUserCollection, function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error occured!!",
+                error
+            });
+        }
+        if (data.length > 0) {
+            res.status(200).send({
+                success: true,
+                msg: "All user Collection Detail!!",
+                response: data
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "Something Wrong due to internal Error"
+            });
+        }
+    });
+}
 
 
 
@@ -933,7 +957,7 @@ exports.getUserItem = async (db, req, res) => {
     var user_collection_id = req.body.user_collection_id;
     var limit = req.body.limit;
     try {
-        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
         
         if (user_id > 0) {
             qry = qry + ` and it.created_by=${user_id}`;
@@ -1406,6 +1430,25 @@ exports.addNftByUser = async (db, req, res) => {
         });
     }
 
+    
+    await db.query(marketplaceQueries.IsApprovedUserCollection,[user_collection_id],async function (error, checkId) {
+        if (error) {
+
+            return res.status(400).send({
+                success: false,
+                msg: "error occured in item insert",
+                error
+            });
+        }
+
+        if (checkId[0].is_approved ==0) {
+
+            return res.status(400).send({
+                success: false,
+                msg: "First you need to approve your collection",
+                error
+            });
+        }
     await db.query(adminQueries.getCollectionRoyaltyPercent,[user_collection_id],async function (error, collectionRoyalty) {
         if (error) {
 
@@ -1576,6 +1619,7 @@ exports.addNftByUser = async (db, req, res) => {
 
         });
     });
+});
 });
 
 }
@@ -1920,6 +1964,7 @@ exports.bidAccept = async (db, req, res) => {
                                         /// SEND MAIL STARTS
                                         qry = `select i.name,i.description,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(${user_id}) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail,ieb.bid_price from item_edition_bid as ieb left join item_edition as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
 
+                                        console.log('qry',qry)
                                         await db.query(qry, async function (error, mailData) {
                                             emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
@@ -2327,6 +2372,7 @@ exports.itemPurchase = async (db, req, res) => {
             amount=0;
         }
 
+        const gas_fee =0;
 
         if (sell_type === 'Price') {
             /// transactoin for sell product start
@@ -2352,6 +2398,16 @@ exports.itemPurchase = async (db, req, res) => {
                         qty: editionResultOfItem[0].qty,
                         getFee: false,
                     });
+
+                     gas_fee = await NFT.mint({
+                        account: from,
+                        privateKey: fromprivate,
+                        contractAddress: collectiosResult[0].contractAddress,
+                        to_address: from,
+                        tokenId: collectiosResult[0].token_id,
+                        qty: editionResultOfItem[0].qty,
+                        getFee: true,
+                    });
                     if (mintRes.hash) {
                         await promisePool.query(`UPDATE item_edition SET ? WHERE item_id = ?`, [{
                             isMinted: 1,
@@ -2372,10 +2428,10 @@ exports.itemPurchase = async (db, req, res) => {
                 }
 
                 if (trx[0].is_resale === 0) {
-                    var sellerPercent = 100;
+                    var sellerPercent = 100-settingData[0].platform_fee;
                 }
                 else {
-                    var sellerPercent = 100 - trx[0].royalty_percent;
+                    var sellerPercent = 100 - trx[0].royalty_percent-settingData[0].platform_fee;
                     ///////// INSERT ROYALTY TRX
                     //console.log("insert royalty trx", trx[0].price, purchased_quantity, sellerPercent);
                     await db.query(marketplaceQueries.insertRoyaltyTransactionByItemId, [trx[0].price * purchased_quantity * trx[0].royalty_percent / 100, trx[0].item_edition_id], async function (error, selldata) {
@@ -2389,8 +2445,8 @@ exports.itemPurchase = async (db, req, res) => {
                     });
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
-
-                await db.query(marketplaceQueries.insertSellTransactionByItemId, [gas_fee,saleAmount, user_address, settingData[0].commission_percent, trx[0].price * settingData[0].commission_percent / 100, item_edition_id], async function (error, selldata) {
+                var platformFee = ((trx[0].price * purchased_quantity) * settingData[0].platform_fee / 100)
+                await db.query(marketplaceQueries.insertSellTransactionByItemId, [platformFee, gas_fee,saleAmount, user_address, settingData[0].commission_percent, trx[0].price * settingData[0].commission_percent / 100, item_edition_id], async function (error, selldata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2556,7 +2612,8 @@ exports.itemPurchase = async (db, req, res) => {
                     }
                     else {
 
-                        await db.query(marketplaceQueries.insertBidTransactionByItemId, [gas_fee, trxdata.insertId], async function (error, dataId) {
+                        console.log('trxdata.insertId',gas_fee,trxdata.insertId)
+                        await db.query(marketplaceQueries.insertBidTransactionByItemId, [trxdata.insertId], async function (error, dataId) {
                             if (error) {
                                 return res.status(400).send({
                                     success: false,
