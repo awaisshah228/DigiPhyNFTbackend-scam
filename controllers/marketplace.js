@@ -764,6 +764,7 @@ exports.insertUserCollection = async (db, req, res) => {
                 "contractOwner": ownerAddress,
                 "contractAddress": "",
                 "blockchainConfirmation": 0,
+                "contractName" :contractName,
                 "royalty_percent":royalty_percent
             }
 
@@ -3489,7 +3490,7 @@ exports.getCollectionById = async (db, req, res) => {
     await db.query(qry1, async function (error, collectionData1) {
         // console.log('collectionData1',collectionData1[0].id)
   
-    var qry = `Select uc.id as collection_id,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
+    var qry = `Select uc.id as collection_id,uc.contractName,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
     //console.log('qry', qry)
     await db.query(qry, async function (error, collectionData) {
         //console.log('wwww', collectionData);
