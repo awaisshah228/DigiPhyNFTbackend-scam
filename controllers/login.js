@@ -11,6 +11,8 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, password: config.password, database: config.database, port: config.mysqlPort });
 // now get a Promise wrapped instance of that pool
 const promisePool = pool.promise();
+var emailActivity = require('./emailActivity');
+
 // Login User
 
 
@@ -144,7 +146,7 @@ exports.login = async (db, req, res) => {
                                     "transaction_type_id": '16',
                                     "item_id": itemData[0].item_id,
                                     "item_edition_id": itemData[0].item_edition_id,
-                                    "blockchain_status":'0',
+                                    "blockchain_status": '0',
                                     "amount": itemData[0].price,
                                     "from_address": itemData[0].owner_address,
                                     "token": 0,
@@ -158,13 +160,13 @@ exports.login = async (db, req, res) => {
                                 console.log("transaction data", transaction);
                                 const [insertTrx,] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
                                 await promisePool.query(marketplaceQueries.updateAirdropNFT, [1, data[0].id, '', '', itemData[0].item_edition_id]);
-                                qry=`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
+                                qry = `INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
                                 await promisePool.query(qry);
                                 const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
                             }
                         }
                         /////////////////////////
-
+                        emailActivity.Activity(email, 'Login', `Login Successful, You are now login successfully`);
                         return res.status(200).send({
                             success: true,
                             msg: "Login Successfully",
@@ -315,7 +317,7 @@ exports.loginType = async (db, req, res) => {
                                 "transaction_type_id": '16',
                                 "item_id": itemData[0].item_id,
                                 "item_edition_id": itemData[0].item_edition_id,
-                                "blockchain_status":'0',
+                                "blockchain_status": '0',
                                 "amount": itemData[0].price,
                                 "from_address": itemData[0].owner_address,
                                 "token": 0,
@@ -329,7 +331,7 @@ exports.loginType = async (db, req, res) => {
                             console.log("transaction data", transaction);
                             const [insertTrx,] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
                             await promisePool.query(marketplaceQueries.updateAirdropNFT, [1, data[0].id, '', '', itemData[0].item_edition_id]);
-                            qry=`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
+                            qry = `INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id)VALUES(${insertTrx.insertId},${itemData[0].item_edition_id})`
                             await promisePool.query(qry);
                             const [updateAirdropClaimed, fields] = await promisePool.query(`UPDATE users SET airdrop_claimed=1 WHERE id=${data[0].id}`);
                         }

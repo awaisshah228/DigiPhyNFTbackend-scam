@@ -427,10 +427,6 @@ exports.forgot = async (db, req, res) => {
 
             }
             else if (results.length > 0) {
-
-
-
-
                 const Token = jwt.sign({
                     email: req.body.email
                 }, config.JWT_SECRET_KEY)
@@ -461,7 +457,108 @@ exports.forgot = async (db, req, res) => {
                     // from : "bilal.espsofttech@gmail.com",
                     to: `${email}`,
                     subject: 'Reset Password Link',
-                    html: `<div style="background-color:#f4f4f4">
+                    html: `
+                    <table cellspacing="0" cellpadding="0" width="100%" class="digiphyemail" >
+                    <tbody>
+                       <tr>
+                          <td style="padding:25px 35px">
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="logo.png" width="150" class="CToWUd" data-bit="iit"></a>
+                             <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
+                             <span style="margin-top:30px;width:100%;display:block;height:1px;background:center/cover no-repeat url(bgbtn.jpg)"></span>
+                          </td>
+                       </tr>
+                       <tr>
+                          <td style="padding:15px 36px" align="left">
+                             <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear  ${results[0].full_name},</p>
+                             <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">
+                             <h4>Please <a href='${config.mailUrl}resetpassword/${Token}'>click here </a>  to Reset  your Password</h4>
+                             
+                             
+                             </p>
+                          </td>
+                       </tr>
+                       <tr>
+                          <td style="padding:15px" align="center">
+                             <a href="#" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background:center/cover no-repeat url(bgsmall.jpg);border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+                          </td>
+                       </tr>
+                       <tr>
+                          <td style="padding:15px 36px" align="left">
+                             <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>TeamDigiphy</p>
+                          </td>
+                       </tr>
+                       <tr>
+                          <td style="padding:20px 15px" align="center">
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
+                             <img src="facebook.png" width="34" class="CToWUd" data-bit="iit">
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                             <img src="twitter.png" width="34" class="CToWUd" data-bit="iit">
+                             </a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                             <img src="instagram.png" width="34" class="CToWUd" data-bit="iit">
+                             </a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                             <img src="discord.png" width="34" class="CToWUd" data-bit="iit">
+                             </a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
+                             <img src="telegram.png" width="34" class="CToWUd" data-bit="iit">
+                             </a>
+                             </a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                             <img src="youtube.png" width="34" class="CToWUd" data-bit="iit">
+                             </a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
+                             <img src="medium.png" width="34" class="CToWUd" >
+                             </a>
+                          </td>
+                       </tr>
+                       <tr>
+                          <td style="background:#19132a;padding:15px" align="center">
+                             <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+                             <font color="#888888">
+                             </font>
+                          </td>
+                       </tr>
+                    </tbody>
+                 </table>
+                    `
+                };
+
+                transporter.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                            console.log(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                    }
+                });
+
+
+                return res.status(200).send({
+                    success: true,
+                    msg: "Check your email for a link to reset your password"
+                });
+
+            }
+            else {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Email Not in Database."
+
+                });
+            }
+
+
+        });
+    } catch (err) {
+        return res.status(500).send({
+            success: false,
+            msg: "user not registered due to internal error"
+        });
+    }
+}
+
+
+{/* <div style="background-color:#f4f4f4">
        <div>
           <div style="margin:0px auto;max-width:800px">
              <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%">
@@ -584,42 +681,7 @@ exports.forgot = async (db, req, res) => {
                       </font></td></tr></tbody></table><font color="#888888">
           </font></div><font color="#888888">
        </font></div><font color="#888888">
-    </font></div>`
-                };
-
-                transporter.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                            console.log(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                    }
-                });
-
-
-                return res.status(200).send({
-                    success: true,
-                    msg: "Check your email for a link to reset your password"
-                });
-
-            }
-            else {
-                return res.status(400).send({
-                    success: false,
-                    msg: "Email Not in Database."
-
-                });
-            }
-
-
-        });
-    } catch (err) {
-        return res.status(500).send({
-            success: false,
-            msg: "user not registered due to internal error"
-        });
-    }
-}
-
+    </font></div> */}
 
 
 exports.Resetpassword = async (db, req, res) => {
@@ -687,6 +749,8 @@ exports.Resetpassword = async (db, req, res) => {
 
 
             });
+            emailActivity.Activity(email, 'Password Changed', `Your password changed successfully, You can login now.`);
+
             return res.status(200).send({
                 success: true,
                 msg: "Your password changed successfully, You can login now."
@@ -857,7 +921,10 @@ exports.changePassword = async (db, req, res) => {
                             error
                         });
                     }
+
+                    emailActivity.Activity(email, 'Password Changed', `Your password changed successfully, You can login now.`);
                     if (result) {
+
                         return res.status(200).send({
                             success: true,
                             msg: "Password Changed Successfully"

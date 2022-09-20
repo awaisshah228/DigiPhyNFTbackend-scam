@@ -36,8 +36,8 @@ exports.Activity = async function (email, subject, text, link, image) {
             </tr>
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear ,</p>
-                  <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">We're delighted to have you on board. Digiphy is the "India's Most memorable NFT Marketplace".Digiphy engages Specialists to fabricate fan networks and empowers fans to assume a part to supercharge development of Craftsmen by purchasing NFTs and assist them with catching additional worth from their work. These NFTs allow the fans an opportunity to be essential for a selective local area with the Craftsman and get unique honors and procure royalty*, exceptional honors like early admittance to restrictive in the background content, meet-n-welcome open doors, behind the stage admittance to shows and so on to reinforce direct commitment and unwaveringness with fans.</p>
+                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear ,${email}</p>
+                  <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">${text}</p>
                </td>
             </tr>
             <tr>
