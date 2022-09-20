@@ -211,6 +211,10 @@ router.post('/resaleNFT',marketplace.resaleNFT.bind(this,db));
 
 
 
+
+
+
+
 router.post('/getQR',marketplace.getQR.bind(this,db));
 router.post('/twoAuthenticationVerify',marketplace.twoAuthenticationVerify.bind(this,db));
 router.post('/getCategoryById',marketplace.getCategoryById.bind(this,db));
