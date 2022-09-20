@@ -112,6 +112,9 @@ router.post('/updateFee', admin.updateFee.bind(this, db));
 router.post('/updateItemMarket', admin.updateItemMarket.bind(this, db));
 router.post('/updateItemAdmin', admin.updateItemAdmin.bind(this, db));
 
+router.post('/updatePlateformFee', admin.updatePlateformFee.bind(this, db));
+
+
 router.post('/deleteuser',admin.deleteUser.bind(this, db));
 router.get('/getadmincollection',admin.getAdminCollection.bind(this,db));
 router.post('/insertadminCollection', collectionImages, admin.insertadminCollection.bind(this, db));
@@ -138,6 +141,10 @@ router.post('/updateadminCollection',collectionImages,admin.updateadminCollectio
 // router.post('/addNftByadmin',addnftImage, admin.addNftByadmin.bind(this,db));
 router.post('/getBulkNFT', admin.getBulkNFT.bind(this, db));
 router.post('/getLocalImageHash', admin.getLocalImageHash.bind(this, db));
+
+router.post('/getWithdrawInr', admin.getWithdrawInr.bind(this, db));
+router.post('/getCoinTransferToUser', admin.getCoinTransferToUser.bind(this, db));
+router.post('/getWithdrawl', admin.getWithdrawl.bind(this, db));
 
 
 //==============Post Status API ===================================

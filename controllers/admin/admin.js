@@ -846,6 +846,7 @@ exports.getSettings = async (db, req, res) => {
                 royalty_percent: data[0].royalty_percent,
                 coin_value: data[0].coin_value,
                 maxcoinpercentage: data[0].maxcoinpercentage,
+                platform_fee : data[0].platform_fee
             });
         } else {
             res.status(400).send({
@@ -948,6 +949,42 @@ exports.updateFee = async (db, req, res) => {
         }
     });
 }
+
+
+
+exports.updatePlateformFee = async (db, req, res) => {
+
+    var email = req.body.email;
+
+    let platform_fee = req.body.platform_fee
+
+    let keys = {
+    
+        "platform_fee": platform_fee
+    }
+
+    db.query(adminQueries.updateWallet, [keys], function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+            res.status(200).send({
+                success: true,
+                msg: "Fee updated successfully",
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}
+
 
 
 
@@ -3423,4 +3460,113 @@ exports.transferToken = async (db, req, res) => {
             err
         });
     }
+}
+
+
+exports.getWithdrawInr = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getWithdrawInr,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}
+
+exports.getCoinTransferToUser = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getCoinTransferToUser,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
+}
+
+exports.getWithdrawl = async (db, req, res) => {
+
+    var user_id = req.body.user_id;
+    console.log("...",req.body.user_id);
+    if (!user_id) {
+        return res.status(400).send({
+            success: false,
+            msg: "user id required! "
+        });
+    }
+
+    db.query(adminQueries.getWithdrawl,[user_id], async function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "Error : Server not responding please try again later! ",
+                error
+            });
+        }
+        if (data) {
+  
+            res.status(200).send({
+                success: true,
+                msg: "Receive address updated successfully",
+            data: data,
+            
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data"
+            });
+        }
+    });
 }
