@@ -16,6 +16,7 @@ var speakeasy = require("speakeasy");
 const { Console } = require('console');
 const adminQueries = require('../services/adminQueries');
 const { json } = require('express');
+const  emailActivity = require('../controllers/emailActivity');
 
 function closeNFT(code) {
     try {
@@ -462,10 +463,10 @@ exports.forgot = async (db, req, res) => {
                     <tbody>
                        <tr>
                           <td style="padding:25px 35px">
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="logo.png" width="150" class="CToWUd" data-bit="iit"></a>
+                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="https://digiphynft.shop/images/email/logo.png" width="150" class="CToWUd" data-bit="iit"></a>
                              <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
-                             <span style="margin-top:30px;width:100%;display:block;height:1px;background:center/cover no-repeat url(bgbtn.jpg)"></span>
-                          </td>
+                             <span style="margin-top:30px;width:100%;display:block;height:1px;background-image: url('https://digiphynft.shop/images/email/bgbtn.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center;"></span>
+               </td>
                        </tr>
                        <tr>
                           <td style="padding:15px 36px" align="left">
@@ -488,31 +489,35 @@ exports.forgot = async (db, req, res) => {
                           </td>
                        </tr>
                        <tr>
-                          <td style="padding:20px 15px" align="center">
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
-                             <img src="facebook.png" width="34" class="CToWUd" data-bit="iit">
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                             <img src="twitter.png" width="34" class="CToWUd" data-bit="iit">
-                             </a>
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                             <img src="instagram.png" width="34" class="CToWUd" data-bit="iit">
-                             </a>
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                             <img src="discord.png" width="34" class="CToWUd" data-bit="iit">
-                             </a>
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank">
-                             <img src="telegram.png" width="34" class="CToWUd" data-bit="iit">
-                             </a>
-                             </a>
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                             <img src="youtube.png" width="34" class="CToWUd" data-bit="iit">
-                             </a>
-                             <a href="#" style="display:inline-block;margin:0 15px" target="_blank" >
-                             <img src="medium.png" width="34" class="CToWUd" >
-                             </a>
-                          </td>
-                       </tr>
-                       <tr>
+               <td style="padding:20px 15px" align="center">
+                  <a href="https://www.facebook.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank">
+                  <img src="https://digiphynft.shop/images/email/facebook.png" width="34" class="CToWUd" data-bit="iit">
+                  <a href="https://twitter.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <img src="https://digiphynft.shop/images/email/twitter.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  <a href="https://www.instagram.com/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <img src="https://digiphynft.shop/images/email/instagram.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  <a href="https://discord.com/invite/GuymFFY2NF" style="display:inline-block;margin:0 15px" target="_blank" >
+                  <img src="https://digiphynft.shop/images/email/discord.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  <a href="https://www.reddit.com/r/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank">
+                  <img src="https://digiphynft.shop/images/email/reddit.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  <a href="https://www.linkedin.com/company/DigiPhyNFT/" style="display:inline-block;margin:0 15px" target="_blank">
+                  <img src="https://digiphynft.shop/images/email/linkedin.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+                  
+                  
+                  
+                  </a>
+                  <a href="https://www.youtube.com/channel/UC878bT4K6sZqjqKarlZa8Qw
+                  " style="display:inline-block;margin:0 15px" target="_blank" >
+                  <img src="https://digiphynft.shop/images/email/youtube.png" width="34" class="CToWUd" data-bit="iit">
+                  </a>
+       
+               </td>
+            </tr> <tr>
                           <td style="background:#19132a;padding:15px" align="center">
                              <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
                              <font color="#888888">

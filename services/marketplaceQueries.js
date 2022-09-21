@@ -10,7 +10,7 @@ module.exports = {
     insertview :"insert into item_edition_view SET ?",
     
     insertBuyTransactionByItemId : "INSERT INTO transaction (gas_fee,user_id,item_id,item_edition_id,token,transaction_type_id,amount,status,user_address,blockchain_status)select ?,?,i.id,ie.id,?,?,? as price,1,?,0 from item_edition as ie left join item as i on i.id=ie.item_id where ie.id =?",
-    insertSellTransactionByItemId : "INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ?, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ? as price,'USD' AS currency,1,?,?,?  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=?",
+    insertSellTransactionByItemId : "INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ?,?, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ? as price,'USD' AS currency,1,?,?,?  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=?",
     insertRoyaltyTransactionByItemId : "INSERT INTO transaction (user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status) select i.created_by,i.id,ie.id as item_edition_id,8 as transaction_type_id,? as price,'USD' AS currency,1 as status from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=?",
 
     createFolder :"insert into bulk_nft_master SET ?",

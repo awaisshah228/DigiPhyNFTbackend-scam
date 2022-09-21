@@ -141,7 +141,7 @@ exports.getMetadataJson = async (db, req, res) => {
         "name": item[0].name,
         "description": item[0].description,
         "external_url": item[0].external_link,
-        "image": item[0].image,
+        "image": "https://digiphy.mypinata.cloud/ipfs/"+item[0].image,
         "attributes" : attributes
     })
 }
@@ -747,6 +747,11 @@ exports.insertUserCollection = async (db, req, res) => {
 
             }
             let deployhash = deployResposne.hash;
+            let is_approved =0;
+            if(user_id ==1){
+                is_approved =1
+            }
+
 
             var dataArr = {
                 "user_id": user_id,
@@ -765,7 +770,8 @@ exports.insertUserCollection = async (db, req, res) => {
                 "contractAddress": "",
                 "blockchainConfirmation": 0,
                 "contractName" :contractName,
-                "royalty_percent":royalty_percent
+                "royalty_percent":royalty_percent,
+                "is_approved" :is_approved
             }
 
             await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
@@ -958,20 +964,22 @@ exports.getUserItem = async (db, req, res) => {
     var user_collection_id = req.body.user_collection_id;
     var limit = req.body.limit;
     try {
-        var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+        //var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,concat('${config.mailUrl}backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
+
+        var qry = `select a.*,getUserUnsoldNFT(${user_id},a.item_id) as totalStock,getUnclaimedNFTCount(a.item_id,${user_id}) as unclaimedNFT,getRemainingForSale(a.item_id,${user_id}) as remainingForSale from (Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.datetime,concat('https://digiphynft.shop/backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from  item as it  left join item_edition as ie on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where it.created_by=${user_id}  and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id) and ie.owner_id=${user_id} GROUP BY it.id) as a where 1 `;
         
         if (user_id > 0) {
-            qry = qry + ` and it.created_by=${user_id}`;
+            qry = qry + ` and a.created_by=${user_id}`;
         }
 
         if (user_collection_id > 0) {
-            qry = qry + ` and cl.id=${user_collection_id}`;
+            qry = qry + ` and a.collection_id=${user_collection_id}`;
         }
         if (limit > 0) {
-            qry = qry + `  GROUP BY it.id order by ie.datetime desc limit ${limit}`;
+            qry = qry + `  GROUP BY a.item_id order by a.datetime desc limit ${limit}`;
         }
         else {
-            qry = qry + ` GROUP BY it.id order by ie.datetime desc `;
+            qry = qry + ` GROUP BY a.item_id order by a.datetime desc `;
         }
 
         //console.log('qry', qry);
@@ -2373,7 +2381,7 @@ exports.itemPurchase = async (db, req, res) => {
             amount=0;
         }
 
-        const gas_fee =0;
+        let gas_fee =0;
 
         if (sell_type === 'Price') {
             /// transactoin for sell product start
