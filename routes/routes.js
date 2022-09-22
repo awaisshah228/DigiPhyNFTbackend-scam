@@ -194,6 +194,9 @@ router.post('/test',marketplace.test.bind(this, db));
 
 router.post('/getjwttoken',marketplace.getJWTToken.bind(this, db));
 
+
+router.post('/checkeditionpurchase',marketplace.checkEdititonPurchase.bind(this, db));
+
 router.post('/itemdetail',marketplace.itemDetails.bind(this,db));
 router.post('/ItemDetailForEdit',marketplace.ItemDetailForEdit.bind(this,db));
 router.post('/deleteUserCollection',marketplace.deleteUserCollection.bind(this,db));

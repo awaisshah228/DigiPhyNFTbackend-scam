@@ -480,7 +480,8 @@ exports.forgot = async (db, req, res) => {
                        </tr>
                        <tr>
                           <td style="padding:15px" align="center">
-                             <a href="#" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background:center/cover no-repeat url(bgsmall.jpg);border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+                          <a href="https://digiphynft.com" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+           
                           </td>
                        </tr>
                        <tr>

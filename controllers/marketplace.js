@@ -2455,7 +2455,9 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
                 var platformFee = ((trx[0].price * purchased_quantity) * settingData[0].platform_fee / 100)
-                await db.query(marketplaceQueries.insertSellTransactionByItemId, [platformFee, gas_fee,saleAmount, user_address, settingData[0].commission_percent, trx[0].price * settingData[0].commission_percent / 100, item_edition_id], async function (error, selldata) {
+                var qry=`INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${ user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
+
+                await db.query(qry,async function (error, selldata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2543,11 +2545,11 @@ exports.itemPurchase = async (db, req, res) => {
 
                             /* end ownership change api */
                             /// SEND MAIL STARTS
-                            qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
+                            qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=i.owner_id where ie.id=${item_edition_id}`;
                             console.log(qry);
                             await db.query(qry, async function (error, mailData) {
-                                //console.log('mailData',mailData)
-                                await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                console.log('mailData',mailData)
+                                await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].bidderEmail} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                 await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
@@ -3881,6 +3883,36 @@ exports.insertView = async (db, req, res) => {
             res.status(400).send({
                 success: false,
                 msg: "Error in Insertion"
+            });
+        }
+    });
+}
+
+
+exports.checkEdititonPurchase = async (db, req, res) => {
+    console.log("in checkEdititonPurchase");
+   
+    var item_edition_id = req.body.item_edition_id;
+    
+
+    
+
+    await db.query(marketplaceQueries.checkEdititonPurchase, [item_edition_id], function (error, data) {
+        if (error) {
+            return res.status(400).send({
+                success: false,
+                msg: "error occured",
+                error
+            });
+        }
+        if (data.length > 0) {
+            res.status(200).send({
+                success: true
+            });
+        } else {
+            res.status(400).send({
+                success: false,
+                msg: "No Data Found"
             });
         }
     });

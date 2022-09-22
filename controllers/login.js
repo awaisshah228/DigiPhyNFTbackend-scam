@@ -60,10 +60,13 @@ exports.login = async (db, req, res) => {
                 });
             }
             else if (user[0].is_email_verify === 0) {
+                emailActivity.RegisterActivity(user[0].email,'Account Activation Link',user[0].user_name)
+
                 return res.status(400).send({
                     success: false,
-                    msg: "Please verify your Account"
+                    msg: "Email has been sent,Please verify your Account"
                 });
+               
             }
             else if (user[0].deactivate_account == 1) {
                 return res.status(400).send({
