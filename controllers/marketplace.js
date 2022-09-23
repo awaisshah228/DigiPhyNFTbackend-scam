@@ -1494,7 +1494,7 @@ exports.addNftByUser = async (db, req, res) => {
             "quantity": quantity,
             'token_id': tokenId,
             "productId": productId,
-            "local_image": recCompress.images[0],
+            "local_image":  image,//recCompress.images[0],
             "metadata": metadata,
             "external_link": external_link,
             "coin_percentage": coin_percentage,
@@ -2428,6 +2428,7 @@ exports.itemPurchase = async (db, req, res) => {
                 }
             }
 
+            let NFTTransferUser;
             await db.query(marketplaceQueries.itemdetail, [item_edition_id, 0, item_edition_id, item_edition_id], async function (error, trx) {
                 if (error) {
                     return res.status(400).send({
@@ -2437,6 +2438,43 @@ exports.itemPurchase = async (db, req, res) => {
                     });
                 }
 
+                // console.log('trx[0].isClaimed123')
+
+                // if(trx[0].isClaimed==1){
+
+                //     console.log('trx[0].isClaimed')
+
+                //     NFTTransferUser = await NFT.transfer({
+                //         account: from,
+                //         privateKey: fromprivate,
+                //         contractAddress: trx[0].contractAddress,
+                //         current_owner_address: trx[0].current_owner, //current owner
+                //         to_address: from, // new owner
+                //         tokenId: trx[0].token_id,
+                //         qty: purchased_quantity,
+                //         getFee: false,
+                //     });
+                // }
+                // if (!NFTTransferUser.success) {
+                //     return res.status(400).send({
+                //         success: false,
+                //         msg: NFTTransferUser.error,
+                //     });
+                // }
+                // if (NFTTransferUser.hash) {
+                //     var i =0;
+                //     while (i<trx.length){
+                //     await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                //         isMinted: 1,
+                //         isClaimed: 1,
+                //         hash: NFTTransferUser.hash,
+                //         current_owner: from, // new owner update
+                //     }, trx[i].id]);
+                //     i++;
+                // }
+        
+
+                
                 if (trx[0].is_resale === 0) {
                     var sellerPercent = 100-settingData[0].platform_fee;
                 }
