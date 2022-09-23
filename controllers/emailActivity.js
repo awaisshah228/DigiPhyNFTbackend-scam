@@ -153,7 +153,7 @@ exports.RegisterActivity = async function (email, subject, text) {
   </tr>
   <tr>
      <td style="padding:15px" align="center">
-     <a href='${config.mailUrl}verifyAccount/${Token}' style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >click here to activate your account</a>
+     <a href='${config.mailUrl}verifyAccount/${Token}' style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click here to activate your account</a>
      </td>
   </tr>
   <tr>

@@ -1378,22 +1378,22 @@ exports.addNftByUser = async (db, req, res) => {
     let approve_by_admin = req.body.approve_by_admin;
     let is_on_sale = req.body.is_on_sale
     // if(file_type==='image'){
-    let recCompress = await ipfsCompress.compressImages(["https://digiphy.mypinata.cloud/ipfs/" + image], file_type);
+    // let recCompress = await ipfsCompress.compressImages(["https://digiphy.mypinata.cloud/ipfs/" + image], file_type);
     //console.log(recCompress.images[0]);
     // return res.status(400).send({
     //     recCompress
     // })
-    if (recCompress.success == false) {
-        //console.log("compress false");
-        // return res.status(400).send({
-        //     success: false,
-        //     msg: "Image compress issue "
-        // });
-        var image_low = image;
-    } else {
-        //console.log("compressed")
-        var image_low = recCompress.imageHash[0];
-    }
+    // if (recCompress.success == false) {
+    //     //console.log("compress false");
+    //     // return res.status(400).send({
+    //     //     success: false,
+    //     //     msg: "Image compress issue "
+    //     // });
+    //     var image_low = image;
+    // } else {
+    //     //console.log("compressed")
+    //     var image_low = recCompress.imageHash[0];
+    // }
 
 
     //  return res.json({
@@ -1480,7 +1480,7 @@ exports.addNftByUser = async (db, req, res) => {
         var users = {
             "name": name,
             "description": description,
-            "image": image_low,
+            "image": image,
             "image_original": image,
             "file_type": file_type,
             "item_category_id": item_category_id,
@@ -1597,7 +1597,7 @@ exports.addNftByUser = async (db, req, res) => {
                             let qry = `select * from users where id =${user_id}`;
 
                             await db.query(qry, async function (error, mailData) {
-                                emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for $${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
+                                emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for INR ${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
 
                             });
                             /// SEND MAIL ENDS    
@@ -1861,6 +1861,7 @@ exports.bidAccept = async (db, req, res) => {
                 var apiData2 = await openNFT(settingData[0].public_key);
 
                 var from = apiData2;
+                let gas_fee ;
                 var fromprivate = apiData;
                 const [editionResult,] = await promisePool.query(`SELECT isMinted from item_edition WHERE isMinted = 0 AND id = ?`, [item_edition_id]);
                 const [editionResultOfItem,] = await promisePool.query(`SELECT count(id) as qty from item_edition WHERE isMinted = 0 AND item_id = ?`, [item_id]);
@@ -1868,7 +1869,7 @@ exports.bidAccept = async (db, req, res) => {
                     const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
                     if (collectiosResult.length > 0) {
                        
-                        const gas_fee= await NFT.mint({
+                         gas_fee= await NFT.mint({
                             account: from,
                             privateKey: fromprivate,
                             contractAddress: collectiosResult[0].contractAddress,
@@ -1975,9 +1976,9 @@ exports.bidAccept = async (db, req, res) => {
 
                                         console.log('qry',qry)
                                         await db.query(qry, async function (error, mailData) {
-                                            emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                            emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of INR ${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                            emailActivity.Activity(mailData[0].bidderEmail, 'Bid Accepted', `Your bid has been accepted for $${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                            emailActivity.Activity(mailData[0].bidderEmail, 'Bid Accepted', `Your bid has been accepted for INR ${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                         });
                                         /// SEND MAIL ENDS    
 
@@ -2490,6 +2491,7 @@ exports.itemPurchase = async (db, req, res) => {
                     ttype=14;
                 }
                 await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, parseFloat(token) * -1,ttype,parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
+                  console.log('error 2494',error)
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2649,12 +2651,12 @@ exports.itemPurchase = async (db, req, res) => {
                                         });
                                     }
                                     /// SEND MAIL STARTS
-                                    qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ie.id=${item_edition_id}`;
+                                    qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=i.owner_id where ie.id=${item_edition_id}`;
                                     //console.log(qry);
                                     await db.query(qry, async function (error, mailData) {
-                                        emailActivity.Activity(mailData[0].ownerEmail, 'Bid Placed', `Bid Placed on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                        emailActivity.Activity(mailData[0].ownerEmail, 'Bid Placed', `Bid Placed on  ${mailData[0].name} for  INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                        emailActivity.Activity(mailData[0].bidderEmail, 'Bid Placed', `You have placed bid on  ${mailData[0].name} for $${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                        emailActivity.Activity(mailData[0].bidderEmail, 'Bid Placed', `You have placed bid on  ${mailData[0].name} for INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                     });
                                     /// SEND MAIL ENDS
                                 });
@@ -2870,11 +2872,11 @@ exports.rejectBid = async (db, req, res) => {
         }
         if (data) {
             /// SEND MAIL STARTS
-            qry = `select i.name,i.description,ieb.bid_price,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail from item_edition_bid as ieb left join item_edition  as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
+            qry = `select i.name,i.description,ieb.bid_price,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail from item_edition_bid as ieb left join item_edition  as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=i.owner_id where ieb.id=${bid_id}`;
             //console.log(qry);
             await db.query(qry, async function (error, mailData) {
-                emailActivity.Activity(mailData[0].ownerEmail, 'Bid Cancelled', `Bid Cancelled on  ${mailData[0].name} for $${mailData[0].bid_price}.`, `salehistory`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
-                emailActivity.Activity(mailData[0].bidderEmail, 'You have cancelled a bid', `You have cancelled bid ${mailData[0].name} for $${mailData[0].bid_price}.`, `yourpurchase`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                emailActivity.Activity(mailData[0].ownerEmail, 'Bid Cancelled', `Bid Cancelled on  ${mailData[0].name} for INR ${mailData[0].bid_price}.`, `salehistory`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                emailActivity.Activity(mailData[0].bidderEmail, 'You have cancelled a bid', `You have cancelled bid ${mailData[0].name} for INR ${mailData[0].bid_price}.`, `yourpurchase`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
             });
             /// SEND MAIL ENDS    
             return res.status(200).send({
