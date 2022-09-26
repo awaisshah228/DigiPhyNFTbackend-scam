@@ -21,6 +21,7 @@ const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, passw
 // now get a Promise wrapped instance of that pool
 const promisePool = pool.promise();
 const erc20 = require('../web3/erc20.js');
+const  emailActivity = require('../emailActivity');
 
 
 
@@ -3317,13 +3318,16 @@ exports.transferList = async (db, req, res) => {
     const [transferList, fields] = await promisePool.query(`select * from transfer_list where status=0`);
 
     while (i < transferList.length) {
-        //console.log("value of i", i);
+        console.log("value of i", i,transferList[i].email);
         const [data,] = await promisePool.query(marketplaceQueries.checkUser, [transferList[i].email]);
-
+        if (data.length > 0) {
+            var userid=data[0].id;
+         }
 
         if (data.length == 0) {
-           // console.log("data.length : ", data.length)
-
+           var qry=`INSERT INTO users(email,password,is_email_verify) values('${transferList[i].email}','1234',0)`;
+           const [addUser,] = await promisePool.query(qry);
+           var userid=addUser.insertId;
         }
         else {
             const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, [transferList[i].productId, transferList[i].productId, transferList[i].collectionName]);
@@ -3334,7 +3338,7 @@ exports.transferList = async (db, req, res) => {
             } else {
 
                 var transaction = {
-                    "user_id": data[0].id,
+                    "user_id": userid,
                     "transaction_type_id": '14',
                     "item_id": itemData[0].item_id,
                     "item_edition_id": itemData[0].item_edition_id,
@@ -3349,14 +3353,15 @@ exports.transferList = async (db, req, res) => {
                     "currency": 'DigiPhyNFT',
                     "status": 1,
                 }
-              //  console.log("transaction data", transaction);
+                console.log("transaction data", transaction);
               const [trxData, fields1] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
 
-                await promisePool.query(marketplaceQueries.updateSold2, [1, data[0].id, '', data[0].address, itemData[0].item_edition_id]);
+                await promisePool.query(marketplaceQueries.updateSold2, [1, userid, '', data[0].address, itemData[0].item_edition_id]);
                 const [updateTransferList, fields] = await promisePool.query(`UPDATE transfer_list SET status=1,item_edition_id= ${itemData[0].item_edition_id} WHERE id=${transferList[i].id}`);
                 const [trxEditionPurchase, fields3] = await promisePool.query(`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id) values(${trxData.insertId}, ${itemData[0].item_edition_id})`);
 
-              //  console.log("List data inserted successfully!!")
+              //  console.log("List data inserted successfully!!");
+              emailActivity.Activity(transferList[i].email, 'NFT received', `You have received a NFT from marketplace.digiphynft.com, please login to claim your NFT., https://marketplace.digiphynft.com`);
 
             }
         }

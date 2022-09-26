@@ -225,7 +225,7 @@ exports.loginType = async (db, req, res) => {
                 });
 
             } else if (results.length > 0) {
-                // console.log(results)
+                console.log(results)
                 if (email === results[0].email) {
                     if (type == 'signup') {
                         return res.status(200).send({
@@ -304,10 +304,11 @@ exports.loginType = async (db, req, res) => {
                     "is_subscribed": is_subscribed,
                     "login_type": login_type
                 }
-                db.query(authQueries.insertUserData, users, async function (error, result) {
-
+                console.log('users',users)
+                db.query(authQueries.insertUserData, users, async function (error, data) {
+                    console.log('data[0]',data[0],data)
                     //////////////// NFT AIRDROP START
-                    if (data[0].airdrop_claimed == 0) {
+                    if (data[0]?.airdrop_claimed == 0) {
                         const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, ['Itsuki0001', 'Itsuki0001', 'KDCRAFT_v2']);
                         console.log("itemData-> ", itemData);
                         if (itemData.length == 0) {

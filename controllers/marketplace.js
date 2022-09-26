@@ -109,40 +109,40 @@ exports.test = async (db, req, res) => {
 
 
 exports.getMetadataJson = async (db, req, res) => {
-    let id =req.params.id;
-    if(!id){
+    let id = req.params.id;
+    if (!id) {
         return res.json({
-            name : "#"+id,
+            name: "#" + id,
             image: "NO IMAGE",
             description: "NO DESCRIPTION",
         });
     }
 
-    const [item,] = await promisePool.query("SELECT id, image, name, description, external_link FROM `item` WHERE token_id = ?",[id]);
-    if(item.length  == 0){
+    const [item,] = await promisePool.query("SELECT id, image, name, description, external_link FROM `item` WHERE token_id = ?", [id]);
+    if (item.length == 0) {
         return res.json({
-            name : "#"+id,
+            name: "#" + id,
             image: "NO IMAGE",
             description: "NO DESCRIPTION",
         });
     }
     const attributes = [];
-    const [itemAttr,] = await promisePool.query("SELECT * FROM `item_properties` WHERE item_id = ?",[item[0].id]);
-    if(itemAttr.length > 0){
-        for(let i=0; i < itemAttr.length; i++){
+    const [itemAttr,] = await promisePool.query("SELECT * FROM `item_properties` WHERE item_id = ?", [item[0].id]);
+    if (itemAttr.length > 0) {
+        for (let i = 0; i < itemAttr.length; i++) {
             let newAttr = {
-                "trait_type" : itemAttr[i].type,
-                "value" : itemAttr[i].value,
+                "trait_type": itemAttr[i].type,
+                "value": itemAttr[i].value,
             }
             attributes.push(newAttr);
         }
     }
-    return  res.json({
+    return res.json({
         "name": item[0].name,
         "description": item[0].description,
         "external_url": item[0].external_link,
-        "image": "https://digiphy.mypinata.cloud/ipfs/"+item[0].image,
-        "attributes" : attributes
+        "image": "https://digiphy.mypinata.cloud/ipfs/" + item[0].image,
+        "attributes": attributes
     })
 }
 
@@ -747,9 +747,9 @@ exports.insertUserCollection = async (db, req, res) => {
 
             }
             let deployhash = deployResposne.hash;
-            let is_approved =0;
-            if(user_id ==1){
-                is_approved =1
+            let is_approved = 0;
+            if (user_id == 1) {
+                is_approved = 1
             }
 
 
@@ -769,9 +769,9 @@ exports.insertUserCollection = async (db, req, res) => {
                 "contractOwner": ownerAddress,
                 "contractAddress": "",
                 "blockchainConfirmation": 0,
-                "contractName" :contractName,
-                "royalty_percent":royalty_percent,
-                "is_approved" :is_approved
+                "contractName": contractName,
+                "royalty_percent": royalty_percent,
+                "is_approved": is_approved
             }
 
             await db.query(marketplaceQueries.insertUserCollection, [dataArr], function (error, data) {
@@ -844,7 +844,7 @@ exports.getUserCollection = async (db, req, res) => {
 exports.getUserOwnerItem = async (db, req, res) => {
     console.log("in getUserCollection owner");
     var user_id = req.body.user_id;
-    await db.query(marketplaceQueries.getUserOwnerItem, [user_id,user_id], function (error, data) {
+    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -967,7 +967,7 @@ exports.getUserItem = async (db, req, res) => {
         //var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,concat('${config.mailUrl}backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
 
         var qry = `select a.*,getUserUnsoldNFT(${user_id},a.item_id) as totalStock,getUnclaimedNFTCount(a.item_id,${user_id}) as unclaimedNFT,getRemainingForSale(a.item_id,${user_id}) as remainingForSale from (Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.datetime,concat('https://digiphynft.shop/backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from  item as it  left join item_edition as ie on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where it.created_by=${user_id}  and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id) and ie.owner_id=${user_id} GROUP BY it.id) as a where 1 `;
-        
+
         if (user_id > 0) {
             qry = qry + ` and a.created_by=${user_id}`;
         }
@@ -1439,8 +1439,8 @@ exports.addNftByUser = async (db, req, res) => {
         });
     }
 
-    
-    await db.query(marketplaceQueries.IsApprovedUserCollection,[user_collection_id],async function (error, checkId) {
+
+    await db.query(marketplaceQueries.IsApprovedUserCollection, [user_collection_id], async function (error, checkId) {
         if (error) {
 
             return res.status(400).send({
@@ -1450,7 +1450,7 @@ exports.addNftByUser = async (db, req, res) => {
             });
         }
 
-        if (checkId[0].is_approved ==0) {
+        if (checkId[0].is_approved == 0) {
 
             return res.status(400).send({
                 success: false,
@@ -1458,132 +1458,121 @@ exports.addNftByUser = async (db, req, res) => {
                 error
             });
         }
-    await db.query(adminQueries.getCollectionRoyaltyPercent,[user_collection_id],async function (error, collectionRoyalty) {
-        if (error) {
-
-            return res.status(400).send({
-                success: false,
-                msg: "error occured in item insert",
-                error
-            });
-        }
-
-    await db.query(adminQueries.getSettings, async function (error, commissionPercent) {
-        if (error) {
-
-            return res.status(400).send({
-                success: false,
-                msg: "error occured in item insert",
-                error
-            });
-        }
-        var users = {
-            "name": name,
-            "description": description,
-            "image": image,
-            "image_original": image,
-            "file_type": file_type,
-            "item_category_id": item_category_id,
-            "user_collection_id": user_collection_id,
-            "start_date": start_date,
-            "price": price,
-            "owner_id": user_id,
-            "created_by": user_id,
-            "sell_type": sell_type,
-            "expiry_date": expiry_date,
-            "quantity": quantity,
-            'token_id': tokenId,
-            "productId": productId,
-            "local_image":  image,//recCompress.images[0],
-            "metadata": metadata,
-            "external_link": external_link,
-            "coin_percentage": coin_percentage,
-            "unlockable_content": unlockable_content,
-            "nft_type": nft_type,
-            "address": user_address,
-
-            "royalty_percent": collectionRoyalty[0].royalty_percent,
-            "commission_percent": commissionPercent[0].commission_percent,
-            "approve_by_admin": approve_by_admin,
-            "is_on_sale": is_on_sale
-
-        }
-
-        await db.query(marketplaceQueries.insertItem, [users], async function (error, data) {
+        await db.query(adminQueries.getCollectionRoyaltyPercent, [user_collection_id], async function (error, collectionRoyalty) {
             if (error) {
+
                 return res.status(400).send({
                     success: false,
                     msg: "error occured in item insert",
-                    errors: error
+                    error
                 });
             }
 
-            var transactionData = {
-                "item_id": data.insertId
-            }
-            await db.query(marketplaceQueries.updateTransaction, [transactionData, transaction_id]);
+            await db.query(adminQueries.getSettings, async function (error, commissionPercent) {
+                if (error) {
 
+                    return res.status(400).send({
+                        success: false,
+                        msg: "error occured in item insert",
+                        error
+                    });
+                }
+                var users = {
+                    "name": name,
+                    "description": description,
+                    "image": image,
+                    "image_original": image,
+                    "file_type": file_type,
+                    "item_category_id": item_category_id,
+                    "user_collection_id": user_collection_id,
+                    "start_date": start_date,
+                    "price": price,
+                    "owner_id": user_id,
+                    "created_by": user_id,
+                    "sell_type": sell_type,
+                    "expiry_date": expiry_date,
+                    "quantity": quantity,
+                    'token_id': tokenId,
+                    "productId": productId,
+                    "local_image": image,//recCompress.images[0],
+                    "metadata": metadata,
+                    "external_link": external_link,
+                    "coin_percentage": coin_percentage,
+                    "unlockable_content": unlockable_content,
+                    "nft_type": nft_type,
+                    "address": user_address,
 
-            await db.query(marketplaceQueries.updateItem, [{
-                "token_id": data.insertId
-            }, data.insertId]);
+                    "royalty_percent": collectionRoyalty[0].royalty_percent,
+                    "commission_percent": commissionPercent[0].commission_percent,
+                    "approve_by_admin": approve_by_admin,
+                    "is_on_sale": is_on_sale
 
-
-
-
-            try {
-
-
-                /*-------------------------------------------------------------------------------------*/
-
-                if (attributes.length > 0) {
-                    for (var i = 0; i < attributes.length; i++) {
-                        var array = {
-                            'item_id': data.insertId,
-                            'type': attributes[i].type,
-                            'value': attributes[i].value
-                        }
-                        await db.query(marketplaceQueries.insertItemAttr, [array])
-                    }
                 }
 
-
-                /*  -----------------------------------Insertinto Edition */
-
-                for (var i = 1; i <= quantity; i++) {
-
-
-                    var item_ed = {
-                        "edition_text": `${i} of ${quantity}`,
-                        "edition_no": i,
-                        "item_id": data.insertId,
-                        "is_sold": 0,
-                        "owner_id": user_id,
-                        "user_collection_id": user_collection_id,
-                        "start_date": start_date,
-                        "end_date": end_date,
-                        "expiry_date": expiry_date,
-                        "user_address": user_address,
-                        "price": price,
-                        "ip": null,
-                        "datetime": new Date()
-                    };
-
-                    await db.query(marketplaceQueries.insertEdition, [item_ed])
-                }
-                /* ---------------------------------------------------------- */
-                await db.query(marketplaceQueries.getItemEdition, [data.insertId], async function (error, iedata) {
+                await db.query(marketplaceQueries.insertItem, [users], async function (error, data) {
                     if (error) {
-
                         return res.status(400).send({
                             success: false,
                             msg: "error occured in item insert",
-                            error
+                            errors: error
                         });
                     }
 
-                    if (data) {
-                        await db.query(marketplaceQueries.getWalletDetail, [user_id], async function (error, walletData) {
+                    var transactionData = {
+                        "item_id": data.insertId
+                    }
+                    await db.query(marketplaceQueries.updateTransaction, [transactionData, transaction_id]);
+
+
+                    await db.query(marketplaceQueries.updateItem, [{
+                        "token_id": data.insertId
+                    }, data.insertId]);
+
+
+
+
+                    try {
+
+
+                        /*-------------------------------------------------------------------------------------*/
+
+                        if (attributes.length > 0) {
+                            for (var i = 0; i < attributes.length; i++) {
+                                var array = {
+                                    'item_id': data.insertId,
+                                    'type': attributes[i].type,
+                                    'value': attributes[i].value
+                                }
+                                await db.query(marketplaceQueries.insertItemAttr, [array])
+                            }
+                        }
+
+
+                        /*  -----------------------------------Insertinto Edition */
+
+                        for (var i = 1; i <= quantity; i++) {
+
+
+                            var item_ed = {
+                                "edition_text": `${i} of ${quantity}`,
+                                "edition_no": i,
+                                "item_id": data.insertId,
+                                "is_sold": 0,
+                                "owner_id": user_id,
+                                "user_collection_id": user_collection_id,
+                                "start_date": start_date,
+                                "end_date": end_date,
+                                "expiry_date": expiry_date,
+                                "user_address": user_address,
+                                "price": price,
+                                "ip": null,
+                                "datetime": new Date()
+                            };
+
+                            await db.query(marketplaceQueries.insertEdition, [item_ed])
+                        }
+                        /* ---------------------------------------------------------- */
+                        await db.query(marketplaceQueries.getItemEdition, [data.insertId], async function (error, iedata) {
                             if (error) {
 
                                 return res.status(400).send({
@@ -1593,43 +1582,54 @@ exports.addNftByUser = async (db, req, res) => {
                                 });
                             }
 
-                            /// SEND MAIL STARTS
-                            let qry = `select * from users where id =${user_id}`;
+                            if (data) {
+                                await db.query(marketplaceQueries.getWalletDetail, [user_id], async function (error, walletData) {
+                                    if (error) {
 
-                            await db.query(qry, async function (error, mailData) {
-                                emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for INR ${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
+                                        return res.status(400).send({
+                                            success: false,
+                                            msg: "error occured in item insert",
+                                            error
+                                        });
+                                    }
 
-                            });
-                            /// SEND MAIL ENDS    
-                            res.status(200).send({
-                                success: true,
-                                msg: "Item Inserted Successfully",
-                                item_edition_id: iedata[0].id,
-                                item_id: data.insertId
-                            });
+                                    /// SEND MAIL STARTS
+                                    let qry = `select * from users where id =${user_id}`;
+
+                                    await db.query(qry, async function (error, mailData) {
+                                        emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for INR ${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
+
+                                    });
+                                    /// SEND MAIL ENDS    
+                                    res.status(200).send({
+                                        success: true,
+                                        msg: "Item Inserted Successfully",
+                                        item_edition_id: iedata[0].id,
+                                        item_id: data.insertId
+                                    });
+                                });
+
+                            } else {
+                                res.status(400).send({
+                                    success: false,
+                                    msg: "Something Wrong due to internal Error"
+                                });
+                            }
                         });
 
-                    } else {
-                        res.status(400).send({
+
+                    } catch (e) {
+                        return res.status(400).send({
                             success: false,
-                            msg: "Something Wrong due to internal Error"
+                            e
                         });
                     }
+
+
                 });
-                
-
-            } catch (e) {
-                return res.status(400).send({
-                    success: false,
-                    e
-                });
-            }
-
-
+            });
         });
     });
-});
-});
 
 }
 
@@ -1861,15 +1861,15 @@ exports.bidAccept = async (db, req, res) => {
                 var apiData2 = await openNFT(settingData[0].public_key);
 
                 var from = apiData2;
-                let gas_fee ;
+                let gas_fee;
                 var fromprivate = apiData;
                 const [editionResult,] = await promisePool.query(`SELECT isMinted from item_edition WHERE isMinted = 0 AND id = ?`, [item_edition_id]);
                 const [editionResultOfItem,] = await promisePool.query(`SELECT count(id) as qty from item_edition WHERE isMinted = 0 AND item_id = ?`, [item_id]);
                 if (editionResult.length > 0) {
                     const [collectiosResult,] = await promisePool.query(`SELECT contractAddress, i.token_id  from user_collection as uc INNER JOIN item as i ON uc.id=i.user_collection_id WHERE i.id = ? AND uc.contractAddress is not null`, [item_id]);
                     if (collectiosResult.length > 0) {
-                       
-                         gas_fee= await NFT.mint({
+
+                        gas_fee = await NFT.mint({
                             account: from,
                             privateKey: fromprivate,
                             contractAddress: collectiosResult[0].contractAddress,
@@ -1974,7 +1974,7 @@ exports.bidAccept = async (db, req, res) => {
                                         /// SEND MAIL STARTS
                                         qry = `select i.name,i.description,i.image,getUserFullName(ieb.user_id) as bidderName,getUserEmail(${user_id}) as ownerEmail,getUserEmail(ieb.user_id) as bidderEmail,ieb.bid_price from item_edition_bid as ieb left join item_edition as ie on ie.id=ieb.item_edition_id left join item as i on i.id=ie.item_id left join users as u on u.id=ie.owner_id where ieb.id=${bid_id}`;
 
-                                        console.log('qry',qry)
+                                        console.log('qry', qry)
                                         await db.query(qry, async function (error, mailData) {
                                             emailActivity.Activity(mailData[0].ownerEmail, `Bid Accepted`, `You have accepted bid of INR ${mailData[0].bid_price} for ${mailData[0].name}.`, `nftdetail/${data1[0].item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
@@ -2231,7 +2231,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
     let item_id = req.body.item_id;
     let item_edition_id = req.body.item_edition_id;
     let claimQuantity = req.body.claimQuantity;
-    
+
     if (!new_owner_address) {
         return res.status(400).send({
             success: false,
@@ -2245,12 +2245,12 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
 
     var from = apiData2;
     var fromprivate = apiData;
-    const [editionResult,] = await promisePool.query(`SELECT * from item_edition WHERE item_id = ? and owner_id=? and isClaimed=0 limit ?`, [item_id,user_id,parseInt(claimQuantity)]);
+    const [editionResult,] = await promisePool.query(`SELECT * from item_edition WHERE item_id = ? and owner_id=? and isClaimed=0 limit ?`, [item_id, user_id, parseInt(claimQuantity)]);
 
     if (editionResult.length < claimQuantity) {
         return res.status(400).send({
             success: false,
-            msg: "Item Edition : You have only "+ editionResult.length + " NFTs available for claim!",
+            msg: "Item Edition : You have only " + editionResult.length + " NFTs available for claim!",
         });
     }
 
@@ -2260,7 +2260,7 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
         let mintRes;
         let gas_fee;
         if (editionResult[0].isMinted == 0) {
-            
+
             gas_fee = await NFT.mint({
                 account: from,
                 privateKey: fromprivate,
@@ -2310,22 +2310,22 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             });
         }
         if (mintRes.hash) {
-            var i =0;
-            while (i<editionResult.length){
-            await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
-                isMinted: 1,
-                isClaimed: 1,
-                hash: mintRes.hash,
-                current_owner: new_owner_address, // new owner update
-            }, editionResult[i].id]);
-            i++;
-        }
+            var i = 0;
+            while (i < editionResult.length) {
+                await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                    isMinted: 1,
+                    isClaimed: 1,
+                    hash: mintRes.hash,
+                    current_owner: new_owner_address, // new owner update
+                }, editionResult[i].id]);
+                i++;
+            }
 
             let data = {
                 from_address: from,
                 to_address: new_owner_address,
                 hash: mintRes.hash,
-                gas_fee : gas_fee,
+                gas_fee: gas_fee,
                 blockchain_status: 1
             }
 
@@ -2361,7 +2361,7 @@ exports.itemPurchase = async (db, req, res) => {
     var item_id = req.body.item_id
     var item_edition_id = req.body.item_edition_id
     var sell_type = req.body.sell_type
-    var user_address = req.body.user_address ;
+    var user_address = req.body.user_address;
     var purchased_quantity = req.body.purchased_quantity;
     var royalty_percent = req.body.royalty_percent;
     var token_owner_address = req.body.token_owner_address
@@ -2372,17 +2372,17 @@ exports.itemPurchase = async (db, req, res) => {
 
     try {
 
-        if(!user_address){
-            user_address=null;
+        if (!user_address) {
+            user_address = null;
         }
-        if(!token_owner_address){
-            token_owner_address=null
+        if (!token_owner_address) {
+            token_owner_address = null
         }
-        if(!amount){
-            amount=0;
+        if (!amount) {
+            amount = 0;
         }
 
-        let gas_fee =0;
+        let gas_fee = 0;
 
         if (sell_type === 'Price') {
             /// transactoin for sell product start
@@ -2409,7 +2409,7 @@ exports.itemPurchase = async (db, req, res) => {
                         getFee: false,
                     });
 
-                     gas_fee = await NFT.mint({
+                    gas_fee = await NFT.mint({
                         account: from,
                         privateKey: fromprivate,
                         contractAddress: collectiosResult[0].contractAddress,
@@ -2438,48 +2438,54 @@ exports.itemPurchase = async (db, req, res) => {
                     });
                 }
 
-                // console.log('trx[0].isClaimed123')
+                if (trx.length == 0) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "Item Edition Invalid",
+                    });
+                }
 
-                // if(trx[0].isClaimed==1){
 
-                //     console.log('trx[0].isClaimed')
+                if (trx[0].isClaimed == 1) {
 
-                //     NFTTransferUser = await NFT.transfer({
-                //         account: from,
-                //         privateKey: fromprivate,
-                //         contractAddress: trx[0].contractAddress,
-                //         current_owner_address: trx[0].current_owner, //current owner
-                //         to_address: from, // new owner
-                //         tokenId: trx[0].token_id,
-                //         qty: purchased_quantity,
-                //         getFee: false,
-                //     });
-                // }
-                // if (!NFTTransferUser.success) {
-                //     return res.status(400).send({
-                //         success: false,
-                //         msg: NFTTransferUser.error,
-                //     });
-                // }
-                // if (NFTTransferUser.hash) {
-                //     var i =0;
-                //     while (i<trx.length){
-                //     await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
-                //         isMinted: 1,
-                //         isClaimed: 1,
-                //         hash: NFTTransferUser.hash,
-                //         current_owner: from, // new owner update
-                //     }, trx[i].id]);
-                //     i++;
-                // }
-        
+                    const [editionList] = await promisePool.query("SELECT * FROM `item_edition` where item_id= ? and owner_id= ? order by id limit ?",[trx[0].item_id, trx[0].owner_id, purchased_quantity]);
+                    console.log("editionList", editionList)
 
-                
+                    NFTTransferUser = await NFT.transfer({
+                        account: from,
+                        privateKey: fromprivate,
+                        contractAddress: trx[0].contractAddress,
+                        current_owner_address: trx[0].current_owner, //current owner
+                        to_address: from, // new owner
+                        tokenId: trx[0].token_id,
+                        qty: purchased_quantity,
+                        getFee: false,
+                    });
+
+                    if (!NFTTransferUser.success) {
+                        return res.status(400).send({
+                            success: false,
+                            msg: NFTTransferUser.error,
+                        });
+                    }
+                    console.log("NFTTransferUser",NFTTransferUser)
+                    if (NFTTransferUser.hash) {
+                        var i = 0;
+                        while (i < editionList.length) {
+                            await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
+                                isClaimed: 0,
+                                current_owner : from,
+                                hash: NFTTransferUser.hash
+                            },editionList[i].id ]);
+                        }
+                    }
+                }
+
                 if (trx[0].is_resale === 0) {
-                    var sellerPercent = 100-settingData[0].platform_fee;
+                    var sellerPercent = 100 - settingData[0].platform_fee;
                 }
                 else {
-                    var sellerPercent = 100 - trx[0].royalty_percent-settingData[0].platform_fee;
+                    var sellerPercent = 100 - trx[0].royalty_percent - settingData[0].platform_fee;
                     ///////// INSERT ROYALTY TRX
                     //console.log("insert royalty trx", trx[0].price, purchased_quantity, sellerPercent);
                     await db.query(marketplaceQueries.insertRoyaltyTransactionByItemId, [trx[0].price * purchased_quantity * trx[0].royalty_percent / 100, trx[0].item_edition_id], async function (error, selldata) {
@@ -2494,9 +2500,9 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
                 var platformFee = ((trx[0].price * purchased_quantity) * settingData[0].platform_fee / 100)
-                var qry=`INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${ user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
+                var qry = `INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
 
-                await db.query(qry,async function (error, selldata) {
+                await db.query(qry, async function (error, selldata) {
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2514,7 +2520,7 @@ exports.itemPurchase = async (db, req, res) => {
                         "amount": 0,
                         "from_address": user_address,
                         "to_address": token_owner_address,
-                        "isClaimed":isClaimed,
+                        "isClaimed": isClaimed,
                         "token": token,
                         "payment_currency": 0,
                         "payment_currency_amount": 0,
@@ -2524,12 +2530,12 @@ exports.itemPurchase = async (db, req, res) => {
 
                     await db.query(marketplaceQueries.insertTransaction, [trx2])
                 }
-                var ttype=6;
-                if(transferNft==1){
-                    ttype=14;
+                var ttype = 6;
+                if (transferNft == 1) {
+                    ttype = 14;
                 }
-                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, parseFloat(token) * -1,ttype,parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
-                  console.log('error 2494',error)
+                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, parseFloat(token) * -1, ttype, parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
+                    console.log('error 2494', error)
                     if (error) {
                         return res.status(400).send({
                             success: false,
@@ -2588,7 +2594,7 @@ exports.itemPurchase = async (db, req, res) => {
                             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=i.owner_id where ie.id=${item_edition_id}`;
                             console.log(qry);
                             await db.query(qry, async function (error, mailData) {
-                                console.log('mailData',mailData)
+                                console.log('mailData', mailData)
                                 await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].bidderEmail} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                 await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
@@ -2604,6 +2610,7 @@ exports.itemPurchase = async (db, req, res) => {
                     });
                 });
             });
+
 
 
 
@@ -2663,7 +2670,7 @@ exports.itemPurchase = async (db, req, res) => {
                     }
                     else {
 
-                        console.log('trxdata.insertId',gas_fee,trxdata.insertId)
+                        console.log('trxdata.insertId', gas_fee, trxdata.insertId)
                         await db.query(marketplaceQueries.insertBidTransactionByItemId, [trxdata.insertId], async function (error, dataId) {
                             if (error) {
                                 return res.status(400).send({
@@ -2722,7 +2729,7 @@ exports.itemPurchase = async (db, req, res) => {
         return res.status(400).send({
             success: false,
             msg: "Unexpected internal error!!",
-            error :err
+            error: err
         });
     }
 }
@@ -3033,7 +3040,7 @@ exports.userWithdraw = async (db, req, res) => {
     console.log("in userWithdraw");
     var user_id = req.body.user_id;
     var amount = req.body.amount;
-   
+
 
     if (!user_id) {
         res.status(400).send({
@@ -3047,7 +3054,7 @@ exports.userWithdraw = async (db, req, res) => {
             msg: "amount required!!"
         });
     }
-  
+
     await db.query(adminQueries.getSettings, async function (error, settingData) {
         if (error) {
             return res.status(400).send({
@@ -3074,44 +3081,44 @@ exports.userWithdraw = async (db, req, res) => {
                     });
                 }
 
-                if(bankData.length==0){
-                  return  res.status(400).send({
+                if (bankData.length == 0) {
+                    return res.status(400).send({
                         success: false,
                         msg: "Please Enter your Bank detail !!"
                     });
                 }
 
-            var transaction = {
-                "user_id": user_id,
-                "transaction_type_id": '3',
-                "amount": -1 * amount,
-                "from_address": '',
-                "to_address": '',
-                "hash": '',
-                "token": 0,
-                "payment_currency": 'INR',
-                "payment_currency_amount": '',
-                "currency": 'INR',
-                "status": 1
-            }
+                var transaction = {
+                    "user_id": user_id,
+                    "transaction_type_id": '3',
+                    "amount": -1 * amount,
+                    "from_address": '',
+                    "to_address": '',
+                    "hash": '',
+                    "token": 0,
+                    "payment_currency": 'INR',
+                    "payment_currency_amount": '',
+                    "currency": 'INR',
+                    "status": 1
+                }
 
-            await db.query(marketplaceQueries.insertTransaction, transaction)
+                await db.query(marketplaceQueries.insertTransaction, transaction)
 
-            if (walletData) {
-                res.status(200).send({
-                    success: true,
-                    msg: "User Withdraw Succesfull",
+                if (walletData) {
+                    res.status(200).send({
+                        success: true,
+                        msg: "User Withdraw Succesfull",
 
-                });
-            } else {
-                res.status(400).send({
-                    success: false,
-                    msg: "User withdrawal Error"
-                });
-            }
+                    });
+                } else {
+                    res.status(400).send({
+                        success: false,
+                        msg: "User withdrawal Error"
+                    });
+                }
+            });
         });
     });
-});
 }
 
 exports.insertContact = async (db, req, res) => {
@@ -3352,9 +3359,9 @@ exports.getWalletTransaction = async (db, req, res) => {
     console.log("in getWalletTransaction");
     var user_id = req.body.user_id;
     var type_id = req.body.type_id;
-    if(type_id >0){
-        console.log('rtesse',type_id)
-        await db.query(marketplaceQueries.getWalletTransactionbyType, [user_id,type_id], async function (error, data) {
+    if (type_id > 0) {
+        console.log('rtesse', type_id)
+        await db.query(marketplaceQueries.getWalletTransactionbyType, [user_id, type_id], async function (error, data) {
             if (error) {
                 return res.status(400).send({
                     success: false,
@@ -3371,8 +3378,8 @@ exports.getWalletTransaction = async (db, req, res) => {
                     }
                 });
                 const usdPrice = await response2.json();
-     console.log('rtesse',data)
-       
+                console.log('rtesse', data)
+
                 res.status(200).send({
                     success: true,
                     msg: "Wallet transaction details!!",
@@ -3385,39 +3392,39 @@ exports.getWalletTransaction = async (db, req, res) => {
                     msg: "No data found!!"
                 });
             }
-        });      
-    }else{
-    await db.query(marketplaceQueries.getWalletTransaction, [user_id], async function (error, data) {
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        if (data.length > 0) {
-            const response2 = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/buy', {
-                method: 'GET', headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-            const usdPrice = await response2.json();
+        });
+    } else {
+        await db.query(marketplaceQueries.getWalletTransaction, [user_id], async function (error, data) {
+            if (error) {
+                return res.status(400).send({
+                    success: false,
+                    msg: "Error occured!!",
+                    error
+                });
+            }
+            if (data.length > 0) {
+                const response2 = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/buy', {
+                    method: 'GET', headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const usdPrice = await response2.json();
 
-            res.status(200).send({
-                success: true,
-                msg: "Wallet transaction details!!",
-                eth_usd_price: usdPrice['data']['amount'],
-                response: data
-            });
-        } else {
-            res.status(400).send({
-                success: false,
-                msg: "No data found!!"
-            });
-        }
-    });
-}
+                res.status(200).send({
+                    success: true,
+                    msg: "Wallet transaction details!!",
+                    eth_usd_price: usdPrice['data']['amount'],
+                    response: data
+                });
+            } else {
+                res.status(400).send({
+                    success: false,
+                    msg: "No data found!!"
+                });
+            }
+        });
+    }
 }
 
 
@@ -3539,21 +3546,11 @@ exports.getCollectionById = async (db, req, res) => {
     var qry1 = `SELECT * FROM user_collection WHERE name='${collection_id}' ORDER BY id  DESC`
     await db.query(qry1, async function (error, collectionData1) {
         // console.log('collectionData1',collectionData1[0].id)
-  
-    var qry = `Select uc.id as collection_id,uc.contractName,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
-    //console.log('qry', qry)
-    await db.query(qry, async function (error, collectionData) {
-        //console.log('wwww', collectionData);
-        if (error) {
-            return res.status(400).send({
-                success: false,
-                msg: "Error occured!!",
-                error
-            });
-        }
-        var qry = `Select i.id,ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(i.id) as like_count,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where i.user_collection_id=${collectionData1[0].id} and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  order by id desc`;
-        //console.log('qry111111111111', qry)
-        await db.query(qry, async function (error, collectionItem) {
+
+        var qry = `Select uc.id as collection_id,uc.contractName,uc.profile_pic as collection_profile_pic,uc.contractAddress,u.id as user_id,u.full_name as user_name,concat('${config.mailUrl}','backend/uploads/', u.profile_pic)  as user_profile_pic,concat('${config.mailUrl}','backend/uploads/', uc.profile_pic) as profile_pic, uc.banner,u.email,uc.name as collection_name,uc.description,date_format(uc.datetime,'%d-%M-%y')as create_date,count(i.id) as nft_count,uc.facebook,uc.insta,uc.telegram,uc.twitter,uc.discord,coalesce(getCollectionItems(uc.id),0)as item_count,coalesce(getCollectionOwners(uc.id),0) as owner_count from user_collection as uc left join users as u on u.id=uc.user_id left join item as i on i.user_collection_id=uc.id where uc.id = ${collectionData1[0].id} group by uc.id,u.id,u.full_name,user_profile_pic,profile_pic,uc.banner,u.email,uc.name,uc.description,create_date order by uc.id desc`;
+        //console.log('qry', qry)
+        await db.query(qry, async function (error, collectionData) {
+            //console.log('wwww', collectionData);
             if (error) {
                 return res.status(400).send({
                     success: false,
@@ -3561,23 +3558,33 @@ exports.getCollectionById = async (db, req, res) => {
                     error
                 });
             }
+            var qry = `Select i.id,ie.id as item_edition_id,ie.owner_id,cu.profile_pic,cu.full_name, case when length(i.name)>=30 then concat(left(i.name,30),'...') else i.name end as name,i.name as item_fullname,i.datetime,i.description,itemLikeCount(i.id) as like_count,i.image,i.file_type,i.owner,i.sell_type,i.item_category_id,i.user_collection_id as collection_id,i.token_id,coalesce(ie.price,'') as price,coalesce(i.start_date,i.datetime) as start_date,i.end_date,ie.edition_text,ie.edition_no,ie.is_sold,ie.expiry_date,concat('${config.mailUrl}backend/DigiPhyNFT_Backend/uploads/',i.local_image) as local_image, ic.name as category_name from item_edition as ie left join item as i on i.id=ie.item_id LEFT JOIN item_category as ic ON i.item_category_id=ic.id left join users as cu on cu.id=i.created_by where i.user_collection_id=${collectionData1[0].id} and ie.id in (select min(id) from item_edition where is_sold=0 group by item_id,owner_id) and (ie.expiry_date > now() or ie.expiry_date is null or ie.expiry_date='0000-00-00 00:00:00') and i.is_active=1  order by id desc`;
+            //console.log('qry111111111111', qry)
+            await db.query(qry, async function (error, collectionItem) {
+                if (error) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "Error occured!!",
+                        error
+                    });
+                }
 
-            if (collectionData.length > 0) {
-                res.status(200).send({
-                    success: true,
-                    msg: "All user Collection Detail!!",
-                    collectionData: collectionData[0],
-                    itemDetail: collectionItem
-                });
-            } else {
-                res.status(400).send({
-                    success: false,
-                    msg: "Something Wrong due to internal Error"
-                });
-            }
+                if (collectionData.length > 0) {
+                    res.status(200).send({
+                        success: true,
+                        msg: "All user Collection Detail!!",
+                        collectionData: collectionData[0],
+                        itemDetail: collectionItem
+                    });
+                } else {
+                    res.status(400).send({
+                        success: false,
+                        msg: "Something Wrong due to internal Error"
+                    });
+                }
+            });
         });
     });
-});
 }
 
 
@@ -3815,7 +3822,7 @@ exports.allSearch = async (
 
 exports.transferTokenToMetamaskWallet = async (db, req, res) => {
     console.log("in transferTokensss");
-    
+
     const user_id = req.body.user_id;
     const to_address = req.body.to_address;
     const token = req.body.token;
@@ -3834,51 +3841,51 @@ exports.transferTokenToMetamaskWallet = async (db, req, res) => {
             var apiData = await openNFT(settingData[0].public_key);
             var apiData2 = await openNFT(settingData[0].private_key);
 
-            const fromAddress =apiData;
+            const fromAddress = apiData;
             const privateKey = apiData2;
             const contractAddress = settingData[0].contractAddress;
 
-        const adminToken = await erc20.transfer({
-            'account': fromAddress,
-            'privateKey' : privateKey,
-            'contractAddress': contractAddress,
-            'to_address' : to_address,
-            'token' : token,
-            'getFee':false
-        });
+            const adminToken = await erc20.transfer({
+                'account': fromAddress,
+                'privateKey': privateKey,
+                'contractAddress': contractAddress,
+                'to_address': to_address,
+                'token': token,
+                'getFee': false
+            });
 
-        console.log('adminToken', adminToken)
-        if (adminToken.success == true) {
+            console.log('adminToken', adminToken)
+            if (adminToken.success == true) {
 
-            var transaction = {
-                "user_id": user_id,
-                "transaction_type_id": '17',
-                "amount": 0,
-                "token": token * -1,
-                "from_address": fromAddress,
-                "to_address": to_address,
-                "hash": adminToken.hash,
-                "payment_currency": payment_currency,
-                "payment_currency_amount": payment_currency_amount,
-                "currency": currency,
-                "status": 1
+                var transaction = {
+                    "user_id": user_id,
+                    "transaction_type_id": '17',
+                    "amount": 0,
+                    "token": token * -1,
+                    "from_address": fromAddress,
+                    "to_address": to_address,
+                    "hash": adminToken.hash,
+                    "payment_currency": payment_currency,
+                    "payment_currency_amount": payment_currency_amount,
+                    "currency": currency,
+                    "status": 1
+                }
+
+                await db.query(marketplaceQueries.insertTransaction, [transaction])
+                return res.json({
+                    success: true,
+                    msg: "Token Transfered",
+                    data: adminToken.hash,
+                })
+            }
+            else if (adminToken.success == false) {
+                return res.json({
+                    success: false,
+                    msg: adminToken.error,
+                })
             }
 
-            await db.query(marketplaceQueries.insertTransaction, [transaction])
-                return res.json({
-                success: true,
-                msg: "Token Transfered",
-                data: adminToken.hash,
-            })
-        }
-        else if (adminToken.success == false) {
-            return res.json({
-                success: false,
-                msg: adminToken.error,
-            })
-        }
-
-    });
+        });
     }
     catch (err) {
         console.log(err)
@@ -3931,11 +3938,11 @@ exports.insertView = async (db, req, res) => {
 
 exports.checkEdititonPurchase = async (db, req, res) => {
     console.log("in checkEdititonPurchase");
-   
-    var item_edition_id = req.body.item_edition_id;
-    
 
-    
+    var item_edition_id = req.body.item_edition_id;
+
+
+
 
     await db.query(marketplaceQueries.checkEdititonPurchase, [item_edition_id], function (error, data) {
         if (error) {

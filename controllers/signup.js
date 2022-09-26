@@ -219,7 +219,7 @@ exports.register = async (db, req, res) => {
             <tr>
                <td style="padding:25px 35px">
                   <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="https://digiphynft.shop/images/email/logo.png" width="150" class="CToWUd" data-bit="iit"></a>
-                  <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
+                
                   <span style="margin-top:30px;width:100%;display:block;height:1px;background-image: url('https://digiphynft.shop/images/email/bgbtn.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center;"></span>
                </td>
             </tr>
@@ -236,7 +236,7 @@ exports.register = async (db, req, res) => {
             </tr>
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>TeamDigiphy</p>
+                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>Team DigiPhyNFT</p>
                </td>
             </tr>
             <tr>
@@ -464,7 +464,7 @@ exports.forgot = async (db, req, res) => {
                        <tr>
                           <td style="padding:25px 35px">
                              <a href="#" style="display:inline-block;margin:0 15px" target="_blank" ><img src="https://digiphynft.shop/images/email/logo.png" width="150" class="CToWUd" data-bit="iit"></a>
-                             <p style="font-size:16px;font-weight:500;color:#fff;float:right">#MusicNFT</p>
+                           
                              <span style="margin-top:30px;width:100%;display:block;height:1px;background-image: url('https://digiphynft.shop/images/email/bgbtn.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center;"></span>
                           </td>
                        </tr>
@@ -481,7 +481,7 @@ exports.forgot = async (db, req, res) => {
                        </tr>
                        <tr>
                           <td style="padding:15px 36px" align="left">
-                             <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>TeamDigiphy</p>
+                             <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>Team DigiPhyNFT</p>
                           </td>
                        </tr>
                        <tr>

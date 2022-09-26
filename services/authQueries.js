@@ -25,7 +25,7 @@ module.exports = {
     addSubscriber: "insert into subscriber SET ?",
     createUserWallet: "insert into user_wallet SET ?",
     getSubscribe: "SELECT * FROM `subscriber` ORDER BY id desc",
-    getUsersloginEmail : "select u.*,coalesce(uw.id,0) as wallet_id,uw.public from users as u left join user_wallet as uw on uw.user_id=u.id where u.email = ?",
+    getUsersloginEmail : "select u.* from users as u where u.email = ?",
     updateShippingAddress :"update users SET ? where id=?",
     getShippingAddress :"select city,state,pin_code,mobile_number,locality,shipping_address,landmark from users where id=?"
 }
