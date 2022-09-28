@@ -791,7 +791,7 @@ exports.insertUserCollection = async (db, req, res) => {
                 } else {
                     res.status(400).send({
                         success: false,
-                        msg: "Something want wrong, Please try again!"
+                        msg: "Something want wrong, Please try again11!"
                     });
                 }
             });
@@ -1595,11 +1595,21 @@ exports.addNftByUser = async (db, req, res) => {
 
                                     /// SEND MAIL STARTS
                                     let qry = `select * from users where id =${user_id}`;
+                                    let qry1 = `select name from user_collection where id =${user_collection_id}`;
+                                  
 
                                     await db.query(qry, async function (error, mailData) {
-                                        emailActivity.Activity(mailData[0].email, 'NFT Created', `You have created NFT (${name}) for INR ${price}.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
+
+                                    await db.query(qry1, async function (error, mailData1) {
+
+
+                                        emailActivity.Activity(mailData[0].email, 'Hola! You just created an NFT', `Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have created the following NFT:<br> 
+                                        Name: (${name})<br> 
+                                        Collection : (${mailData1[0].name})<br><br>
+                                        Hope you had a good experience. Looking forward to your next visit.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
 
                                     });
+                                });
                                     /// SEND MAIL ENDS    
                                     res.status(200).send({
                                         success: true,
@@ -2534,7 +2544,9 @@ exports.itemPurchase = async (db, req, res) => {
                 if (transferNft == 1) {
                     ttype = 14;
                 }
-                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, parseFloat(token) * -1, ttype, parseFloat(amount) * -1, user_address, item_edition_id], async function (error, buydata) {
+                var token2=parseFloat(token) * -1;
+                var amount2=parseFloat(amount) * -1;
+                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, token2, ttype,amount2 , user_address, item_edition_id], async function (error, buydata) {
                     console.log('error 2494', error)
                     if (error) {
                         return res.status(400).send({

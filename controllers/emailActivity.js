@@ -37,22 +37,24 @@ exports.Activity = async function (email, subject, text, link, image) {
             </tr>
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear ,${email}</p>
                   <br>
-                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Congratulations!</p>
+                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Hello,</p>
                   <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">${text}</p>
                </td>
             </tr>
-            <tr>
-               <td style="padding:15px" align="center">
-                  <a href="https://digiphynft.com" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
-               </td>
-            </tr>
+
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>Team DigiPhyNFT</p>
+                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Best Regrads,<br>Team DigiPhyNFT</p>
                </td>
             </tr>
+
+            <tr>
+               <td style="padding:15px" align="center">
+                  <a href="https://marketplace.digiphynft.com" style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click Here to Explore the Platform</a>
+               </td>
+            </tr>
+            
             <tr>
             <td style="padding:20px 15px" align="center">
                <a href="https://www.facebook.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank">
@@ -85,7 +87,7 @@ exports.Activity = async function (email, subject, text, link, image) {
          </tr>
          <tr>
                <td style="background:#19132a;padding:15px" align="center">
-                  <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+                  <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">help@digiphynft.com</a> for any queries</p>
                   <font color="#888888">
                   </font>
                </td>
@@ -195,7 +197,7 @@ exports.RegisterActivity = async function (email, subject, text) {
   </tr>
   <tr>
      <td style="background:#19132a;padding:15px" align="center">
-        <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+        <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">help@digiphynft.com</a> for any queries</p>
         <font color="#888888">
         </font>
      </td>

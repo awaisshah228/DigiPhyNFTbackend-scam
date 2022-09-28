@@ -16,7 +16,7 @@ var speakeasy = require("speakeasy");
 const { Console } = require('console');
 const adminQueries = require('../services/adminQueries');
 const { json } = require('express');
-const  emailActivity = require('../controllers/emailActivity');
+const emailActivity = require('../controllers/emailActivity');
 
 function closeNFT(code) {
     try {
@@ -68,7 +68,7 @@ exports.register = async (db, req, res) => {
 
 
     try {
-      
+
 
 
         // if (!full_name) {
@@ -142,77 +142,77 @@ exports.register = async (db, req, res) => {
         await db.query(authQueries.getUsersEmail, [email], async function (error, results) {
 
 
-        await db.query(authQueries.getUsersUser, [user_name], async function (error, userresults) {
+            await db.query(authQueries.getUsersUser, [user_name], async function (error, userresults) {
 
-          
-            if (error) {
-                return res.status(400).send({
-                    success: false,
-                    msg: "error occured",
-                    error
-                });
-            } else if (results.length > 0) {
-                if (email === results[0].email) {
+
+                if (error) {
                     return res.status(400).send({
                         success: false,
-                        msg: "Email Already Registered! Try New Email."
-
+                        msg: "error occured",
+                        error
                     });
-                }
-                 }
-                 else if (userresults.length > 0) {
-                   
+                } else if (results.length > 0) {
+                    if (email === results[0].email) {
                         return res.status(400).send({
                             success: false,
-                            msg: "User Name Already Registered! Try New Username."
-    
+                            msg: "Email Already Registered! Try New Email."
+
                         });
-                   
-                     }
+                    }
+                }
+                else if (userresults.length > 0) {
 
-                 
-            if (is_subscribed == 1) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "User Name Already Registered! Try New Username."
 
-                var sub = {
-                    "email": email,
-                    "ip": null,
-                    "datetime": new Date()
+                    });
+
                 }
 
-                await db.query(authQueries.addSubscriber, [sub])
 
-            }
+                if (is_subscribed == 1) {
 
-            const Token = jwt.sign({
-                email: req.body.email
-            }, config.JWT_SECRET_KEY)
+                    var sub = {
+                        "email": email,
+                        "ip": null,
+                        "datetime": new Date()
+                    }
 
-            // var transporter = nodemailer.createTransport({
-            //     service: 'gmail',
-            //     auth: {
-            //       user: `bilal.espsofttech@gmail.com`,
-            //       pass: `Bilal123#`
-            //     }
-            //   });
+                    await db.query(authQueries.addSubscriber, [sub])
 
-            var transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
-                auth: {
-                    user: 'support@digiphynft.com',
-                    pass: 'DigiPhyNFT@123#'
-                },
-                tls: {
-                    rejectUnauthorized: false
                 }
-            });
 
-            var mailOptions = {
-                from: 'support@digiphynft.com',
-                to: `${email}`,
-                subject: 'Account Activation Link',
-                html: `
+                const Token = jwt.sign({
+                    email: req.body.email
+                }, config.JWT_SECRET_KEY)
+
+                // var transporter = nodemailer.createTransport({
+                //     service: 'gmail',
+                //     auth: {
+                //       user: `bilal.espsofttech@gmail.com`,
+                //       pass: `Bilal123#`
+                //     }
+                //   });
+
+                var transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    secure: true,
+                    auth: {
+                        user: 'support@digiphynft.com',
+                        pass: 'DigiPhyNFT@123#'
+                    },
+                    tls: {
+                        rejectUnauthorized: false
+                    }
+                });
+
+                var mailOptions = {
+                    from: 'support@digiphynft.com',
+                    to: `${email}`,
+                    subject: 'Please verify your DigiPhyNFT account',
+                    html: `
                 
         <table cellspacing="0" cellpadding="0" width="100%" class="digiphyemail" style=" max-width: 600px;margin: auto;font-family: Inter,sans-serif;font-size: 14px; background-image:url('https://digiphynft.shop/images/email/music.png');  background-size:cover;background-repeat:no-repeat ">
          <tbody>
@@ -225,20 +225,30 @@ exports.register = async (db, req, res) => {
             </tr>
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin:0 0 30px;color:#fff;line-height:28px;font-size:16px">Dear ${user_name},</p>
-                  <p style="margin:0px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">We're delighted to have you on board. Digiphy is the "India's Most memorable NFT Marketplace".Digiphy engages Specialists to fabricate fan networks and empowers fans to assume a part to supercharge development of Craftsmen by purchasing NFTs and assist them with catching additional worth from their work. These NFTs allow the fans an opportunity to be essential for a selective local area with the Craftsman and get unique honors and procure royalty*, exceptional honors like early admittance to restrictive in the background content, meet-n-welcome open doors, behind the stage admittance to shows and so on to reinforce direct commitment and unwaveringness with fans.</p>
+                  <p style="margin:0 0 20px;color:#fff;line-height:28px;font-size:16px">Hello,</p>
+
+                  <p style="margin:0 0 20px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">Greetings from DigiPhyNFT.</p>
+
+                  <p style="margin:0 0 20px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">We have received a request to login using email address ${email} on DigiPhyNFT.</p>
+
+                  <p style="margin:0 0 20px;color:#fff;line-height:28px;font-size:16px;word-wrap:break-word">If you did not make this request, you can safely ignore this email.</p>
+                   
                </td>
             </tr>
-            <tr>
-               <td style="padding:15px" align="center">
-               <a href='${config.mailUrl}verifyAccount/${Token}' style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Click here to activate your account</a>
-               </td>
-            </tr>
+         
             <tr>
                <td style="padding:15px 36px" align="left">
-                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Regards,<br>Team DigiPhyNFT</p>
+                  <p style="margin-top:30px;color:#fff;line-height:25px;font-size:16px;font-weight:400;text-align:justify">Best Regrads,<br>
+                  Team DigiPhyNFT</p>
                </td>
             </tr>
+
+            <tr>
+            <td style="padding:15px" align="center">
+            <a href='${config.mailUrl}verifyAccount/${Token}' style="display:inline-block;font-size:16px;width:60%;padding:16px 0;background-image:url('https://digiphynft.shop/images/email/bgsmall.jpg');background-size:cover;background-repeat:no-repeat;backend-position:center; border-radius:10px;color:#fff;text-decoration:none" target="_blank" >Verify Now</a>
+            </td>
+         </tr>
+
             <tr>
                <td style="padding:20px 15px" align="center">
                   <a href="https://www.facebook.com/DigiPhyNFT" style="display:inline-block;margin:0 15px" target="_blank">
@@ -271,89 +281,89 @@ exports.register = async (db, req, res) => {
             </tr>
             <tr>
                <td style="background:#19132a;padding:15px" align="center">
-                  <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+                  <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">help@digiphynft.com</a> for any queries</p>
                   <font color="#888888">
                   </font>
                </td>
             </tr>
          </tbody>
       </table>`
-            };
+                };
 
-            transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('Email sent: ' + info.response);
-                }
-            });
-
-            var secret = speakeasy.generateSecret({ length: 20 });
-
-            QRCode.toDataURL(secret.otpauth_url, function (err, data_url) {
-
-                // const hash = bcrypt.hashSync(password, 8);
-                const hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
-                //     console.log('hash',hash);
-                var users = {
-                    "full_name": full_name,
-                    "user_name": user_name,
-                    "email": email,
-                    "password": hash,
-                    "is_email_verify": 0,
-                    "googleAuthCode": secret.base32,
-                    "QR_code": data_url,
-                    "deactivate_account": 0,
-                    "address" :address,
-                    "is_subscribed": is_subscribed
-                }
-                db.query(authQueries.insertUserData, users, async function (error, result) {
+                transporter.sendMail(mailOptions, function (error, info) {
                     if (error) {
-                        return res.status(400).send({
-                            success: false,
-                            msg: "error occured",
-                            error
-                        });
+                        console.log(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
                     }
-                    // const response1 = await fetch(config.walletApiUrl, {
-                    //     method: 'GET', headers: {
-                    //         'Accept': 'application/json',
-                    //         'Content-Type': 'application/json'
-                    //     }
-                    // });
-                    // const data1 = await response1.json();
-                    // console.log(data1);
-                    // if (!data1?.wallet?.private) {
-                    //     return res.status(400).send({
-                    //         success: false,
-                    //         msg: "error occured in wallet creation",
-                    //         error
-                    //     });
-                    // }
+                });
 
-                    // var insertData = {
-                    //     "user_id": result.insertId,
-                    //     "coin_id": 1,
-                    //     "public": data1.wallet.address,
-                    //     "private": data1.wallet.private
-                    // }
-                    // await db.query(adminQueries.createUserWallet, [insertData], async function (error, data) {
-                    //     if (error) {
-                    //         return res.status(400).send({
-                    //             success: false,
-                    //             msg: "error occured",
-                    //             error
-                    //         });
-                    //     }
-                    // })
+                var secret = speakeasy.generateSecret({ length: 20 });
 
-                    return res.status(200).send({
-                        success: true,
-                        msg: "Email has been sent, kindly activate your account"
+                QRCode.toDataURL(secret.otpauth_url, function (err, data_url) {
+
+                    // const hash = bcrypt.hashSync(password, 8);
+                    const hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+                    //     console.log('hash',hash);
+                    var users = {
+                        "full_name": full_name,
+                        "user_name": user_name,
+                        "email": email,
+                        "password": hash,
+                        "is_email_verify": 0,
+                        "googleAuthCode": secret.base32,
+                        "QR_code": data_url,
+                        "deactivate_account": 0,
+                        "address": address,
+                        "is_subscribed": is_subscribed
+                    }
+                    db.query(authQueries.insertUserData, users, async function (error, result) {
+                        if (error) {
+                            return res.status(400).send({
+                                success: false,
+                                msg: "error occured",
+                                error
+                            });
+                        }
+                        // const response1 = await fetch(config.walletApiUrl, {
+                        //     method: 'GET', headers: {
+                        //         'Accept': 'application/json',
+                        //         'Content-Type': 'application/json'
+                        //     }
+                        // });
+                        // const data1 = await response1.json();
+                        // console.log(data1);
+                        // if (!data1?.wallet?.private) {
+                        //     return res.status(400).send({
+                        //         success: false,
+                        //         msg: "error occured in wallet creation",
+                        //         error
+                        //     });
+                        // }
+
+                        // var insertData = {
+                        //     "user_id": result.insertId,
+                        //     "coin_id": 1,
+                        //     "public": data1.wallet.address,
+                        //     "private": data1.wallet.private
+                        // }
+                        // await db.query(adminQueries.createUserWallet, [insertData], async function (error, data) {
+                        //     if (error) {
+                        //         return res.status(400).send({
+                        //             success: false,
+                        //             msg: "error occured",
+                        //             error
+                        //         });
+                        //     }
+                        // })
+
+                        return res.status(200).send({
+                            success: true,
+                            msg: "Email has been sent, kindly activate your account"
+                        });
                     });
                 });
             });
-        });
         });
     } catch (err) {
         return res.status(500).send({
@@ -516,7 +526,7 @@ exports.forgot = async (db, req, res) => {
                        </tr>
                        <tr>
                           <td style="background:#19132a;padding:15px" align="center">
-                             <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">support@Digiphy.com</a> for any queries</p>
+                             <p style="margin:0;color:#fff">Please reach out to <a href="#" style="text-decoration:none;color:#e33f84" target="_blank">help@digiphynft.com</a> for any queries</p>
                              <font color="#888888">
                              </font>
                           </td>
@@ -527,7 +537,7 @@ exports.forgot = async (db, req, res) => {
 
                 transporter.sendMail(mailOptions, function (error, info) {
                     if (error) {
-                            console.log(error);
+                        console.log(error);
                     } else {
                         console.log('Email sent: ' + info.response);
                     }
@@ -964,7 +974,7 @@ exports.updateProfilePic = async (db, req, res) => {
     console.log("in updateProfilePic");
     var full_name = req.body.full_name;
     var email = req.body.email;
-    var user_name=req.body.user_name;
+    var user_name = req.body.user_name;
     var profile_pic = (!req.files['profile_pic']) ? null : req.files['profile_pic'][0].filename;
     var banner = (!req.files['banner']) ? null : req.files['banner'][0].filename;
 
@@ -977,7 +987,7 @@ exports.updateProfilePic = async (db, req, res) => {
                 error
             });
         }
-        db.query(authQueries.checkUserName, [user_name,email], function (error, checkUserName) {
+        db.query(authQueries.checkUserName, [user_name, email], function (error, checkUserName) {
             if (error) {
                 return res.status(400).send({
                     success: false,
@@ -985,43 +995,43 @@ exports.updateProfilePic = async (db, req, res) => {
                     error
                 });
             }
-        if(checkUserName.length>0){
-            return res.status(400).send({
-                success: false,
-                msg: "User name already exists!"
-            });
-        }
-
-        if (!profile_pic) {
-            profile_pic = result1[0].profile_pic;
-        }
-        if (!banner) {
-            banner = result1[0].banner;
-        }
-
-
-        db.query(authQueries.updateProfile, [full_name, email, profile_pic, banner, user_name, email], function (error, result) {
-            if (error) {
+            if (checkUserName.length > 0) {
                 return res.status(400).send({
                     success: false,
-                    msg: "error occured!",
-                    error
+                    msg: "User name already exists!"
                 });
             }
-            if (result) {
-                res.status(200).send({
-                    success: true,
-                    msg: "Update Profile Successfully",
-                });
-            } else {
-                res.status(200).send({
-                    success: true,
-                    msg: "update Profile Failed",
-                });
+
+            if (!profile_pic) {
+                profile_pic = result1[0].profile_pic;
             }
-        })
+            if (!banner) {
+                banner = result1[0].banner;
+            }
+
+
+            db.query(authQueries.updateProfile, [full_name, email, profile_pic, banner, user_name, email], function (error, result) {
+                if (error) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "error occured!",
+                        error
+                    });
+                }
+                if (result) {
+                    res.status(200).send({
+                        success: true,
+                        msg: "Update Profile Successfully",
+                    });
+                } else {
+                    res.status(200).send({
+                        success: true,
+                        msg: "update Profile Failed",
+                    });
+                }
+            })
+        });
     });
-});
 }
 
 
@@ -1093,8 +1103,8 @@ exports.updateAboutDetail = async (db, req, res) => {
 
 
 exports.getShippingAddress = async (db, req, res) => {
-   var user_id = req.body.user_id;
- 
+    var user_id = req.body.user_id;
+
 
     await db.query(authQueries.getShippingAddress, [user_id], function (error, data) {
         if (error) {
@@ -1104,11 +1114,11 @@ exports.getShippingAddress = async (db, req, res) => {
                 error
             });
         }
-        if (data.length >0) {
+        if (data.length > 0) {
             res.status(200).send({
                 success: true,
                 msg: "Address Details Updated",
-                data : data[0]
+                data: data[0]
             });
         } else {
             res.status(400).send({
@@ -1121,7 +1131,7 @@ exports.getShippingAddress = async (db, req, res) => {
 
 
 exports.updateShippingAddress = async (db, req, res) => {
- 
+
     var user_id = req.body.user_id;
     var mobile_number = req.body.mobile_number;
     var pin_code = req.body.pin_code;
@@ -1132,18 +1142,18 @@ exports.updateShippingAddress = async (db, req, res) => {
     var landmark = req.body.landmark_address;
 
 
-    let address ={
-        mobile_number : mobile_number,
-        pin_code : pin_code,
-        locality : locality,
-        shipping_address : shipping_address,
-        city : city,
-        state : state,
-        landmark : landmark
+    let address = {
+        mobile_number: mobile_number,
+        pin_code: pin_code,
+        locality: locality,
+        shipping_address: shipping_address,
+        city: city,
+        state: state,
+        landmark: landmark
     }
 
 
-    await db.query(authQueries.updateShippingAddress, [address,user_id], function (error, data) {
+    await db.query(authQueries.updateShippingAddress, [address, user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,

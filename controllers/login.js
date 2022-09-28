@@ -60,7 +60,7 @@ exports.login = async (db, req, res) => {
                 });
             }
             else if (user[0].is_email_verify === 0) {
-                emailActivity.RegisterActivity(user[0].email,'Account Activation Link',user[0].user_name)
+                emailActivity.RegisterActivity(user[0].email,'Please verify your DigiPhyNFT account',user[0].user_name)
 
                 return res.status(400).send({
                     success: false,
@@ -169,7 +169,8 @@ exports.login = async (db, req, res) => {
                             }
                         }
                         /////////////////////////
-                        emailActivity.Activity(email, 'Login', `Login Successful, You are now login successfully`);
+                        emailActivity.Activity(email, 'Hola! Your login is successful.', `Greetings from DigiPhyNFT.<br><br>
+                        Thank you for using DigiPhyNFT. You have successfully logged in to your account.`);
                         return res.status(200).send({
                             success: true,
                             msg: "Login Successfully",
