@@ -844,7 +844,7 @@ exports.getUserCollection = async (db, req, res) => {
 exports.getUserOwnerItem = async (db, req, res) => {
     console.log("in getUserCollection owner");
     var user_id = req.body.user_id;
-    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id], function (error, data) {
+    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id, user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -1596,20 +1596,20 @@ exports.addNftByUser = async (db, req, res) => {
                                     /// SEND MAIL STARTS
                                     let qry = `select * from users where id =${user_id}`;
                                     let qry1 = `select name from user_collection where id =${user_collection_id}`;
-                                  
+
 
                                     await db.query(qry, async function (error, mailData) {
 
-                                    await db.query(qry1, async function (error, mailData1) {
+                                        await db.query(qry1, async function (error, mailData1) {
 
 
-                                        emailActivity.Activity(mailData[0].email, 'Hola! You just created an NFT', `Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have created the following NFT:<br> 
+                                            emailActivity.Activity(mailData[0].email, 'Hola! You just created an NFT', `Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have created the following NFT:<br> 
                                         Name: (${name})<br> 
                                         Collection : (${mailData1[0].name})<br><br>
                                         Hope you had a good experience. Looking forward to your next visit.`, `featurescreator/${user_id}`, `https://digiphy.mypinata.cloud/ipfs/${image}`);
 
+                                        });
                                     });
-                                });
                                     /// SEND MAIL ENDS    
                                     res.status(200).send({
                                         success: true,
@@ -2447,7 +2447,14 @@ exports.itemPurchase = async (db, req, res) => {
                         error
                     });
                 }
+                const [buyer] = await promisePool.query(`SELECT COALESCE(uo.user_name,uo.full_name,uo.email) as buyer_name,email FROM users as uo where id=${user_id}`);
+                let seller_name=trx[0].owner;
+                let buyer_name=buyer[0].buyer_name;
 
+                let seller_name_email=trx[0].email;
+                let buyer_name_email=buyer[0].email;
+
+                
                 if (trx.length == 0) {
                     return res.status(400).send({
                         success: false,
@@ -2458,7 +2465,7 @@ exports.itemPurchase = async (db, req, res) => {
 
                 if (trx[0].isClaimed == 1) {
 
-                    const [editionList] = await promisePool.query("SELECT * FROM `item_edition` where item_id= ? and owner_id= ? order by id limit ?",[trx[0].item_id, trx[0].owner_id, purchased_quantity]);
+                    const [editionList] = await promisePool.query("SELECT * FROM `item_edition` where item_id= ? and owner_id= ? order by id limit ?", [trx[0].item_id, trx[0].owner_id, purchased_quantity]);
                     console.log("editionList", editionList)
 
                     NFTTransferUser = await NFT.transfer({
@@ -2478,15 +2485,15 @@ exports.itemPurchase = async (db, req, res) => {
                             msg: NFTTransferUser.error,
                         });
                     }
-                    console.log("NFTTransferUser",NFTTransferUser)
+                    console.log("NFTTransferUser", NFTTransferUser)
                     if (NFTTransferUser.hash) {
                         var i = 0;
                         while (i < editionList.length) {
                             await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
                                 isClaimed: 0,
-                                current_owner : from,
+                                current_owner: from,
                                 hash: NFTTransferUser.hash
-                            },editionList[i].id ]);
+                            }, editionList[i].id]);
                         }
                     }
                 }
@@ -2544,9 +2551,9 @@ exports.itemPurchase = async (db, req, res) => {
                 if (transferNft == 1) {
                     ttype = 14;
                 }
-                var token2=parseFloat(token) * -1;
-                var amount2=parseFloat(amount) * -1;
-                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, token2, ttype,amount2 , user_address, item_edition_id], async function (error, buydata) {
+                var token2 = parseFloat(token) * -1;
+                var amount2 = parseFloat(amount) * -1;
+                await db.query(marketplaceQueries.insertBuyTransactionByItemId, [gas_fee, user_id, token2, ttype, amount2, user_address, item_edition_id], async function (error, buydata) {
                     console.log('error 2494', error)
                     if (error) {
                         return res.status(400).send({
@@ -2604,12 +2611,43 @@ exports.itemPurchase = async (db, req, res) => {
                             /* end ownership change api */
                             /// SEND MAIL STARTS
                             qry = `select i.name,i.description,i.image,getUserFullName(${user_id}) as bidderName,getUserEmail(u.id) as ownerEmail,getUserEmail(${user_id}) as bidderEmail from item_edition as ie left join item as i on i.id=ie.item_id left join users as u on u.id=i.owner_id where ie.id=${item_edition_id}`;
+
+                            let qry1 = `SELECT uc.name,it.user_collection_id from item as it left JOIN user_collection as uc on uc.id=it.user_collection_id where it.id=${item_id}`;
+                            
                             console.log(qry);
                             await db.query(qry, async function (error, mailData) {
-                                console.log('mailData', mailData)
-                                await emailActivity.Activity(mailData[0].ownerEmail, `NFT purchased by ${mailData[0].name}`, `Your NFT  ${mailData[0].name} has been purchased by ${mailData[0].bidderEmail} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
-                                await emailActivity.Activity(mailData[0].bidderEmail, 'NFT Purchased', `You have purchased NFT  ${mailData[0].name} in INR ${amount}.`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                            await db.query(qry1, async function (error1, mailData1) {
+
+                                console.log('mailData', mailData)
+
+                                if(ttype == 14){
+                                    await emailActivity.Activity1(mailData[0].ownerEmail, `Hola! You just transferred your NFT`,
+                                    `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just transferred your NFT , details of which are as below<br>Name: (${mailData[0].name})<br>
+                                    Collection : (${mailData1[0].name})<br> 
+                                    Transferred To : (${buyer_name_email})<br></div>
+                                    `, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+    
+                                    await emailActivity.Activity1(mailData[0].bidderEmail, 'Hola! You just recieved an NFT', 
+                                    `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT.  You have just recieved an NFT, details of which are as below<br>Name: (${mailData[0].name})<br>
+                                    Collection : (${mailData1[0].name})<br> 
+                                    Recieved from : (${seller_name_email})<br></div>
+                                   <br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                }
+                                else{
+                                    await emailActivity.Activity1(mailData[0].ownerEmail, `Yaya! You have just sold an NFT`,
+                                `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just sold the following NFT:<br>Name: (${mailData[0].name})<br>
+                                Collection : (${mailData1[0].name})<br> 
+                                Sold To : (${buyer_name})<br></div>
+                                <div style="color:#fff">Price : (Rs ${amount})</div><br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+
+                                await emailActivity.Activity1(mailData[0].bidderEmail, 'Hola! You just bought a new NFT', 
+                                `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have bought the following NFT:<br>Name: (${mailData[0].name})<br>
+                                Collection : (${mailData1[0].name})<br> 
+                                Bought it from : (${seller_name})<br></div>
+                                <div style="color:#fff">Price : (Rs ${amount})</div><br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
+                                }
+                                
 
                                 /// SEND MAIL ENDS    
                                 return res.status(200).send({
@@ -2619,6 +2657,7 @@ exports.itemPurchase = async (db, req, res) => {
                                 });
                             });
                         });
+                    });
                     });
                 });
             });
@@ -3975,4 +4014,48 @@ exports.checkEdititonPurchase = async (db, req, res) => {
             });
         }
     });
+}
+
+
+exports.depositToken = async (db, req, res) => {
+    console.log("depositToken");
+
+    const user_id = req.body.user_id;
+    const to_address = req.body.to_address;
+    const from_address = req.body.from_address;
+    const token = req.body.token;
+    let payment_currency = 'DigiCoin'//req.body.payment_currency;
+    let payment_currency_amount = 0
+    let currency = 'INR'
+    let transactionHash = req.body.transactionHash
+    try {
+        var transaction = {
+            "user_id": user_id,
+            "transaction_type_id": '18',
+            "amount": 0,
+            "token": token,
+            "from_address": from_address,
+            "to_address": to_address,
+            "hash": transactionHash,
+            "payment_currency": payment_currency,
+            "payment_currency_amount": payment_currency_amount,
+            "currency": currency,
+            "status": 1
+        }
+
+        await db.query(marketplaceQueries.insertTransaction, [transaction])
+        return res.json({
+            success: true,
+            msg: "Token Transfered",
+        })
+    }
+
+    catch (err) {
+        console.log(err)
+        return res.status(400).send({
+            success: false,
+            msg: "Unexpected internal error!!",
+            err
+        });
+    }
 }

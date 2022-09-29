@@ -306,6 +306,8 @@ router.post('/getAdminTokenBalance' ,admin.getAdminTokenBalance.bind(this, db));
 
 router.get('/nft/metadata/:id' ,marketplace.getMetadataJson.bind(this, db));
 router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
+router.post('/depositToken' ,marketplace.depositToken.bind(this, db));
+
 
 
 
