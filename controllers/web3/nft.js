@@ -1,6 +1,7 @@
 const Web3 = require('web3');
 const { Network } = require('../../config');
 
+
 const providerOrUrlTestnet = 'https://rpc-mumbai.maticvigil.com'; // Mumbai Testnet
 const providerOrUrlMainnet = 'https://polygon-rpc.com'; // Polygon Mainnet
 const ABI = require('./erc1155Abi.json');
@@ -17,7 +18,7 @@ exports.mint = async (reqData) => {
     const tokenId = reqData.tokenId;
     const qty = reqData.qty;
     const getFee = reqData.getFee; // bool
-    
+
 
     try {
         web3.eth.defaultAccount = fromAddress;
@@ -31,13 +32,13 @@ exports.mint = async (reqData) => {
         }
 
         const contract = await new web3.eth.Contract(ABI, contractAddress);
-        let count = await web3.eth.getTransactionCount(fromAddress, 'pending');       
+        let count = await web3.eth.getTransactionCount(fromAddress, 'pending');
 
         const tx_builder = await contract.methods.mint(to_address, tokenId, qty);
         let encoded_tx = tx_builder.encodeABI();
 
         let gasPrice = await web3.eth.getGasPrice();
-         
+
         let gasLimit = await web3.eth.estimateGas({
             from: fromAddress,
             nonce: web3.utils.toHex(count),
@@ -46,10 +47,10 @@ exports.mint = async (reqData) => {
             data: encoded_tx,
         });
 
-        if(getFee){
+        if (getFee) {
             return {
-                success : true,
-                fee : (parseInt(gasPrice) * parseInt(gasLimit) / 10**18).toFixed(6)
+                success: true,
+                fee: (parseInt(gasPrice) * parseInt(gasLimit) / 10 ** 18).toFixed(6)
             }
         }
 
@@ -62,8 +63,8 @@ exports.mint = async (reqData) => {
             data: encoded_tx,
         };
 
-    
-        
+
+
         const trxPromise = await new Promise((resolve, reject) => {
             web3.eth.accounts
                 .signTransaction(transactionObject, privateKey)
@@ -127,13 +128,13 @@ exports.transfer = async (reqData) => {
         }
 
         const contract = await new web3.eth.Contract(ABI, contractAddress);
-        let count = await web3.eth.getTransactionCount(fromAddress, 'pending');       
+        let count = await web3.eth.getTransactionCount(fromAddress, 'pending');
 
-        const tx_builder = await contract.methods.safeTransferFrom(item_owner_address,to_address, tokenId, qty,'0x');
+        const tx_builder = await contract.methods.safeTransferFrom(item_owner_address, to_address, tokenId, qty, '0x');
         let encoded_tx = tx_builder.encodeABI();
 
         let gasPrice = await web3.eth.getGasPrice();
-         
+
         let gasLimit = await web3.eth.estimateGas({
             from: fromAddress,
             nonce: web3.utils.toHex(count),
@@ -142,10 +143,10 @@ exports.transfer = async (reqData) => {
             data: encoded_tx,
         });
 
-        if(getFee){
+        if (getFee) {
             return {
-                success : true,
-                fee : (parseInt(gasPrice) * parseInt(gasLimit) / 10**18).toFixed(6)
+                success: true,
+                fee: (parseInt(gasPrice) * parseInt(gasLimit) / 10 ** 18).toFixed(6)
             }
         }
 
@@ -158,8 +159,8 @@ exports.transfer = async (reqData) => {
             data: encoded_tx,
         };
 
-    
-        
+
+
         const trxPromise = await new Promise((resolve, reject) => {
             web3.eth.accounts
                 .signTransaction(transactionObject, privateKey)
@@ -194,6 +195,48 @@ exports.transfer = async (reqData) => {
         return {
             success: false,
             error: ee.toString() + ', Please contact support for transfer item.'
+        }
+    }
+}
+
+
+exports.getAllNFTFromBlockchainByAddress = async (address, contractAddress) => {
+    try {
+        const ALCHEMY = require('@alch/alchemy-sdk');
+        // { Network, initializeAlchemy, getNftsForOwner }
+        // Optional Config object, but defaults to demo api-key and eth-mainnet.
+        const settings = {
+            apiKey: 'N5qFDgGJCytFMzOmRIWKMT7A5vbrpE87', // Replace with your Alchemy API Key. https://dashboard.alchemy.com/
+            network: ALCHEMY.Network.MATIC_MAINNET, // Replace with your network.
+            maxRetries: 10
+        };
+
+        const alchemy = ALCHEMY.initializeAlchemy(settings);
+        // Get how many NFTs an address owns.
+        const promiseRes = await new Promise(function (resolve, reject) {
+            ALCHEMY.getNftsForOwner(alchemy, address).then(nfts => {
+                
+                let data = nfts.ownedNfts.filter(item => item.tokenType == "ERC1155" && contractAddress.indexOf(nfts.ownedNfts[0].contract.address.toLocaleUpperCase()) > -1)
+                resolve(data);
+            }).catch(err => {
+                resolve(err)
+            })
+        })
+        if (!promiseRes[0]?.contract) {
+            return {
+                success: false,
+                error: promiseRes.toString()
+            };
+        }else{
+            return {
+                success: true,
+                data: promiseRes
+            };
+        }
+    } catch (err) {
+        return {
+            success: false,
+            error: err.toString()
         }
     }
 }

@@ -21,7 +21,7 @@ const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, passw
 // now get a Promise wrapped instance of that pool
 const promisePool = pool.promise();
 const erc20 = require('../web3/erc20.js');
-const  emailActivity = require('../emailActivity');
+const emailActivity = require('../emailActivity');
 
 
 
@@ -84,9 +84,17 @@ exports.updateItemMarket = async (db, req, res) => {
     var user_id = req.body.user_id;
     var quantity = req.body.quantity;
     var price = req.body.price;
+    var gas_fee = req.body.gas_fee;
 
     //await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
+    console.log('gas_fee111:', gas_fee)
+
     try {
+        if (gas_fee) {
+            console.log('gas_fee11:', gas_fee)
+            var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee},'Put on sale')`;
+            const [data,] = await promisePool.query(qry);
+        }
         db.query(adminQueries.checkEditionQty, [item_id, user_id, parseInt(quantity)], async function (error, checkData) {
             if (error) {
                 return res.status(400).send({
@@ -122,6 +130,40 @@ exports.updateItemMarket = async (db, req, res) => {
     }
 }
 
+exports.updateWalletItemMarket = async (db, req, res) => {
+
+    var item_id = req.body.item_id;
+    var user_id = req.body.user_id;
+    var quantity = req.body.quantity;
+    var price = req.body.price;
+    var gas_fee = req.body.gas_fee;
+    var user_address = req.body.user_address;
+
+    //await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
+    console.log('gas_fee111:', gas_fee)
+
+    try {
+        if (gas_fee) {
+            console.log('gas_fee11:', gas_fee)
+            var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee},'Put on sale')`;
+            const [data,] = await promisePool.query(qry);
+        }
+        var i = 0;
+        while (i < quantity) {
+            const [data,] = await promisePool.query(`INSERT INTO item_edition(item_id,is_on_sale,owner_id,user_collection_id,price,user_address,isMinted,isClaimed) select id,1,${user_id},user_collection_id,${price},'${user_address}',1,1 from item where id=${item_id}`);
+            i++;
+        }
+        res.status(200).send({
+            success: true,
+            msg: "Item put on sale successfully",
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            msg: error
+        });
+    }
+}
 //============================================  Update on market place ====================================
 
 exports.updateItemAdmin = async (db, req, res) => {
@@ -847,7 +889,7 @@ exports.getSettings = async (db, req, res) => {
                 royalty_percent: data[0].royalty_percent,
                 coin_value: data[0].coin_value,
                 maxcoinpercentage: data[0].maxcoinpercentage,
-                platform_fee : data[0].platform_fee
+                platform_fee: data[0].platform_fee
             });
         } else {
             res.status(400).send({
@@ -960,7 +1002,7 @@ exports.updatePlateformFee = async (db, req, res) => {
     let platform_fee = req.body.platform_fee
 
     let keys = {
-    
+
         "platform_fee": platform_fee
     }
 
@@ -2388,7 +2430,7 @@ exports.changePassword = async (db, req, res) => {
         });
     }
     catch (err) {
-          console.log(err)
+        console.log(err)
         return res.status(400).send({
             success: false,
             msg: "Unexpected internal error!!",
@@ -2565,7 +2607,7 @@ exports.insertadminCollection = async (db, req, res) => {
     var user_id = req.body.user_id;
     var website = req.body.website;
     var games_category = req.body.games_category;
-    var royalty_percent =req.body.royalty_percent;
+    var royalty_percent = req.body.royalty_percent;
 
     // if(!games_category){
     //     res.status(400).send({
@@ -2586,7 +2628,7 @@ exports.insertadminCollection = async (db, req, res) => {
         "telegram": req.body.telegram,
         "twitter": req.body.twitter,
         "discord": req.body.discord,
-        "royalty_percent":royalty_percent
+        "royalty_percent": royalty_percent
     }
     await db.query(adminQueries.insertadminCollection, [dataArr], function (error, data) {
         if (error) {
@@ -2612,7 +2654,7 @@ exports.insertadminCollection = async (db, req, res) => {
 }
 //===============================getadmin collection===========================================//
 exports.getAdminCollection = async (db, req, res) => {
-     console.log("in getAllUserCollection");
+    console.log("in getAllUserCollection");
     await db.query(adminQueries.getadmincollection, function (error, data) {
         if (error) {
             return res.status(400).send({
@@ -2641,7 +2683,7 @@ exports.getAdminCollection = async (db, req, res) => {
 
 
 exports.updateUserCollection = async (db, req, res) => {
-     console.log("in updateUserCollection");
+    console.log("in updateUserCollection");
     var user_id = req.body.user_id;
     var collection_id = req.body.collection_id;
     var name = req.body.name;
@@ -3318,20 +3360,20 @@ exports.transferList = async (db, req, res) => {
     const [transferList, fields] = await promisePool.query(`select * from transfer_list where status=0`);
 
     while (i < transferList.length) {
-        console.log("value of i", i,transferList[i].email);
+        console.log("value of i", i, transferList[i].email);
         const [data,] = await promisePool.query(marketplaceQueries.checkUser, [transferList[i].email]);
         if (data.length > 0) {
-            var userid=data[0].id;
-         }
+            var userid = data[0].id;
+        }
 
         if (data.length == 0) {
-           var qry=`INSERT INTO users(email,password,is_email_verify) values('${transferList[i].email}','1234',0)`;
-           const [addUser,] = await promisePool.query(qry);
-           var userid=addUser.insertId;
+            var qry = `INSERT INTO users(email,password,is_email_verify) values('${transferList[i].email}','1234',0)`;
+            const [addUser,] = await promisePool.query(qry);
+            var userid = addUser.insertId;
         }
         else {
             const [itemData,] = await promisePool.query(marketplaceQueries.checkItem, [transferList[i].productId, transferList[i].productId, transferList[i].collectionName]);
-          //  console.log("itemData-> ", itemData);
+            //  console.log("itemData-> ", itemData);
             if (itemData.length == 0) {
                 //console.log("itemData lenght 0")
 
@@ -3354,14 +3396,14 @@ exports.transferList = async (db, req, res) => {
                     "status": 1,
                 }
                 console.log("transaction data", transaction);
-              const [trxData, fields1] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
+                const [trxData, fields1] = await promisePool.query(marketplaceQueries.insertTransaction, [transaction]);
 
                 await promisePool.query(marketplaceQueries.updateSold2, [1, userid, '', data[0].address, itemData[0].item_edition_id]);
                 const [updateTransferList, fields] = await promisePool.query(`UPDATE transfer_list SET status=1,item_edition_id= ${itemData[0].item_edition_id} WHERE id=${transferList[i].id}`);
                 const [trxEditionPurchase, fields3] = await promisePool.query(`INSERT INTO transaction_edition_purchase(transaction_id,item_edition_id) values(${trxData.insertId}, ${itemData[0].item_edition_id})`);
 
-              //  console.log("List data inserted successfully!!");
-              emailActivity.Activity(transferList[i].email, 'NFT received', `You have received a NFT from marketplace.digiphynft.com, please login to claim your NFT., https://marketplace.digiphynft.com`);
+                //  console.log("List data inserted successfully!!");
+                emailActivity.Activity(transferList[i].email, 'NFT received', `You have received a NFT from marketplace.digiphynft.com, please login to claim your NFT., https://marketplace.digiphynft.com`);
 
             }
         }
@@ -3412,7 +3454,7 @@ exports.getAdminTokenBalance = async (db, req, res) => {
 
 exports.transferToken = async (db, req, res) => {
     console.log("in transferToken");
-    
+
     const to_address = req.body.to_address;
     const token = req.body.token;
     try {
@@ -3427,35 +3469,35 @@ exports.transferToken = async (db, req, res) => {
             var apiData = await openNFT(settingData[0].public_key);
             var apiData2 = await openNFT(settingData[0].private_key);
 
-            const fromAddress =apiData;
+            const fromAddress = apiData;
             const privateKey = apiData2;
             const contractAddress = settingData[0].contractAddress;
 
-        const adminToken = await erc20.transfer({
-            'account': fromAddress,
-            'privateKey' : privateKey,
-            'contractAddress': contractAddress,
-            'to_address' : to_address,
-            'token' : token,
-            'getFee':false
+            const adminToken = await erc20.transfer({
+                'account': fromAddress,
+                'privateKey': privateKey,
+                'contractAddress': contractAddress,
+                'to_address': to_address,
+                'token': token,
+                'getFee': false
+            });
+
+            //console.log('adminToken', adminToken)
+            if (adminToken.success == true) {
+                return res.json({
+                    success: true,
+                    msg: "Token Transfered",
+                    data: adminToken.hash,
+                })
+            }
+            else if (adminToken.success == false) {
+                return res.json({
+                    success: false,
+                    msg: adminToken.error,
+                })
+            }
+
         });
-
-        //console.log('adminToken', adminToken)
-        if (adminToken.success == true) {
-            return res.json({
-                success: true,
-                msg: "Token Transfered",
-                data: adminToken.hash,
-            })
-        }
-        else if (adminToken.success == false) {
-            return res.json({
-                success: false,
-                msg: adminToken.error,
-            })
-        }
-
-    });
     }
     catch (err) {
         console.log(err)
@@ -3471,7 +3513,7 @@ exports.transferToken = async (db, req, res) => {
 exports.getWithdrawInr = async (db, req, res) => {
 
     var user_id = req.body.user_id;
-    console.log("...",req.body.user_id);
+    console.log("...", req.body.user_id);
     if (!user_id) {
         return res.status(400).send({
             success: false,
@@ -3479,7 +3521,7 @@ exports.getWithdrawInr = async (db, req, res) => {
         });
     }
 
-    db.query(adminQueries.getWithdrawInr,[user_id], async function (error, data) {
+    db.query(adminQueries.getWithdrawInr, [user_id], async function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3488,12 +3530,12 @@ exports.getWithdrawInr = async (db, req, res) => {
             });
         }
         if (data) {
-  
+
             res.status(200).send({
                 success: true,
                 msg: "Receive address updated successfully",
-            data: data,
-            
+                data: data,
+
             });
         } else {
             res.status(400).send({
@@ -3507,7 +3549,7 @@ exports.getWithdrawInr = async (db, req, res) => {
 exports.getCoinTransferToUser = async (db, req, res) => {
 
     var user_id = req.body.user_id;
-    console.log("...",req.body.user_id);
+    console.log("...", req.body.user_id);
     if (!user_id) {
         return res.status(400).send({
             success: false,
@@ -3515,7 +3557,7 @@ exports.getCoinTransferToUser = async (db, req, res) => {
         });
     }
 
-    db.query(adminQueries.getCoinTransferToUser,[user_id], async function (error, data) {
+    db.query(adminQueries.getCoinTransferToUser, [user_id], async function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3524,12 +3566,12 @@ exports.getCoinTransferToUser = async (db, req, res) => {
             });
         }
         if (data) {
-  
+
             res.status(200).send({
                 success: true,
                 msg: "Receive address updated successfully",
-            data: data,
-            
+                data: data,
+
             });
         } else {
             res.status(400).send({
@@ -3543,7 +3585,7 @@ exports.getCoinTransferToUser = async (db, req, res) => {
 exports.getWithdrawl = async (db, req, res) => {
 
     var user_id = req.body.user_id;
-    console.log("...",req.body.user_id);
+    console.log("...", req.body.user_id);
     if (!user_id) {
         return res.status(400).send({
             success: false,
@@ -3551,7 +3593,7 @@ exports.getWithdrawl = async (db, req, res) => {
         });
     }
 
-    db.query(adminQueries.getWithdrawl,[user_id], async function (error, data) {
+    db.query(adminQueries.getWithdrawl, [user_id], async function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -3560,12 +3602,12 @@ exports.getWithdrawl = async (db, req, res) => {
             });
         }
         if (data) {
-  
+
             res.status(200).send({
                 success: true,
                 msg: "Receive address updated successfully",
-            data: data,
-            
+                data: data,
+
             });
         } else {
             res.status(400).send({

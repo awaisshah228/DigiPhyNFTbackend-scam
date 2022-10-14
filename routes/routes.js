@@ -110,6 +110,8 @@ router.post('/getSettings', admin.getSettings.bind(this, db));
 router.post('/adminWalletUpdate', admin.adminWalletUpdate.bind(this, db));
 router.post('/updateFee', admin.updateFee.bind(this, db));
 router.post('/updateItemMarket', admin.updateItemMarket.bind(this, db));
+router.post('/updateWalletItemMarket', admin.updateWalletItemMarket.bind(this, db));
+
 router.post('/updateItemAdmin', admin.updateItemAdmin.bind(this, db));
 
 router.post('/updatePlateformFee', admin.updatePlateformFee.bind(this, db));
@@ -308,6 +310,7 @@ router.get('/nft/metadata/:id' ,marketplace.getMetadataJson.bind(this, db));
 router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
 router.post('/depositToken' ,marketplace.depositToken.bind(this, db));
 
+router.get('/getNFTfromblockchain/:address',marketplace.getNFTfromblockchain.bind(this, db));
 
 
 
