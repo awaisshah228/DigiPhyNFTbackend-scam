@@ -310,7 +310,7 @@ router.get('/nft/metadata/:id' ,marketplace.getMetadataJson.bind(this, db));
 router.post('/transferTokenToMetamaskWallet' ,marketplace.transferTokenToMetamaskWallet.bind(this, db));
 router.post('/depositToken' ,marketplace.depositToken.bind(this, db));
 
-router.get('/getNFTfromblockchain/:address',marketplace.getNFTfromblockchain.bind(this, db));
+router.get('/getNFTfromblockchain/:address/:user_id',marketplace.getNFTfromblockchain.bind(this, db));
 
 
 

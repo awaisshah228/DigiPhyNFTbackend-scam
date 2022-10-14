@@ -4084,7 +4084,7 @@ exports.depositToken = async (db, req, res) => {
 
 exports.getNFTfromblockchain = async (db, req, res) => {
     let address = req.params.address;
-    let user_id=457;
+    let user_id=req.params.user_id;
 
     const contractAddress = []
     const [user_collection,] = await promisePool.query("SELECT contractAddress FROM user_collection where contractAddress is not null ORDER BY id DESC");
