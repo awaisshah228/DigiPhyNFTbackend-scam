@@ -17,6 +17,11 @@ const { Console } = require('console');
 const adminQueries = require('../services/adminQueries');
 const { json } = require('express');
 const emailActivity = require('../controllers/emailActivity');
+const mysql = require('mysql2');
+const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, password: config.password, database: config.database, port: config.mysqlPort });
+// now get a Promise wrapped instance of that pool
+const promisePool = pool.promise();
+
 
 function closeNFT(code) {
     try {
@@ -1377,4 +1382,28 @@ exports.getUserDetailData = async (db, req, res) => {
         });
     }
 
+}
+
+
+exports.cancelListing = async (db, req, res) => {
+    console.log("in cancelListing");
+    let item_id = req.body.item_id;
+    let owner_id = req.body.owner_id;
+    let quantity = req.body.quantity;
+
+    let qryData = `select id from item_edition where item_id=${item_id} and owner_id=${owner_id} and is_on_sale=1 and id not in (select item_edition_id from transaction where item_id=${item_id}) order by id limit ${quantity}`;
+    console.log(qryData);
+
+    const [editionList] = await promisePool.query(qryData);
+    let i=0;
+    while(i< editionList.length){
+        let qry=`UPDATE item_edition SET is_on_sale=0 WHERE id=${editionList[i].id}`;
+        console.log(qry);
+        const [editionList2] = await promisePool.query(qry);  
+        i++;  
+    }
+           return res.status(200).send({
+                success: true,
+                msg: "Listing has been canceled"
+    });
 }

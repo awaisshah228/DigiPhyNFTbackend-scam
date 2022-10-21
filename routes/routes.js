@@ -110,6 +110,8 @@ router.post('/getSettings', admin.getSettings.bind(this, db));
 router.post('/adminWalletUpdate', admin.adminWalletUpdate.bind(this, db));
 router.post('/updateFee', admin.updateFee.bind(this, db));
 router.post('/updateItemMarket', admin.updateItemMarket.bind(this, db));
+router.post('/updateItemMarketBulkNft', admin.updateItemMarketBulkNft.bind(this, db));
+
 router.post('/updateWalletItemMarket', admin.updateWalletItemMarket.bind(this, db));
 
 router.post('/updateItemAdmin', admin.updateItemAdmin.bind(this, db));
@@ -265,9 +267,14 @@ router.post('/updateProfilePic', userupload, signup.updateProfilePic.bind(this, 
 router.post('/getAboutDetail',signup.getAboutDetail.bind(this,db));
 router.post('/updateAboutDetail',signup.updateAboutDetail.bind(this,db));
 
+router.post('/cancelListing',signup.cancelListing.bind(this,db));
+
+
 router.post('/getUserDetail',signup.getUserDetail.bind(this, db))
 router.post('/addSubscriber',signup.addSubscriber.bind(this, db));
 router.get('/getSubscriber',signup.getSubscriber.bind(this, db));
+
+
 
 router.post('/getshippingaddress',signup.getShippingAddress.bind(this, db));
 router.post('/updateshippingaddress',signup.updateShippingAddress.bind(this, db));

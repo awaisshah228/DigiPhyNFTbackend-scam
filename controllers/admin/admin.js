@@ -130,6 +130,66 @@ exports.updateItemMarket = async (db, req, res) => {
     }
 }
 
+
+//============================================  Update on market place ====================================
+
+exports.updateItemMarketBulkNft = async (db, req, res) => {
+    var dataArr = req.body.dataArr
+    try {
+
+        for (let i = 0; i < dataArr.length; i++) {
+            let _id = dataArr[i].id;
+            let created_by = dataArr[i].created_by;
+            let quantity = dataArr[i].quantity;
+            let price = dataArr[i].price;
+
+
+            console.log('dataArr[i].item_id', _id, created_by, quantity, price)
+            let qry = `SELECT id FROM item_edition where item_id=${_id} and owner_id=${created_by} and is_on_sale=0 ORDER BY id limit ${quantity}`
+            db.query(qry, async function (error, checkData) {
+                console.log('error', error)
+                console.log('checkData', checkData)
+                if (error) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "Error : Server not responding please try again later! ",
+                        error
+                    });
+                }
+
+                if (checkData.length < quantity) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "You have only" + checkData.length + " editions.!!",
+                        error
+                    });
+                }
+                console.log(checkData)
+                var i = 0;
+                while (i < checkData.length) {
+                    let qry1 = `update item_edition set is_on_sale=1,is_sold=0,price=${price} where id=${checkData[i].id}`
+                    console.log('qry1',qry1)
+                    const [data,] = await promisePool.query(qry1);
+                    i++;
+                }
+                return res.status(200).send({
+                    success: true,
+                    msg: "Item updated successfully",
+                });
+
+            });
+
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(400).send({
+            success: false,
+            msg: "unexpected internal error",
+            err
+        });
+    }
+}
+
 exports.updateWalletItemMarket = async (db, req, res) => {
 
     var item_id = req.body.item_id;
@@ -2764,44 +2824,13 @@ exports.deleteUser = async (db, req, res) => {
 
 
 exports.addBulkNftByAdmin = async (db, req, res) => {
-    console.log("in addBulkNftByAdmin");
     var folderName = Math.random().toString(36).slice(2);
     var form = new formidable.IncomingForm();
     form.parse(req, async function (err, fields, files) {
-
-        var zip_file_upload = (!files.zip_file) ? null : (!files.zip_file.name) ? null : files.zip_file;
-        if (!zip_file_upload) {
-            return res.status(400).send({
-                success: false,
-                msg: "Please select zip file!! "
-            });
-        } else {
-            var dir = './uploads/' + folderName
-            fs.mkdirSync(dir);
-            var oldpath = files.zip_file.path;
-            var filePath = dir + '/'
-            let newfilename = filePath + files.zip_file.name
-            await fs.readFile(oldpath, async function (err, data) {
-                if (err) {
-                    return res.status(400).send({
-                        success: false,
-                        msg: "Please select zip file!! "
-                    });
-                }
-                await fs.writeFile(newfilename, data, function (err) {
-                    if (err) {
-                        return res.status(400).send({
-                            success: false,
-                            msg: "Please select zip file!! "
-                        });
-                    }
-                    var zip = new AdmZip(newfilename);
-                    zip.extractAllTo(filePath);
-                });
-            });
-        }
-
-
+        var dir = './uploads/' + folderName
+        fs.mkdirSync(dir);
+        var oldpath = files?.zip_file?.path;
+        var filePath = dir + '/'
         var excel_file_upload = (!files.excel_file) ? null : (!files.excel_file.name) ? null : files.excel_file;
         if (!excel_file_upload) {
             return res.status(400).send({
@@ -2820,43 +2849,27 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                         msg: "Something want wrong, Please try again!"
                     });
                 }
-                await fs.writeFile(newExlFilename, data, function (err) {
+                await fs.writeFile(newExlFilename, data, async function (err) {
                     if (err) {
                         return res.status(400).send({
                             success: false,
                             msg: "Something want wrong, Please try again!"
                         });
                     } else {
-                        var excel_file = files.excel_file.name
+                        var excel_file = files.excel_file.name;
                         if (excel_file) {
                             var filepath = path.join('uploads/' + folderName + '/', excel_file);
                             const file = reader.readFile(filepath)
                             const sheets = file.SheetNames
-                            // db.query(marketplaceQueries.getSingleCollectionDetails, [fields.user_collection_id], async function (error, userCollections) {
-                            //     if (error) {
-                            //         return res.status(400).send({
-                            //             success: false,
-                            //             msg: "Something want wrong, Please try again!"
-                            //         });
-                            //     }
 
-                            //     var totalNftCount = userCollections[0].totalNft + sheets.length
-                            //     if (userCollections[0].max_nft_supply < totalNftCount) {
-                            //         return res.status(400).send({
-                            //             success: false,
-                            //             msg: "Collection limit exceeded!!"
-                            //         });
-                            //     } else {
                             const temp1 = reader.utils.sheet_to_json(
                                 file.Sheets[file.SheetNames[0]])
-
                             if (temp1.length == '0') {
                                 return res.status(400).send({
                                     success: false,
                                     msg: "No data found in excel file!!"
                                 });
                             } else {
-
                                 var title = Object.keys(temp1[0])[0]
                                 if (title != 'Title') {
                                     return res.status(400).send({
@@ -2868,7 +2881,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                 var createFolderData = {
                                     'folder_name': folderName
                                 }
-                                db.query(marketplaceQueries.createFolder, [createFolderData], async function
+                                await db.query(marketplaceQueries.createFolder, [createFolderData], async function
                                     (error, createFolderRes) {
 
                                     await db.query(adminQueries.getSettings, async function (error, commissionPercent) {
@@ -2886,8 +2899,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                             const temp = reader.utils.sheet_to_json(
                                                 file.Sheets[file.SheetNames[i]]);
 
-
-                                            temp.forEach(async (resExl) => {
+                                            await temp.forEach(async (resExl) => {
 
                                                 if (resExl.Description) {
                                                     var desc = resExl.Description;
@@ -2896,17 +2908,15 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     var desc1 = ""
                                                 }
 
-
-
                                                 var singleData = {
                                                     'bulk_nft_master_id': createFolderRes.insertId,
                                                     'name': resExl.Title,
                                                     'description': desc1,
                                                     "image": resExl.Image,
                                                     "image_original": resExl.Image,
-                                                    "file_type": 'image',
-                                                    "item_category_id": fields.item_category_id,
-                                                    "user_collection_id": fields.user_collection_id,
+                                                    "file_type": resExl.file_type,
+                                                    "item_category_id": resExl.item_category_id,
+                                                    "user_collection_id": resExl.user_collection_id,
                                                     "start_date": resExl.start_date,
                                                     "price": resExl.price,
                                                     "owner_id": fields.user_id,
@@ -2922,104 +2932,86 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     "unlockable_content": resExl.unlockable_content,
                                                     "nft_type": resExl.nft_type,
                                                     "address": resExl.user_address,
-                                                    "royalty_percent": resExl.royalty_percentage,
                                                     "commission_percent": commissionPercent[0].commission_percent,
-                                                    "approve_by_admin": 0,
                                                     "is_on_sale": 0,
                                                     "bulkNFT": 0
 
                                                 }
+                                                console.log('singleData', singleData)
+                                                await db.query(marketplaceQueries.insertItem, [singleData], async function (error, data) {
+                                                    if (data.insertId) {
+                                                        var t = 1;
+                                                        for (var s = 20; s < 1500; s++) {
+                                                            var attr = Object.keys(resExl);
 
-                                                var t = 1;
+                                                            if (attr[s] != 'attributes_name_' + t) {
+                                                                break
+                                                            }
+                                                            var key1 = attr[s]
+                                                            console.log('key1', key1)
+                                                            s = s + 1
 
-                                                for (var s = 3; s < 1500; s++) {
-                                                    var attr = Object.keys(resExl)
+                                                            if (attr[s] != 'attributes_value_' + t) {
+                                                                break
+                                                            }
 
-                                                    if (attr[s] != 'attributes_name_' + t) {
-                                                        break
-                                                    }
-                                                    var key1 = attr[s]
-                                                    s = s + 1
-                                                    //console.log('attr1111111111111', attr[s], key1)
-
-
-                                                    if (attr[s] != 'attributes_value_' + t) {
-                                                        break
-                                                    }
-
-
-
-
-
-                                                    db.query(marketplaceQueries.insertItem, [singleData], async function (error, data) {
-
-
-
-
-
-                                                        if (error) {
-                                                            return res.status(400).send({
-                                                                success: false,
-                                                                msg: "Something want wrong, Please try again!!"
-                                                            });
-                                                        } else {
-
-
-                                                            var value = attr[s]
+                                                            var value = attr[s];
                                                             attrArr = {
                                                                 'item_id': data.insertId,
                                                                 'type': resExl[key1],
                                                                 'value': resExl[value]
                                                             }
+                                                            console.log('attrArr', attrArr)
+                                                            await db.query(marketplaceQueries.insertItemAttr, [attrArr], async function (error, data12) {
+
+                                                            })
+
+                                                            t = t + 1
+                                                        }                                                        /*  -----------------------------------Insertinto Edition */
+
+                                                        for (var i = 1; i <= resExl.quantity; i++) {
+                                                            console.log('1111');
+
+                                                            var item_ed = {
+                                                                "edition_text": `${i} of ${resExl.quantity}`,
+                                                                "edition_no": i,
+                                                                "item_id": data.insertId,
+                                                                "is_sold": 0,
+                                                                "owner_id": fields.user_id,
+                                                                "user_collection_id": fields.user_collection_id,
+                                                                "start_date": resExl.start_date,
+                                                                "end_date": resExl.end_date,
+                                                                "expiry_date": resExl.expiry_date,
+                                                                "user_address": resExl.user_address,
+                                                                "price": resExl.price,
+                                                                "ip": null,
+                                                                "datetime": new Date()
+                                                            };
 
 
-                                                            //console.log('attr22222222222222', resExl[key1], resExl[value])
 
-                                                            await db.query(marketplaceQueries.insertItemAttr, [attrArr]);
-
-                                                            /*  -----------------------------------Insertinto Edition */
-
-                                                            for (var i = 1; i <= resExl.quantity; i++) {
-                                                                //console.log('1111');
-
-                                                                var item_ed = {
-                                                                    "edition_text": `${i} of ${resExl.quantity}`,
-                                                                    "edition_no": i,
-                                                                    "item_id": data.insertId,
-                                                                    "is_sold": 0,
-                                                                    "owner_id": fields.user_id,
-                                                                    "user_collection_id": fields.user_collection_id,
-                                                                    "start_date": resExl.start_date,
-                                                                    "end_date": resExl.end_date,
-                                                                    "expiry_date": resExl.expiry_date,
-                                                                    "user_address": resExl.user_address,
-                                                                    "price": resExl.price,
-                                                                    "ip": null,
-                                                                    "datetime": new Date()
-                                                                };
-
-
-
-                                                                await db.query(marketplaceQueries.insertEdition, [item_ed])
-                                                            }
-                                                            //console.log('InsertId:', data.insertId);
-                                                            var updateData = {
-                                                                "token_id": data.insertId
-                                                            }
-                                                            await db.query(adminQueries.updateItem, [updateData, data.insertId])
-
-
-                                                            p++;
-                                                            if (p == sheets.length) {
-                                                                return res.status(200).send({
-                                                                    success: true,
-                                                                    msg: "NFTs data imported successfully!!"
-                                                                });
-                                                            }
-
+                                                            await db.query(marketplaceQueries.insertEdition, [item_ed])
                                                         }
-                                                    })
-                                                }
+
+                                                        var updateData = {
+                                                            "token_id": data.insertId
+                                                        }
+                                                        await db.query(adminQueries.updateItem, [updateData, data.insertId])
+                                                        p++;
+                                                        if (p == sheets.length) {
+                                                            return res.status(200).send({
+                                                                success: true,
+                                                                msg: "NFTs data imported successfully!!"
+                                                            });
+                                                        }
+                                                    } else {
+                                                        return res.status(400).send({
+                                                            success: false,
+                                                            msg: "Something want wrong, Please try again!!"
+                                                        });
+                                                    }
+                                                })
+
 
                                             })
 

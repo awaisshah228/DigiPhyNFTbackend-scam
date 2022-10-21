@@ -39,10 +39,11 @@ const erc20 = require('./web3/erc20.js');
 const NFT = require('./web3/nft.js');
 
 
-const mysql = require('mysql2');
+
 const { JWT_SECRET_KEY } = require("../config");
 const { end } = require("../utils/connection");
 // create the pool
+const mysql = require('mysql2');
 const pool = mysql.createPool({ host: config.mysqlHost, user: config.user, password: config.password, database: config.database, port: config.mysqlPort });
 // now get a Promise wrapped instance of that pool
 const promisePool = pool.promise();
@@ -144,7 +145,7 @@ exports.getMetadataJson = async (db, req, res) => {
         "external_url": item[0].external_link,
         "image": "https://digiphy.mypinata.cloud/ipfs/" + item[0].image,
         "attributes": attributes,
-        "file_type":item[0].file_type
+        "file_type": item[0].file_type
     })
 }
 
@@ -968,7 +969,7 @@ exports.getUserItem = async (db, req, res) => {
     try {
         //var qry = `Select  cl.contractAddress, ie.isClaimed, it.id as item_id,concat('${config.mailUrl}backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by,getUserUnsoldNFT(${user_id},it.id) as totalStock,getUnclaimedNFTCount(it.id,${user_id}) as unclaimedNFT, it.name,ie.is_on_sale,getRemainingForSale(it.id,${user_id}) as remainingForSale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,cl.name as collection_name,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from item_edition as ie left join item as it on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where ie.owner_id=${user_id} and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id)`;
 
-        var qry = `select a.*,getUserUnsoldNFT(${user_id},a.item_id) as totalStock,getUnclaimedNFTCount(a.item_id,${user_id}) as unclaimedNFT,getRemainingForSale(a.item_id,${user_id}) as remainingForSale from (Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.datetime,concat('https://digiphynft.shop/backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from  item as it  left join item_edition as ie on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where it.created_by=${user_id}  and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id) and ie.owner_id=${user_id} GROUP BY it.id) as a where 1 `;
+        var qry = `select a.*,getUserUnsoldNFT(${user_id},a.item_id) as totalStock,getCancelListingCount(${user_id},a.item_id) as cancelListingCount, getUnclaimedNFTCount(a.item_id,${user_id}) as unclaimedNFT,getRemainingForSale(a.item_id,${user_id}) as remainingForSale from (Select  cl.contractAddress, ie.isClaimed, it.id as item_id,ie.datetime,concat('https://digiphynft.shop/backend/uploads/',it.local_image) as local_image, ie.id as item_edition_id,ie.user_address,ie.owner_id,t.blockchain_status,it.created_by, it.name,ie.is_on_sale,it.sell_type,it.approve_by_admin,it.description,it.bulkNFT,cl.name as collection_name,cl.is_approved, it.image,it.file_type,it.owner,it.item_category_id,it.token_id,ie.price,cl.id as collection_id,cl.user_id,ie.is_sold,ie.expiry_date,ic.name as category_name,case when it.edition_type=2 then 'Open'  else ie.edition_text end as edition_text from  item as it  left join item_edition as ie on it.id=ie.item_id LEFT JOIN user_collection as cl ON cl.id = it.user_collection_id left join (select id,user_id,blockchain_status from transaction where user_id=${user_id} and transaction_type_id=6 order by id desc limit 1) as t on t.user_id=ie.owner_id LEFT JOIN item_category as ic ON it.item_category_id=ic.id where it.created_by=${user_id}  and ie.item_id in (select min(id) from item where created_by=${user_id} group by id,owner_id) and ie.owner_id=${user_id} GROUP BY it.id) as a where 1 `;
 
         if (user_id > 0) {
             qry = qry + ` and a.created_by=${user_id}`;
@@ -2321,13 +2322,13 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
         if (mintRes.hash) {
             var i = 0;
             while (i < editionResult.length) {
+                console.log("deleted edition id ",editionResult[i].id)
                 // await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
                 //     isMinted: 1,
                 //     isClaimed: 1,
                 //     hash: mintRes.hash,
                 //     current_owner: new_owner_address, // new owner update
                 // }, editionResult[i].id]);
-
                 await promisePool.query(`DELETE FROM item_edition WHERE id = ${editionResult[i].id}`);
                 i++;
             }
@@ -2536,7 +2537,7 @@ exports.itemPurchase = async (db, req, res) => {
                     const [data,] = await promisePool.query(qry);
                 }
 
-                var qry = `INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
+                var qry = `INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee.fee ? gas_fee.fee : '0'}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
 
                 await db.query(qry, async function (error, selldata) {
                     if (error) {
@@ -2572,7 +2573,7 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var token2 = parseFloat(token) * -1;
                 var amount2 = parseFloat(amount) * -1;
-                var qry = `INSERT INTO transaction (gas_fee,user_id,item_id,item_edition_id,token,transaction_type_id,amount,status,user_address,blockchain_status)select ${gas_fee},${user_id},i.id,ie.id,${token2},${ttype},${amount2} as price,1,'${user_address}',0 from item_edition as ie left join item as i on i.id=ie.item_id where ie.id =${item_edition_id}`;
+                var qry = `INSERT INTO transaction (gas_fee,user_id,item_id,item_edition_id,token,transaction_type_id,amount,status,user_address,blockchain_status)select ${gas_fee.fee ? gas_fee.fee : '0'},${user_id},i.id,ie.id,${token2},${ttype},${amount2} as price,1,'${user_address}',0 from item_edition as ie left join item as i on i.id=ie.item_id where ie.id =${item_edition_id}`;
                 await db.query(qry, async function (error, buydata) {
                     console.log('error 2494', error)
                     if (error) {
@@ -4084,7 +4085,7 @@ exports.depositToken = async (db, req, res) => {
 
 exports.getNFTfromblockchain = async (db, req, res) => {
     let address = req.params.address;
-    let user_id=req.params.user_id;
+    let user_id = req.params.user_id;
 
     const contractAddress = []
     const [user_collection,] = await promisePool.query("SELECT contractAddress FROM user_collection where contractAddress is not null ORDER BY id DESC");
@@ -4092,7 +4093,7 @@ exports.getNFTfromblockchain = async (db, req, res) => {
         contractAddress.push(item.contractAddress.toLocaleUpperCase())
     })
     const response = await NFT.getAllNFTFromBlockchainByAddress(address, contractAddress);
-    
+    // console.log(response)
     if (contractAddress.length == 0) {
         return res.status(400).send({
             success: false,
@@ -4101,14 +4102,13 @@ exports.getNFTfromblockchain = async (db, req, res) => {
     }
     else {
         if (response.success) {
-            for(let i=0; i< response.data.length;i++){
-                let qry = `select getClaimedNFTOnSaleCount(${response.data[i].tokenId},${user_id}) as onSaleNft`;
+            for (let i = 0; i < response.data.length; i++) {
+                let qry = `select getClaimedNFTOnSaleCount(${response.data[i].tokenId},${user_id}) as onSaleNft,file_type FROM item WHERE token_id = ${response.data[i].tokenId}`;
                 let [item] = await promisePool.query(qry);
-                response.data[i].balance = response.data[i].balance - item[0].onSaleNft
-                
-                
+                response.data[i].balance = response.data[i].balance - item[0]?.onSaleNft
+                response.data[i].file_type = item[0]?.file_type
             }
-            
+
             return res.status(200).send({
                 success: true,
                 walletAddress: address,
@@ -4118,7 +4118,7 @@ exports.getNFTfromblockchain = async (db, req, res) => {
             return res.status(200).send({
                 success: false,
                 walletAddress: address,
-                msg:response.error
+                msg: response.error
             });
         }
     }
