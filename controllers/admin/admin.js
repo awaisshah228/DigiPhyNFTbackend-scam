@@ -2247,34 +2247,52 @@ exports.updateItem = async (db, req, res) => {
 
 exports.deleteItem = async (db, req, res) => {
 
-    var item_edition_id = req.body.item_edition_id;
-    if (!item_edition_id) {
+    var item_id = req.body.item_id;
+    if (!item_id) {
         return res.status(400).send({
             success: false,
-            msg: "item_edition_id required!! "
+            msg: "item_id required!! "
         });
     }
 
-    await db.query(adminQueries.deleteItem, [item_edition_id], function (error, data) {
-        if (error) {
+    await db.query(adminQueries.checkTransaction, [item_id], async function (error, data) {
+        console.log('data.length',data.length)
+        if (data.length > 0) {
             return res.status(400).send({
                 success: false,
-                msg: "You can't delete NFT purchased by other or in bid process!!",
-                error
+                msg: "Transaction in this Nft!"
             });
         }
-        if (data) {
-            res.status(200).send({
-                success: true,
-                msg: "Item Delete Successfully"
-            });
-        } else {
-            res.status(200).send({
+        await db.query(adminQueries.checkItemEditionView, [item_id], async function (error, data1) {
+            console.log('data.length',data.length)
+            await db.query(adminQueries.checkItemProperties, [item_id], async function (error, data5) {
+       
+        await db.query(adminQueries.checkItemEditionLike, [item_id], async function (error, data2) {
+       
+        await db.query(adminQueries.checkItemEditionDeletion, [item_id], async function (error, data3) {
+       
+        await db.query(adminQueries.checkItemDeletion, [item_id], async function (error, data4) {
+            console.log('data4',data4,error)
+            if (data4) {
+                return res.status(200).send({
+                    success: true,
+                    msg: "Item Deleted successfully!"
+                });
+            }
+        
+        else {
+            return res.status(400).send({
                 success: false,
                 msg: "Deletion failed!!"
             });
         }
     });
+});
+});
+
+});
+});
+});
 }
 
 

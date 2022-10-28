@@ -88,7 +88,11 @@ module.exports = {
   transactionDetailAll:"SELECT t.id as transaction_id,t.edition_text,tt.name as transaction_type,t.transaction_type_id,u.full_name,u.email,i.id as item_id,t.item_edition_id,i.name as item_name,i.description,i.image,t.amount,t.currency,date_format(t.datetime,'%d-%M-%y') as transaction_date  FROM transaction as t left join users as u on u.id=t.user_id left join item_edition as ie on ie.id=t.item_edition_id left join item as i on i.id=ie.item_id left join transaction_type as tt on tt.id=t.transaction_type_id where t.transaction_type_id=1 or t.transaction_type_id=4 order by t.id desc",
   transactionDetailAllWithdraw:"SELECT t.id as transaction_id,t.edition_text,tt.name as transaction_type,t.transaction_type_id,u.full_name,u.user_name,u.email,i.id as item_id,t.item_edition_id,i.name as item_name,i.description,i.image,t.amount,t.currency,bk.account_number,bk.ifsc_code,bk.account_name,bk.bank_name,date_format(t.datetime,'%d-%M-%y') as transaction_date  FROM transaction as t left join users as u on u.id=t.user_id left join item_edition as ie on ie.id=t.item_edition_id left join item as i on i.id=ie.item_id left join transaction_type as tt on tt.id=t.transaction_type_id left join user_bank_detail as bk on bk.user_id = t.user_id where t.transaction_type_id=3 order by t.id desc",
   transactionTotalSum : "select sum(amount) as amount from transaction WHERE transaction_type_id = 1",
-  transactionTotalBid : "select sum(amount*-1) as amount from transaction WHERE transaction_type_id = 4"
-
-
+  transactionTotalBid : "select sum(amount*-1) as amount from transaction WHERE transaction_type_id = 4",
+  checkTransaction : "Select id from transaction where item_id=?",
+  checkItemEditionView : "delete from item_edition_view where item_edition_id in (select id from item_edition where item_id=?)",
+  checkItemEditionLike :  "delete from item_edition_like where item_edition_id in (select id from item_edition where item_id=?)",  
+  checkItemEditionDeletion :"delete from item_edition where item_id =?",
+  checkItemDeletion  :"delete from item where id=?",
+  checkItemProperties:"delete from item_properties where item_id =?"
 }
