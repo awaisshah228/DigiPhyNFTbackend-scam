@@ -85,14 +85,22 @@ exports.updateItemMarket = async (db, req, res) => {
     var quantity = req.body.quantity;
     var price = req.body.price;
     var gas_fee = req.body.gas_fee;
+    var sender_wallet = req.body.sender_wallet;
+    var receiver_wallet = req.body.receiver_wallet;
+    var transaction_hash = req.body.transaction_hash;
+
 
     //await db.query('update item_edition set is_sold = 0 where id=?', [item_edition_id]);
     console.log('gas_fee111:', gas_fee)
+    console.log('sender_wallet:', sender_wallet)
+    console.log('receiver_wallet:', receiver_wallet)
+    console.log('transaction_hash:', transaction_hash)
+
 
     try {
         if (gas_fee) {
             console.log('gas_fee11:', gas_fee)
-            var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee},'Put on sale')`;
+            var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee},${sender_wallet},${receiver_wallet},${transaction_hash},'Put on sale')`;
             const [data,] = await promisePool.query(qry);
         }
         db.query(adminQueries.checkEditionQty, [item_id, user_id, parseInt(quantity)], async function (error, checkData) {

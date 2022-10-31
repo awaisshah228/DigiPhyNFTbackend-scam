@@ -1912,7 +1912,7 @@ exports.bidAccept = async (db, req, res) => {
 
                 if (gas_fee) {
                     console.log('gas_fee3222:', gas_fee)
-                    var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee.fee},'Bid Accept')`;
+                    var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${token_owner_address}','${from}','${mintRes?.hash}','Bid Accept')`;
 
                     const [data,] = await promisePool.query(qry);
                 }
@@ -2342,14 +2342,15 @@ exports.blockchainupdatetransaction = async (db, req, res) => {
             }
 
             console.log("gas_fee3: ", gas_fee)
-
+            
             if (gas_fee) {
+                console.log('data11111',from,new_owner_address,mintRes.hash)
                 console.log('gas_fee3222:', gas_fee)
-                var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee.fee},'Claim Nft')`;
+                var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${from}','${new_owner_address}','${mintRes.hash}','Claim Nft')`;
 
                 const [data,] = await promisePool.query(qry);
             }
-
+            console.log('qqqqqqqqqqqq',qry)
             await promisePool.query(adminQueries.updateblockchainstatus, [data, user_id, item_id]);
 
             return res.status(200).send({
@@ -2447,6 +2448,15 @@ exports.itemPurchase = async (db, req, res) => {
                             current_owner: from,
                         }, item_id]);
                     }
+
+
+                    if (gas_fee) {
+                        console.log('gas_fee3222:', gas_fee)
+                        var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${token_owner_address}','${from}','${mintRes?.hash}','Item Purchase')`;
+    
+                        const [data,] = await promisePool.query(qry);
+                        console.log('22222222',qry)
+                    } 
                 }
             }
 
@@ -2529,13 +2539,9 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
                 var platformFee = ((trx[0].price * purchased_quantity) * settingData[0].platform_fee / 100)
-
-                if (gas_fee) {
-                    console.log('gas_fee3222:', gas_fee)
-                    var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,type)VALUES(${item_id},${user_id},${gas_fee.fee},'Item Purchase')`;
-
-                    const [data,] = await promisePool.query(qry);
-                }
+              
+                
+                
 
                 var qry = `INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee.fee ? gas_fee.fee : '0'}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
 
@@ -2614,7 +2620,7 @@ exports.itemPurchase = async (db, req, res) => {
                         }
 
 
-
+                        console.log('data1hash',data1hash)
                         //console.log("updateTransferHash");
                         await db.query(marketplaceQueries.updateTransferHash, [data1hash, item_edition_id], async function (error, data) {
                             if (error) {
