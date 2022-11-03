@@ -847,7 +847,7 @@ exports.getUserCollection = async (db, req, res) => {
 exports.getUserOwnerItem = async (db, req, res) => {
     console.log("in getUserCollection owner");
     var user_id = req.body.user_id;
-    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id, user_id], function (error, data) {
+    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id, user_id, user_id,user_id,user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -2232,13 +2232,13 @@ exports.getUserBids = async (db, req, res) => {
 
 
 exports.blockchainupdatetransaction = async (db, req, res) => {
-
+console.log("in blockchainupdatetransaction");
     let user_id = req.body.user_id;
     let new_owner_address = req.body.new_owner_address;
     let item_id = req.body.item_id;
     let item_edition_id = req.body.item_edition_id;
     let claimQuantity = req.body.claimQuantity;
-
+    console.log("claimQuantity ",claimQuantity);
     if (!new_owner_address) {
         return res.status(400).send({
             success: false,
@@ -2448,10 +2448,8 @@ exports.itemPurchase = async (db, req, res) => {
                             current_owner: from,
                         }, item_id]);
                     }
-
-
-                    if (gas_fee) {
-                        console.log('gas_fee3222:', gas_fee)
+                    if (gas_fee.success != false) {
+                        console.log('gas_fee3222:', mintRes.hash,gas_fee)
                         var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${token_owner_address}','${from}','${mintRes?.hash}','Item Purchase')`;
     
                         const [data,] = await promisePool.query(qry);

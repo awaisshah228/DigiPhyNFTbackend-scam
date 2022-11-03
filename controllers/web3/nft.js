@@ -216,7 +216,15 @@ exports.getAllNFTFromBlockchainByAddress = async (address, contractAddress) => {
         const promiseRes = await new Promise(function (resolve, reject) {
             ALCHEMY.getNftsForOwner(alchemy, address).then(nfts => {
                 
-                let data = nfts.ownedNfts.filter(item => item.tokenType == "ERC1155" && contractAddress.indexOf(nfts.ownedNfts[0].contract.address.toLocaleUpperCase()) > -1)
+                let data = nfts.ownedNfts.filter(item => {
+                    if(item.tokenType == "ERC1155"){
+                        item.isDigiphyNFT = false;
+                        if(contractAddress.indexOf(nfts.ownedNfts[0].contract.address.toLocaleUpperCase()) > -1){
+                            item.isDigiphyNFT = true;
+                        }
+                        return item;
+                    }
+                })
                 resolve(data);
             }).catch(err => {
                 resolve(err)

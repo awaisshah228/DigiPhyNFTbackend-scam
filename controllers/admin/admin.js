@@ -2853,10 +2853,40 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
     var folderName = Math.random().toString(36).slice(2);
     var form = new formidable.IncomingForm();
     form.parse(req, async function (err, fields, files) {
-        var dir = './uploads/' + folderName
-        fs.mkdirSync(dir);
-        var oldpath = files?.zip_file?.path;
-        var filePath = dir + '/'
+
+        var zip_file_upload = (!files.zip_file) ? null : (!files.zip_file.name) ? null : files.zip_file;
+        if (!zip_file_upload) {
+            return res.status(400).send({
+                success: false,
+                msg: "Please select zip file!! "
+            });
+        } else {
+            var dir = './uploads/' + folderName
+            fs.mkdirSync(dir);
+            var oldpath = files.zip_file.path;
+            var filePath = dir + '/'
+            let newfilename = filePath + files.zip_file.name
+            await fs.readFile(oldpath, async function (err, data) {
+                if (err) {
+                    return res.status(400).send({
+                        success: false,
+                        msg: "Please select zip file!! "
+                    });
+                }
+                await fs.writeFile(newfilename, data, function (err) {
+                    if (err) {
+                        return res.status(400).send({
+                            success: false,
+                            msg: "Please select zip file!! "
+                        });
+                    }
+                    var zip = new AdmZip(newfilename);
+                    zip.extractAllTo(filePath);
+                });
+            });
+        }
+
+
         var excel_file_upload = (!files.excel_file) ? null : (!files.excel_file.name) ? null : files.excel_file;
         if (!excel_file_upload) {
             return res.status(400).send({
@@ -2887,7 +2917,7 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                             var filepath = path.join('uploads/' + folderName + '/', excel_file);
                             const file = reader.readFile(filepath)
                             const sheets = file.SheetNames
-
+                           
                             const temp1 = reader.utils.sheet_to_json(
                                 file.Sheets[file.SheetNames[0]])
                             if (temp1.length == '0') {
@@ -2926,7 +2956,29 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                 file.Sheets[file.SheetNames[i]]);
 
                                             await temp.forEach(async (resExl) => {
+                                                
+                                                let localImg = path.join('uploads/' + folderName + '/', resExl.Image);
+                                                console.log('resxcl',localImg)
 
+                                                
+                                                const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+                                                let formdata = new FormData();
+                                                formdata.append('file', fs.createReadStream(localImg))
+                                            
+                                            
+                                                const response2 = await fetch(url, {
+                                                    method: 'POST', headers: {
+                                                        // 'Content-Type' : `application/json;boundary=${formdata._boundary}`,
+                                                        'Content-Type': `multipart/form-data; boundary=${formdata._boundary}`,
+                                                        'pinata_api_key': config.pinata_api_key,
+                                                        'pinata_secret_api_key': config.pinata_secret_api_key
+                                                    },
+                                                    body: formdata
+                                                });
+                                                const filedata = await response2.json();
+                                                //console.log('file', filedata)
+                                                let ipfsImg = filedata.IpfsHash;
+                                                console.log(ipfsImg);
                                                 if (resExl.Description) {
                                                     var desc = resExl.Description;
                                                     var desc1 = desc.substring(0, 60);
@@ -2938,8 +2990,8 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     'bulk_nft_master_id': createFolderRes.insertId,
                                                     'name': resExl.Title,
                                                     'description': desc1,
-                                                    "image": resExl.Image,
-                                                    "image_original": resExl.Image,
+                                                    "image": ipfsImg,
+                                                    "image_original": ipfsImg,
                                                     "file_type": resExl.file_type,
                                                     "item_category_id": resExl.item_category_id,
                                                     "user_collection_id": resExl.user_collection_id,
@@ -2957,9 +3009,9 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                     "coin_percentage": resExl.coin_percentage,
                                                     "unlockable_content": resExl.unlockable_content,
                                                     "nft_type": resExl.nft_type,
-                                                    "address": resExl.user_address,
+                                                    "address": fields.address,
                                                     "commission_percent": commissionPercent[0].commission_percent,
-                                                    "is_on_sale": 0,
+                                                    "is_on_sale": 1,
                                                     "bulkNFT": 0
 
                                                 }
@@ -3011,7 +3063,8 @@ exports.addBulkNftByAdmin = async (db, req, res) => {
                                                                 "user_address": resExl.user_address,
                                                                 "price": resExl.price,
                                                                 "ip": null,
-                                                                "datetime": new Date()
+                                                                "datetime": new Date(),
+                                                                "is_on_sale":1
                                                             };
 
 
