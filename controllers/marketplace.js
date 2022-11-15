@@ -86,7 +86,6 @@ function openNFT(code) {
     var encrypted = code.substring(64);
     //var pass = process.env.EKEY;
     var pass = "Espsoft123#";
-
     var key = CryptoJS.PBKDF2(pass, salt, {
         keySize: keySize / 32,
         iterations: iterations
@@ -439,7 +438,7 @@ exports.itemDetails = async (db, req, res) => {
     }
 
     await db.query(marketplaceQueries.itemdetail, [item_edition_id, user_id, item_edition_id, item_edition_id], async function (error, data) {
-        //console.log('data', data[0])
+        console.log('data', data[0])
 
         if (error) {
             return res.status(400).send({
@@ -449,7 +448,7 @@ exports.itemDetails = async (db, req, res) => {
             });
         }
 
-        if (data[0].owner_id == 1) {
+        if (data[0]?.owner_id == 1) {
             var apiData = await openNFT(data[0].itemaddress);
             data[0].address = apiData;
         }
@@ -847,7 +846,7 @@ exports.getUserCollection = async (db, req, res) => {
 exports.getUserOwnerItem = async (db, req, res) => {
     console.log("in getUserCollection owner");
     var user_id = req.body.user_id;
-    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id, user_id, user_id,user_id,user_id], function (error, data) {
+    await db.query(marketplaceQueries.getUserOwnerItem, [user_id, user_id, user_id, user_id, user_id, user_id,user_id], function (error, data) {
         if (error) {
             return res.status(400).send({
                 success: false,
@@ -1377,7 +1376,6 @@ exports.addNftByUser = async (db, req, res) => {
     let coin_percentage = req.body.coin_percentage;
     let unlockable_content = req.body.unlockable_content
     let nft_type = req.body.nft_type
-
     let approve_by_admin = req.body.approve_by_admin;
     let is_on_sale = req.body.is_on_sale
     // if(file_type==='image'){
@@ -1504,7 +1502,6 @@ exports.addNftByUser = async (db, req, res) => {
                     "unlockable_content": unlockable_content,
                     "nft_type": nft_type,
                     "address": user_address,
-
                     "royalty_percent": collectionRoyalty[0].royalty_percent,
                     "commission_percent": commissionPercent[0].commission_percent,
                     "approve_by_admin": approve_by_admin,
@@ -2232,13 +2229,13 @@ exports.getUserBids = async (db, req, res) => {
 
 
 exports.blockchainupdatetransaction = async (db, req, res) => {
-console.log("in blockchainupdatetransaction");
+    console.log("in blockchainupdatetransaction");
     let user_id = req.body.user_id;
     let new_owner_address = req.body.new_owner_address;
     let item_id = req.body.item_id;
     let item_edition_id = req.body.item_edition_id;
     let claimQuantity = req.body.claimQuantity;
-    console.log("claimQuantity ",claimQuantity);
+    console.log("claimQuantity ", claimQuantity);
     if (!new_owner_address) {
         return res.status(400).send({
             success: false,
@@ -2322,7 +2319,7 @@ console.log("in blockchainupdatetransaction");
         if (mintRes.hash) {
             var i = 0;
             while (i < editionResult.length) {
-                console.log("deleted edition id ",editionResult[i].id)
+                console.log("deleted edition id ", editionResult[i].id)
                 // await promisePool.query(`UPDATE item_edition SET ? WHERE id = ?`, [{
                 //     isMinted: 1,
                 //     isClaimed: 1,
@@ -2342,15 +2339,15 @@ console.log("in blockchainupdatetransaction");
             }
 
             console.log("gas_fee3: ", gas_fee)
-            
+
             if (gas_fee) {
-                console.log('data11111',from,new_owner_address,mintRes.hash)
+                console.log('data11111', from, new_owner_address, mintRes.hash)
                 console.log('gas_fee3222:', gas_fee)
                 var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${from}','${new_owner_address}','${mintRes.hash}','Claim Nft')`;
 
                 const [data,] = await promisePool.query(qry);
             }
-            console.log('qqqqqqqqqqqq',qry)
+            console.log('qqqqqqqqqqqq', qry)
             await promisePool.query(adminQueries.updateblockchainstatus, [data, user_id, item_id]);
 
             return res.status(200).send({
@@ -2391,8 +2388,15 @@ exports.itemPurchase = async (db, req, res) => {
     let isClaimed = 0
     let transferNft = req.body.transferNft
     let gas_fee = req.body.gas_fee;
+    let email=req.body.email;
 
     try {
+
+        if (req.body.user_id==0) {
+            var qry = `INSERT INTO users(email,password,is_email_verify) values('${email}','1234',0)`;
+            const [addUser,] = await promisePool.query(qry);
+            user_id = addUser.insertId;
+        }
 
         if (!user_address) {
             user_address = null;
@@ -2449,12 +2453,12 @@ exports.itemPurchase = async (db, req, res) => {
                         }, item_id]);
                     }
                     if (gas_fee.success != false) {
-                        console.log('gas_fee3222:', mintRes.hash,gas_fee)
+                        console.log('gas_fee3222:', mintRes.hash, gas_fee)
                         var qry = `INSERT INTO gasFeeDetail(item_id,user_id,amount,sender_wallet,receiver_wallet,transaction_hash,type)VALUES(${item_id},${user_id},${gas_fee.fee},'${token_owner_address}','${from}','${mintRes?.hash}','Item Purchase')`;
-    
+
                         const [data,] = await promisePool.query(qry);
-                        console.log('22222222',qry)
-                    } 
+                        console.log('22222222', qry)
+                    }
                 }
             }
 
@@ -2467,7 +2471,7 @@ exports.itemPurchase = async (db, req, res) => {
                         error
                     });
                 }
-                const [buyer] = await promisePool.query(`SELECT COALESCE(uo.user_name,uo.full_name,uo.email) as buyer_name,email FROM users as uo where id=${user_id}`);
+                const [buyer] = await promisePool.query(`SELECT COALESCE(uo.user_name,uo.full_name,uo.email) as buyer_name,email FROM users as uo where uo.id=${user_id}`);
                 let seller_name = trx[0].owner;
                 let buyer_name = buyer[0].buyer_name;
 
@@ -2537,9 +2541,9 @@ exports.itemPurchase = async (db, req, res) => {
                 }
                 var saleAmount = (trx[0].price * purchased_quantity * sellerPercent / 100) - (trx[0].price * settingData[0].commission_percent / 100) - (token * settingData[0].coin_value);
                 var platformFee = ((trx[0].price * purchased_quantity) * settingData[0].platform_fee / 100)
-              
-                
-                
+
+
+
 
                 var qry = `INSERT INTO transaction (plateform_fee,gas_fee,user_id,item_id,item_edition_id,transaction_type_id,amount,currency,status,user_address,commission_percent,commission) select ${platformFee},${gas_fee.fee ? gas_fee.fee : '0'}, ie.owner_id,i.id,ie.id as item_edition_id,1 as transaction_type_id, ${saleAmount} as price,'USD' AS currency,1,${user_address},${settingData[0].commission_percent},${trx[0].price * settingData[0].commission_percent / 100}  from item_edition as ie left join item as i on i.id=ie.item_id where ie.id=${item_edition_id}`;
 
@@ -2618,7 +2622,7 @@ exports.itemPurchase = async (db, req, res) => {
                         }
 
 
-                        console.log('data1hash',data1hash)
+                        console.log('data1hash', data1hash)
                         //console.log("updateTransferHash");
                         await db.query(marketplaceQueries.updateTransferHash, [data1hash, item_edition_id], async function (error, data) {
                             if (error) {
@@ -2648,28 +2652,28 @@ exports.itemPurchase = async (db, req, res) => {
 
                                     if (ttype == 14) {
                                         await emailActivity.Activity1(mailData[0].ownerEmail, `Hola! You just transferred your NFT`,
-                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just transferred your NFT , details of which are as below<br>Name: (${mailData[0].name})<br>
-                                    Collection : (${mailData1[0].name})<br> 
-                                    Transferred To : (${buyer_name_email})<br></div>
+                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just transferred your NFT , details of which are as below<br>Name: ${mailData[0].name}<br>
+                                    Collection : ${mailData1[0].name}<br> 
+                                    Transferred To : ${buyer_name_email}<br></div>
                                     `, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                         await emailActivity.Activity1(mailData[0].bidderEmail, 'Hola! You just recieved an NFT',
-                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT.  You have just recieved an NFT, details of which are as below<br>Name: (${mailData[0].name})<br>
-                                    Collection : (${mailData1[0].name})<br> 
-                                    Recieved from : (${seller_name_email})<br></div>
+                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT.  You have just recieved an NFT, details of which are as below<br>Name: ${mailData[0].name}<br>
+                                    Collection : ${mailData1[0].name}<br> 
+                                    Recieved from : ${seller_name_email}<br></div>
                                    <br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                     }
                                     else {
                                         await emailActivity.Activity1(mailData[0].ownerEmail, `Yaya! You have just sold an NFT`,
-                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just sold the following NFT:<br>Name: (${mailData[0].name})<br>
-                                Collection : (${mailData1[0].name})<br> 
-                                Sold To : (${buyer_name})<br></div>
+                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have just sold the following NFT:<br>Name: ${mailData[0].name}<br>
+                                Collection : ${mailData1[0].name}<br> 
+                                Sold To : ${buyer_name}<br></div>
                                 <div style="color:#fff">Price : (Rs ${amount})</div><br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
 
                                         await emailActivity.Activity1(mailData[0].bidderEmail, 'Hola! You just bought a new NFT',
-                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have bought the following NFT:<br>Name: (${mailData[0].name})<br>
-                                Collection : (${mailData1[0].name})<br> 
-                                Bought it from : (${seller_name})<br></div>
+                                            `<div style="color:#fff">Hello,<br><br>Greetings from DigiPhyNFT.<br><br>Thank you for using DigiPhyNFT. You have bought the following NFT:<br>Name: ${mailData[0].name}<br>
+                                Collection : ${mailData1[0].name}<br> 
+                                Bought it from : ${seller_name}<br></div>
                                 <div style="color:#fff">Price : (Rs ${amount})</div><br>`, `nftdetail/${item_edition_id}`, `https://digiphy.mypinata.cloud/ipfs/${mailData[0].image}`);
                                     }
 

@@ -69,7 +69,9 @@ var sliderUpload = upload.fields([{ name: 'slider1', maxCount: 1 }, { name: 'sli
 
 var collectionImages = upload.fields([{ name: 'profile_pic', maxCount: 1 }, { name: 'banner', maxCount: 1 }]);
 
-var addnftImage = upload.fields([{ name: 'image', maxCount: 1 }])
+var addnftImage = upload.fields([{ name: 'image', maxCount: 1 }
+// ,{name:'image_file_scanner',maxCount:1}
+])
 
 // ---------------Controllers--------
 const signup = require('../controllers/signup');
